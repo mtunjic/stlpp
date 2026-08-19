@@ -1,5 +1,10 @@
 #pragma once
 
+#define STLPP_VERSION_MAJOR 0
+#define STLPP_VERSION_MINOR 1
+#define STLPP_VERSION_PATCH 0
+#define STLPP_VERSION "0.1.0"
+
 #include "apply.h"
 #include "binary_counter.h"
 #include "border.h"

@@ -22,6 +22,8 @@ Include `"stlpp.h"` (or `"algorithms.h"`). CMake target `stlpp::stlpp`. Conan an
 
 The rest: [plan / progress](doc/progress.md).
 
+**v0.1.0** freezes this surface: `namespace mt`, include `"stlpp.h"`. Checked names keep their signatures. CUDA `scan` / `power` / `map` / `reduce` and dual-GPU `partial_bucketsort` are not in this freeze.
+
 Recommended reading: Alexander Stepanov and Paul McJones, [*Elements of Programming*](https://elementsofprogramming.com/eop.pdf) (free PDF).
 
 ### Build
