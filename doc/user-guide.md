@@ -54,6 +54,8 @@ auto [it, left] = mt::find_if_n(nums.begin(), 4, [](int x) { return x % 2 == 0; 
 std::vector<int> back{5, 3, 0, 1, 0, 8};
 mt::find_backward(back.begin(), back.end(), 0);     // iterator to last 0
 mt::find_backward(back.begin(), back.end(), 9);     // end()  (not begin())
+mt::find_backward_if(back.begin(), back.end(),
+                     [](int x) { return x == 0; }); // last 0
 
 std::vector<int> hits{1, 2, 1, 3};
 auto all1 = mt::find_all(hits, 1);                  // two iterators
@@ -341,7 +343,7 @@ ds.connected(0, 1);                         // true
 
 Thread-safe adaptors: `ts_stack`, `ts_queue`, `ts_priority_queue` — `push` / `try_pop`.
 
-## Vector and string ext
+## Vector ext
 
 ```cpp
 std::vector<int> v{9, 0, 1, 4, 4, 0, 7, 7, 8, 0};
@@ -349,14 +351,54 @@ mt::keep_if(v, mt::less_than<int>{8});
 mt::distinct(v);
 mt::fast_erase(v, 0);
 mt::delete_if(v, [](int x) { return x % 2 == 0; });
+```
 
+## String ext
+
+In-place unless the name ends in `_copy`. Predicates such as `is_any_of` / `is_space` are in `namespace mt`.
+
+```cpp
 std::string s = "woow!!!!";
 mt::trim_right_if(s, '!');                  // "woow"
+
+std::wstring ws = L"Awesome........";
+mt::trim_right_if(ws, L'.');                // L"Awesome"
+
+std::string set = "';;;'yep..'';";
+mt::trim_right_if(set, mt::is_any_of(";,.'"));
+mt::trim_left_if(set, mt::is_any_of(";,.'"));  // "yep"
+
+std::string spaces{"trim me     "};
+mt::trim_right_if(spaces, mt::is_space);    // "trim me"
+
 mt::to_lower("MARKO");                      // "marko"
-mt::has_prefix(uri, "https://");
+mt::to_upper("cpp");                        // "CPP"
+mt::to_title("hello world");                // "Hello World"
+
+std::string uri{"https://www.google.com"};
+mt::has_prefix(uri, "https://");            // true
+mt::has_suffix(uri, ".com");                // true
+
+std::wstring bad{L"some,12<script>-1=1test29710-1---,.1888Osss"};
 mt::sanitize(bad);
-mt::is_palindrome("abba");
+mt::digits_copy(bad);                       // L"12112971011888"
+mt::letters_copy(bad);                      // L"somescripttestosss"
+
+std::string digits{"-1,2,3;name=marko$"};
+mt::remove_if(digits, [](char c) {
+    return std::isdigit(static_cast<unsigned char>(c)) != 0;
+});                                         // "-,,;name=marko$"
+
+std::string fs{"-some1+2"};
+auto plus = mt::find_backward_if(fs.begin(), fs.end(),
+                                 [](char c) { return c == '+'; });
+// *plus == '+', 6 from begin
+
+mt::is_palindrome("abba");                  // true
 mt::repeat("ab", 3);                        // "ababab"
+mt::repeat_char('x', 4);                    // "xxxx"
+mt::eq_ignore_case("AbC", "aBc");           // true
+mt::sanitize_copy("Hello, 12!");            // "hello12"
 ```
 
 ## Utils
