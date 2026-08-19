@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 96" role="img" aria-labelledby="title desc">
+  <title id="title">The generic machine</title>
+  <desc id="desc">Functors plug into algorithms. Algorithms walk iterators. Iterators sit on layout.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#123a6b"/>
+    </marker>
+  </defs>
+
+  <rect x="8" y="28" width="148" height="48" rx="4" fill="#123a6b"/>
+  <text x="82" y="57" text-anchor="middle" fill="#fff" font-family="ui-sans-serif, system-ui, sans-serif" font-size="15" font-weight="600">Functors</text>
+
+  <line x1="160" y1="52" x2="188" y2="52" stroke="#123a6b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="174" y="22" text-anchor="middle" fill="#123a6b" font-family="ui-sans-serif, system-ui, sans-serif" font-size="11">plug into</text>
+
+  <rect x="196" y="28" width="148" height="48" rx="4" fill="#123a6b"/>
+  <text x="270" y="57" text-anchor="middle" fill="#fff" font-family="ui-sans-serif, system-ui, sans-serif" font-size="15" font-weight="600">Algorithms</text>
+
+  <line x1="348" y1="52" x2="376" y2="52" stroke="#123a6b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="362" y="22" text-anchor="middle" fill="#123a6b" font-family="ui-sans-serif, system-ui, sans-serif" font-size="11">walk</text>
+
+  <rect x="384" y="28" width="148" height="48" rx="4" fill="#123a6b"/>
+  <text x="458" y="57" text-anchor="middle" fill="#fff" font-family="ui-sans-serif, system-ui, sans-serif" font-size="15" font-weight="600">Iterators</text>
+
+  <line x1="536" y1="52" x2="564" y2="52" stroke="#123a6b" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="550" y="22" text-anchor="middle" fill="#123a6b" font-family="ui-sans-serif, system-ui, sans-serif" font-size="11">sit on</text>
+
+  <rect x="572" y="28" width="140" height="48" rx="4" fill="#123a6b"/>
+  <text x="642" y="57" text-anchor="middle" fill="#fff" font-family="ui-sans-serif, system-ui, sans-serif" font-size="15" font-weight="600">Layout</text>
+</svg>

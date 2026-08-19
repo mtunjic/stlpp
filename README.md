@@ -2,6 +2,13 @@
 
 Not a second Standard Library. The generic machine behind one.
 
+```mermaid
+flowchart LR
+  F["Functors"] -->|"plug into"| A["Algorithms"]
+  A -->|"walk"| I["Iterators"]
+  I -->|"sit on"| L["Layout"]
+```
+
 Functors plug into algorithms. Algorithms walk iterators. Iterators sit on layout. That is the whole design — Stepanov’s stack, in C++20, header-only, `namespace mt`. You keep `<vector>` and `<algorithm>`. You gain counted `_n` algorithms, lazy views, and containers that were never in `std`: tape, rope, zipper, ring buffer, disjoint set.
 
 ```cpp
@@ -12,7 +19,7 @@ auto prefix = mt::scan(v, mt::plus<int>{});   // {1, 3, 6, 10}
 int total   = mt::fold(v, 0, mt::plus<int>{}); // 10
 ```
 
-Include `"stlpp.h"` (or `"algorithms.h"`). CMake target `stlpp::stlpp`. Conan and vcpkg recipes ship the same headers. Usage examples: [user guide](doc/user-guide.md).
+Include `"stlpp.h"` (or `"algorithms.h"`). CMake target `stlpp::stlpp`. Conan and vcpkg recipes ship the same headers. Usage examples: [user guide](doc/user-guide.md). The idea: [for beginners](doc/for-beginners.md), [why begin / end](doc/begin-end.md).
 
 **Algorithms** — `scan`, `power`, `fold`, `gather`, `slide`, `find_if_n`, `binary_counter`  
 **Hybrid** — `map`, `reduce`, `psort`, `pfind`  
