@@ -1,0 +1,8 @@
+stlpp provides CMake targets:
+
+  find_package(stlpp CONFIG REQUIRED)
+  target_link_libraries(main PRIVATE stlpp::stlpp)
+
+Include the umbrella header:
+
+  #include "stlpp.h"

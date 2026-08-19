@@ -1,0 +1,17 @@
+{
+  "name": "stlpp",
+  "version": "0.1.0",
+  "description": "Header-only Stepanov-style algorithms, iterators, and containers (STL++)",
+  "homepage": "https://github.com/mtunjic/stlpp",
+  "license": "MIT",
+  "dependencies": [
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "host": true
+    }
+  ]
+}

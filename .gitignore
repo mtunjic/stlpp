@@ -29,3 +29,9 @@
 
 # mac
 .DS_Store
+
+# Conan 2 / CMake presets generated next to the recipe
+CMakeUserPresets.json
+test_package/build/
+/build-pkg/
+/dist-stlpp/

@@ -1,68 +1,95 @@
-//
-//  VECTOR_EXT.H
-//
-//
-//  Created by Marko Tunjic on 05/05/16.
-//  Copyright © 2016 Marko Tunjic. All rights reserved.
-//
+#pragma once
 
-#ifndef VECTOR_EXT
-#define VECTOR_EXT
+#include "concepts.h"
+
 #include <algorithm>
+#include <cstddef>
+#include <istream>
+#include <utility>
 #include <vector>
-#include <string>
 
 namespace mt {
 
-	template <typename T>
-	void distinct(std::vector<T>& v) 
-	{
-		std::sort(std::begin(v), std::end(v));
-		auto end_unique = std::unique(std::begin(v), std::end(v));
-		v.erase(end_unique, std::end(v)); 
-	}
-
-	template <typename T, typename Predicate>
-	void keep_if(std::vector<T>& v, Predicate pred)
-	{
-	    auto notpred = [&pred](const T& t) { return !pred(t); };
-	    v.erase(std::remove_if(std::begin(v), 
-	    	std::end(v), notpred), std::end(end));
-	}
-
-	template<typename T>
-	void fast_erase(std::vector<T>& v, size_t i)
-	{
-	    v[i] = std::move(v.back());
-	    v.pop_back();
-	}
-
-	template<typename T>
-	void fill(istream& ist, vector<T>& v, char terminator)
-	{
-	    int i = 0;
-	    while (ist >> i) v.push_back(i);
-	    if (ist.eof()) return;  
-	    ist.clear();             
-	    char c;
-	    ist>>c;                 
-	    if (c != terminator) {   
-	        ist.unget();         
-	        ist.clear(ios_base::failbit); 
-	    }
-	}
-
-	// find_all
-	template<typename T>
-	using Iterator = typename T::iterator;
-	template<typename C, typename V>
-	std::vector<Iterator<C>> find_all(C& c, V v) {
-		std::vector<Iterator<C>> result;
-		for (auto p = c.begin(); p != c.end(); ++p)
-			if (*p == v)
-				result.emplace_back(p);
-		return result;
-	}
+/// Sort then unique-erase. Adjacent duplicates after sorting disappear.
+///
+/// Example:
+///   std::vector<int> v{3, 1, 3, 2, 1};
+///   mt::distinct(v);  // {1, 2, 3}
+template <typename T>
+void distinct(std::vector<T>& v)
+{
+    std::sort(v.begin(), v.end());
+    v.erase(std::unique(v.begin(), v.end()), v.end());
 }
 
-#endif
+/// Keep elements that satisfy `pred` (stable). The rest are erased.
+///
+/// Example:
+///   std::vector<int> v{9, 0, 1, 4, 4, 0, 7, 7, 8, 0};
+///   mt::keep_if(v, [](int x) { return x < 8; });
+///   // {0, 1, 4, 4, 0, 7, 7, 0}
+template <typename T, typename P>
+    requires std::predicate<P&, const T&>
+void keep_if(std::vector<T>& v, P pred)
+{
+    v.erase(std::remove_if(v.begin(), v.end(),
+                           [&](const T& x) { return !std::invoke(pred, x); }),
+            v.end());
+}
+
+template <typename T, typename P>
+    requires std::predicate<P&, const T&>
+void keep_if_not(std::vector<T>& v, P pred)
+{
+    keep_if(v, [&](const T& x) { return !std::invoke(pred, x); });
+}
+
+/// Erase elements that satisfy `pred` (stable).
+template <typename T, typename P>
+    requires std::predicate<P&, const T&>
+void delete_if(std::vector<T>& v, P pred)
+{
+    v.erase(std::remove_if(v.begin(), v.end(), std::move(pred)), v.end());
+}
+
+template <typename T, typename P>
+    requires std::predicate<P&, const T&>
+void delete_if_not(std::vector<T>& v, P pred)
+{
+    delete_if(v, [&](const T& x) { return !std::invoke(pred, x); });
+}
+
+/// O(1) erase at index `i` by swapping with the last element. Order is not
+/// preserved. Precondition: `i < v.size()`.
+///
+/// Example:
+///   std::vector<int> v{1, 2, 3, 4};
+///   mt::fast_erase(v, 1);  // {1, 4, 3}
+template <typename T>
+void fast_erase(std::vector<T>& v, std::size_t i)
+{
+    v[i] = std::move(v.back());
+    v.pop_back();
+}
+
+/// Append every `operator>>`-readable `T` from `in` onto `v`.
+///
+/// Example:
+///   std::istringstream in{"1 2 3"};
+///   std::vector<int> v;
+///   mt::read(in, v);  // {1, 2, 3}
+template <typename T>
+void read(std::istream& in, std::vector<T>& v)
+{
+    T value{};
+    while (in >> value) {
+        v.push_back(std::move(value));
+    }
+}
+
+inline void read_nums(std::istream& in, std::vector<int>& v)
+{
+    read(in, v);
+}
+
+}  // namespace mt

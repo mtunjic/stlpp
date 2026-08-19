@@ -1,0 +1,10 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+find_dependency(Threads)
+
+if(NOT TARGET stlpp::stlpp)
+    include("${CMAKE_CURRENT_LIST_DIR}/stlppTargets.cmake")
+endif()
+
+check_required_components(stlpp)

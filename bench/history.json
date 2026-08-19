@@ -1,0 +1,59 @@
+{
+  "title": "STL++ Google Benchmark history",
+  "filter": "BM_(Scan_Plus|Fold_Sum|Reduce_Sum|Map_Double|BinaryCounter_PlusReduce|StdAccumulate_Plus)/1024$",
+  "runs": [
+    {
+      "id": "2026-08-19",
+      "source": "bench/history/stlpp-bench-2026-08-19.json",
+      "date": "2026-08-19T09:22:01+02:00",
+      "host_name": "MAKINA",
+      "num_cpus": 20,
+      "mhz_per_cpu": 3878,
+      "library_build_type": "debug",
+      "benchmarks": [
+        {
+          "name": "BM_BinaryCounter_PlusReduce/1024",
+          "cpu_time_ns": 6422.593,
+          "real_time_ns": 6720.283,
+          "iterations": 26761,
+          "items_per_second": 159437172.36363637
+        },
+        {
+          "name": "BM_Fold_Sum/1024",
+          "cpu_time_ns": 4185.268,
+          "real_time_ns": 4179.373,
+          "iterations": 44800,
+          "items_per_second": 244667733.33333334
+        },
+        {
+          "name": "BM_Map_Double/1024",
+          "cpu_time_ns": 3487.723,
+          "real_time_ns": 4094.924,
+          "iterations": 44800,
+          "items_per_second": 293601280.0
+        },
+        {
+          "name": "BM_Reduce_Sum/1024",
+          "cpu_time_ns": 1167.762,
+          "real_time_ns": 1332.053,
+          "iterations": 133803,
+          "items_per_second": 876891340.8
+        },
+        {
+          "name": "BM_Scan_Plus/1024",
+          "cpu_time_ns": 7847.377,
+          "real_time_ns": 8751.417,
+          "iterations": 17920,
+          "items_per_second": 130489457.77777778
+        },
+        {
+          "name": "BM_StdAccumulate_Plus/1024",
+          "cpu_time_ns": 523.158,
+          "real_time_ns": 619.784,
+          "iterations": 298667,
+          "items_per_second": 1957344051.2
+        }
+      ]
+    }
+  ]
+}

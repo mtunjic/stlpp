@@ -1,0 +1,131 @@
+{
+  "context": {
+    "date": "2026-08-19T09:22:01+02:00",
+    "host_name": "MAKINA",
+    "executable": "C:\\Users\\Marko\\Projects\\components\\build\\algorithms_bench.exe",
+    "num_cpus": 20,
+    "mhz_per_cpu": 3878,
+    "caches": [
+      {
+        "type": "Data",
+        "level": 1,
+        "size": 49152,
+        "num_sharing": 1
+      },
+      {
+        "type": "Instruction",
+        "level": 1,
+        "size": 65536,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 2,
+        "size": 3145728,
+        "num_sharing": 1
+      },
+      {
+        "type": "Unified",
+        "level": 3,
+        "size": 31457280,
+        "num_sharing": 20
+      }
+    ],
+    "load_avg": [],
+    "library_version": "v1.9.1",
+    "library_build_type": "debug",
+    "json_schema_version": 1
+  },
+  "benchmarks": [
+    {
+      "name": "BM_Scan_Plus/1024",
+      "family_index": 0,
+      "per_family_instance_index": 0,
+      "run_name": "BM_Scan_Plus/1024",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 17920,
+      "real_time": 8.7514174107842082e+03,
+      "cpu_time": 7.8473772321428569e+03,
+      "time_unit": "ns",
+      "items_per_second": 1.3048945777777778e+08
+    },
+    {
+      "name": "BM_Map_Double/1024",
+      "family_index": 1,
+      "per_family_instance_index": 0,
+      "run_name": "BM_Map_Double/1024",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 44800,
+      "real_time": 4.0949241071887500e+03,
+      "cpu_time": 3.4877232142857142e+03,
+      "time_unit": "ns",
+      "items_per_second": 2.9360128000000000e+08
+    },
+    {
+      "name": "BM_Reduce_Sum/1024",
+      "family_index": 2,
+      "per_family_instance_index": 0,
+      "run_name": "BM_Reduce_Sum/1024",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 133803,
+      "real_time": 1.3320530930077689e+03,
+      "cpu_time": 1.1677615599052338e+03,
+      "time_unit": "ns",
+      "items_per_second": 8.7689134079999995e+08
+    },
+    {
+      "name": "BM_Fold_Sum/1024",
+      "family_index": 3,
+      "per_family_instance_index": 0,
+      "run_name": "BM_Fold_Sum/1024",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 44800,
+      "real_time": 4.1793727677941206e+03,
+      "cpu_time": 4.1852678571428569e+03,
+      "time_unit": "ns",
+      "items_per_second": 2.4466773333333334e+08
+    },
+    {
+      "name": "BM_BinaryCounter_PlusReduce/1024",
+      "family_index": 4,
+      "per_family_instance_index": 0,
+      "run_name": "BM_BinaryCounter_PlusReduce/1024",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 26761,
+      "real_time": 6.7202832480551097e+03,
+      "cpu_time": 6.4225925787526621e+03,
+      "time_unit": "ns",
+      "items_per_second": 1.5943717236363637e+08
+    },
+    {
+      "name": "BM_StdAccumulate_Plus/1024",
+      "family_index": 5,
+      "per_family_instance_index": 0,
+      "run_name": "BM_StdAccumulate_Plus/1024",
+      "run_type": "iteration",
+      "repetitions": 1,
+      "repetition_index": 0,
+      "threads": 1,
+      "iterations": 298667,
+      "real_time": 6.1978357166151886e+02,
+      "cpu_time": 5.2315789826127423e+02,
+      "time_unit": "ns",
+      "items_per_second": 1.9573440512000000e+09
+    }
+  ]
+}
