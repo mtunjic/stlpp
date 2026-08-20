@@ -51,6 +51,8 @@ Dated JSON + SVG land in `bench/` (`stlpp-bench-YYYY-MM-DD`); `bench/stlpp-bench
 
 Optional: `-DSTLPP_SANITIZE=ON` for ASan/UBSan (needs `libasan`/`libubsan`; off by default on this MinGW). Packaging (`cmake --install`, Conan, vcpkg) uses `-DSTLPP_BUILD_TESTING=OFF -DSTLPP_BUILD_BENCHMARKS=OFF` so GoogleTest/Benchmark are not fetched.
 
+**Generic / concept tests** (EoP-style): `test/concept_axioms_test.cpp`, `test/generic_*_test.cpp`, and helpers in `test/support/`. See [`doc/progress.md`](doc/progress.md#generic-law-tests-eop-style). Behavioral reference: [Elements of Programming](https://elementsofprogramming.com/eop.pdf) and [`doc/eop-code/tests.h`](doc/eop-code/tests.h).
+
 ### Use in an existing C++ project
 
 Header-only, C++20, `namespace mt`. Pick **one** path. Conan and vcpkg both work as recipes, but not in the same CMake configure (each owns `CMAKE_TOOLCHAIN_FILE`).
