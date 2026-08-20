@@ -1,6 +1,8 @@
+import os
+
 from conan import ConanFile
+from conan.tools.build import can_run, check_min_cppstd
 from conan.tools.cmake import CMake, cmake_layout
-from conan.tools.build import check_min_cppstd
 
 
 class StlppExamplesConan(ConanFile):
@@ -35,3 +37,8 @@ class StlppExamplesConan(ConanFile):
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
+
+    def test(self):
+        if can_run(self):
+            cmd = os.path.join(self.cpp.build.bindirs[0], "stlpp_examples")
+            self.run(f"{cmd} orbit", env="conanrun")

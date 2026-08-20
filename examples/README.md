@@ -39,5 +39,12 @@ conan create . --build=missing -s compiler.cppstd=20
 | `orbit` | ρ-orbit stem/cycle via `collision_point` / `connection_point` |
 | `fibpower` | Fibonacci in O(log n) with `mt::power` on matrices |
 | `hotspots` | KMP `matches` → `scan` → window scores → `psort` |
+| `btree` | Expr trees: traverse/eval; isomorphic ≠ equal |
+| `rope` | Rope concat vs `string +=`; zipper focus edit |
+| `parallel` | Timed `fold` vs `reduce` and sequential vs parallel `map` |
+| `cards` | Gather / slide / `partition_stable` on a shuffled deck |
+| `components` | Grid components via `graph` + `disjoint_set` |
+| `pipeline` | `numeric_range` → `filter` → `windows` → fold |
+| `adaptive` | `sort_n_adaptive` with tiny vs large merge buffer |
 
 More ideas are tracked in the root `TODO.md` (Examples section).

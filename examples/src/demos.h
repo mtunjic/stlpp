@@ -14,5 +14,12 @@ struct Demo {
 void demo_orbit_rho();
 void demo_matrix_fibonacci();
 void demo_pattern_hotspots();
+void demo_expr_btree();
+void demo_rope_zipper();
+void demo_parallel_race();
+void demo_cards_gather();
+void demo_components();
+void demo_lazy_pipeline();
+void demo_adaptive_sort();
 
 }  // namespace stlpp_examples

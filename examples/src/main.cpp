@@ -20,6 +20,27 @@ const Demo kDemos[] = {
     {"hotspots", "Pattern hotspots pipeline",
      "KMP matches → prefix scan → window scores → parallel sort (psort).",
      &stlpp_examples::demo_pattern_hotspots},
+    {"btree", "Bifurcate expression trees",
+     "Build/evaluate binary expr trees; show isomorphic ≠ equal.",
+     &stlpp_examples::demo_expr_btree},
+    {"rope", "Rope + zipper edit buffer",
+     "Structural concat vs string rebuild; zipper focus insert/erase.",
+     &stlpp_examples::demo_rope_zipper},
+    {"parallel", "Parallel map / reduce race",
+     "Timed fold vs reduce and sequential vs parallel map on a large corpus.",
+     &stlpp_examples::demo_parallel_race},
+    {"cards", "Deck gather / slide / partition",
+     "In-place gather, slide, and stable_partition on a shuffled deck.",
+     &stlpp_examples::demo_cards_gather},
+    {"components", "Grid connected components",
+     "Random planar map via graph edges + disjoint_set component map.",
+     &stlpp_examples::demo_components},
+    {"pipeline", "Lazy iterator pipeline",
+     "numeric_range → filter → windows → fold without a nested index nest.",
+     &stlpp_examples::demo_lazy_pipeline},
+    {"adaptive", "Adaptive sort_n buffer story",
+     "Same input, tiny vs large merge buffer — compare moves and time.",
+     &stlpp_examples::demo_adaptive_sort},
 };
 
 void print_menu()
@@ -37,13 +58,29 @@ void print_menu()
     std::cout << "Choice (number or key): " << std::flush;
 }
 
+[[nodiscard]] bool all_digits(std::string_view s)
+{
+    if (s.empty()) {
+        return false;
+    }
+    for (char c : s) {
+        if (!std::isdigit(static_cast<unsigned char>(c))) {
+            return false;
+        }
+    }
+    return true;
+}
+
 const Demo* find_demo(std::string_view choice)
 {
     if (choice.empty()) {
         return nullptr;
     }
-    if (choice.size() == 1 && std::isdigit(static_cast<unsigned char>(choice[0]))) {
-        const std::size_t idx = static_cast<std::size_t>(choice[0] - '0');
+    if (all_digits(choice)) {
+        std::size_t idx = 0;
+        for (char c : choice) {
+            idx = idx * 10 + static_cast<std::size_t>(c - '0');
+        }
         if (idx >= 1 && idx <= std::size(kDemos)) {
             return &kDemos[idx - 1];
         }
