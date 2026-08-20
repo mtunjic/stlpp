@@ -73,6 +73,36 @@ I lower_bound_n(I first, S last, N n, const T& value, Comp comp = {})
     return lower_bound_n(first, bounded_count(first, last, n), value, std::move(comp));
 }
 
+/// Subrange of sorted elements equivalent to `value` (EoP ex. 6.7).
+///
+/// Example:
+///   std::vector<int> v{1, 2, 2, 4};
+///   auto [lo, hi] = mt::equal_range(v.begin(), v.end(), 2);
+///   // distance(lo, hi) == 2
+template <std::forward_iterator I, std::sentinel_for<I> S, typename T, typename Comp = std::less<>>
+[[nodiscard]] std::pair<I, I> equal_range(I first, S last, const T& value, Comp comp = {})
+{
+    first = std::lower_bound(first, last, value, comp);
+    return {first, std::upper_bound(first, last, value, comp)};
+}
+
+template <std::forward_iterator I, Integer N, typename T, typename Comp = std::less<>>
+[[nodiscard]] std::pair<I, I> equal_range_n(I first, N n, const T& value, Comp comp = {})
+{
+    I lo = lower_bound_n(first, n, value, comp);
+    const N used = static_cast<N>(std::distance(first, lo));
+    const N rem = n - used;
+    I hi = upper_bound_n(lo, rem, value, comp);
+    return {lo, hi};
+}
+
+template <std::forward_iterator I, std::sentinel_for<I> S, Integer N, typename T,
+          typename Comp = std::less<>>
+[[nodiscard]] std::pair<I, I> equal_range_n(I first, S last, N n, const T& value, Comp comp = {})
+{
+    return equal_range_n(first, bounded_count(first, last, n), value, std::move(comp));
+}
+
 /// Insertion sort of `n` elements using binary search for the insertion point
 /// (Stepanov).
 ///
