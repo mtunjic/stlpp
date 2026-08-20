@@ -112,4 +112,51 @@ swap_ranges_n(I0 first0, S0 last0, I1 first1, S1 last1, N n)
     return {first0, first1};
 }
 
+/// Copy `[first, last)` backward into the range ending at `result` (EoP ch. 9).
+/// Returns the new begin of the written range. Safe for overlapping ranges
+/// when `result` is in `(first, last]`.
+///
+/// Example:
+///   std::vector<int> v{1, 2, 3, 0, 0};
+///   mt::copy_backward(v.begin(), v.begin() + 3, v.end());  // {?, 1, 2, 3} pattern
+template <std::bidirectional_iterator I, std::bidirectional_iterator O>
+    requires std::indirectly_copyable<I, O>
+[[nodiscard]] constexpr O copy_backward(I first, I last, O result)
+{
+    while (first != last) {
+        *--result = *--last;
+    }
+    return result;
+}
+
+/// Counted backward copy of `n` elements ending at `last` into the range ending at `result`.
+/// Returns `{new_last, new_result}` after stepping `n` predecessors.
+template <std::bidirectional_iterator I, std::bidirectional_iterator O, Integer N>
+    requires std::indirectly_copyable<I, O>
+[[nodiscard]] constexpr std::pair<I, O> copy_backward_n(I last, N n, O result)
+{
+    while (n > N{0}) {
+        *--result = *--last;
+        --n;
+    }
+    return {last, result};
+}
+
+/// Copy `[first, last)` in reverse into the range ending at `result`.
+///
+/// Example:
+///   std::vector<int> src{1, 2, 3};
+///   std::vector<int> dst(3);
+///   mt::reverse_copy_backward(src.begin(), src.end(), dst.end());  // dst == {3, 2, 1}
+template <std::input_iterator I, std::sentinel_for<I> S, std::bidirectional_iterator O>
+    requires std::indirectly_copyable<I, O>
+[[nodiscard]] constexpr O reverse_copy_backward(I first, S last, O result)
+{
+    while (first != last) {
+        *--result = *first;
+        ++first;
+    }
+    return result;
+}
+
 }  // namespace mt
