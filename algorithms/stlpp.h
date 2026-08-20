@@ -34,6 +34,7 @@
 #include "reduce.h"
 #include "remove.h"
 #include "reverse.h"
+#include "rotate.h"
 #include "scan.h"
 #include "skip_take.h"
 #include "slice.h"
