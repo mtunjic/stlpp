@@ -60,4 +60,57 @@ template <std::ranges::input_range R1, std::ranges::input_range R2, typename Com
     return out;
 }
 
+/// Merge two adjacent counted sorted ranges using a buffer of size `n0` (EoP).
+/// Precondition: `[f0, f0+n0)` and `[f1, f1+n1)` are sorted and typically
+/// adjacent (`f1 == f0 + n0`). Returns the end of the merged range.
+template <std::forward_iterator I, std::forward_iterator B, typename N, typename Comp = std::less<>>
+    requires std::indirectly_copyable<I, B> && std::indirectly_copyable<B, I>
+[[nodiscard]] I merge_n_with_buffer(I f0, N n0, I f1, N n1, B buffer, Comp comp = {})
+{
+    if (n0 <= N{0}) {
+        I end = f1;
+        std::advance(end, static_cast<std::iter_difference_t<I>>(n1));
+        return end;
+    }
+    if (n1 <= N{0}) {
+        I end = f0;
+        std::advance(end, static_cast<std::iter_difference_t<I>>(n0));
+        return end;
+    }
+    B buf_end = std::copy_n(f0, n0, buffer);
+    I f1_end = f1;
+    std::advance(f1_end, static_cast<std::iter_difference_t<I>>(n1));
+    return std::merge(buffer, buf_end, f1, f1_end, f0, std::move(comp));
+}
+
+/// Merge-sort of `n` elements using a buffer of size at least `ceil(n/2)`.
+template <std::forward_iterator I, std::forward_iterator B, typename N, typename Comp = std::less<>>
+    requires std::indirectly_copyable<I, B> && std::indirectly_copyable<B, I>
+[[nodiscard]] I sort_n_with_buffer(I first, N n, B buffer, Comp comp = {})
+{
+    const N h = n / N{2};
+    if (h == N{0}) {
+        I end = first;
+        std::advance(end, static_cast<std::iter_difference_t<I>>(n));
+        return end;
+    }
+    I mid = sort_n_with_buffer(first, h, buffer, comp);
+    (void)sort_n_with_buffer(mid, n - h, buffer, comp);
+    return merge_n_with_buffer(first, h, mid, n - h, buffer, comp);
+}
+
+/// Counted merge-sort allocating an internal buffer of size `n/2`.
+template <std::forward_iterator I, typename N, typename Comp = std::less<>>
+[[nodiscard]] I sort_n(I first, N n, Comp comp = {})
+{
+    if (n <= N{1}) {
+        I end = first;
+        std::advance(end, static_cast<std::iter_difference_t<I>>(n > N{0} ? n : N{0}));
+        return end;
+    }
+    using T = std::iter_value_t<I>;
+    std::vector<T> buf(static_cast<std::size_t>((n + N{1}) / N{2}));
+    return sort_n_with_buffer(first, n, buf.begin(), std::move(comp));
+}
+
 }  // namespace mt

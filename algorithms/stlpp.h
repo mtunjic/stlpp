@@ -13,6 +13,7 @@
 #include "concepts.h"
 #include "copy.h"
 #include "find.h"
+#include "fill.h"
 #include "gcd.h"
 #include "integer.h"
 #include "iota.h"
