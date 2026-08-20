@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <optional>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -20,7 +21,14 @@ class ring_buffer {
     std::size_t head_ = 0;
     std::size_t size_ = 0;
 
-    [[nodiscard]] std::size_t index(std::size_t i) const { return (head_ + i) % buf_.size(); }
+    [[nodiscard]] std::size_t index(std::size_t i) const
+    {
+        const std::size_t cap = buf_.size();
+        if (cap == 0) {
+            throw std::out_of_range("ring_buffer::index");
+        }
+        return (head_ + i) % cap;
+    }
 
 public:
     explicit ring_buffer(std::size_t capacity) : buf_(capacity) {}
@@ -51,8 +59,20 @@ public:
         return value;
     }
 
-    [[nodiscard]] T& operator[](std::size_t i) { return buf_[index(i)]; }
-    [[nodiscard]] const T& operator[](std::size_t i) const { return buf_[index(i)]; }
+    [[nodiscard]] T& operator[](std::size_t i)
+    {
+        if (i >= size_) {
+            throw std::out_of_range("ring_buffer::operator[]");
+        }
+        return buf_[index(i)];
+    }
+    [[nodiscard]] const T& operator[](std::size_t i) const
+    {
+        if (i >= size_) {
+            throw std::out_of_range("ring_buffer::operator[]");
+        }
+        return buf_[index(i)];
+    }
 };
 
 }  // namespace mt

@@ -24,7 +24,7 @@ template <std::input_iterator I, std::sentinel_for<I> S>
 }
 
 template <std::ranges::input_range R>
-[[nodiscard]] auto skip(R&& range, std::ranges::range_difference_t<R> n)
+[[nodiscard]] auto skip(R& range, std::ranges::range_difference_t<R> n)
 {
     auto b = skip(std::ranges::begin(range), std::ranges::end(range), n);
     return std::ranges::subrange(b, std::ranges::end(range));
@@ -45,7 +45,7 @@ template <std::input_iterator I, std::sentinel_for<I> S, typename P>
 }
 
 template <std::ranges::input_range R, typename P>
-[[nodiscard]] auto skip_while(R&& range, P pred)
+[[nodiscard]] auto skip_while(R& range, P pred)
 {
     auto b = skip_while(std::ranges::begin(range), std::ranges::end(range), std::move(pred));
     return std::ranges::subrange(b, std::ranges::end(range));
@@ -67,7 +67,7 @@ template <std::input_iterator I, std::sentinel_for<I> S>
 }
 
 template <std::ranges::forward_range R>
-[[nodiscard]] auto take(R&& range, std::ranges::range_difference_t<R> n)
+[[nodiscard]] auto take(R& range, std::ranges::range_difference_t<R> n)
 {
     auto [a, b] = take(std::ranges::begin(range), std::ranges::end(range), n);
     return std::ranges::subrange(a, b);
@@ -91,7 +91,7 @@ template <std::input_iterator I, std::sentinel_for<I> S, typename P>
 }
 
 template <std::ranges::forward_range R, typename P>
-[[nodiscard]] auto take_while(R&& range, P pred)
+[[nodiscard]] auto take_while(R& range, P pred)
 {
     auto [a, b] = take_while(std::ranges::begin(range), std::ranges::end(range), std::move(pred));
     return std::ranges::subrange(a, b);

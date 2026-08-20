@@ -27,9 +27,57 @@ constexpr void advance(I& i, Difference_type<I> n)
             }
         }
     } else {
-        while (n--) {
+        while (n > 0) {
             ++i;
+            --n;
         }
+    }
+}
+
+/// Advance `i` by at most `n` steps, stopping at `last`. Negative `n` uses
+/// the unbounded overload (input iterators ignore it).
+template <std::input_iterator I, std::sentinel_for<I> S>
+constexpr void advance(I& i, S last, Difference_type<I> n)
+{
+    if (n <= 0) {
+        mt::advance(i, n);
+        return;
+    }
+    if constexpr (std::random_access_iterator<I> && std::sized_sentinel_for<S, I>) {
+        const auto d = last - i;
+        if (d <= 0) {
+            return;
+        }
+        i += n < d ? n : d;
+    } else {
+        while (n > 0 && i != last) {
+            ++i;
+            --n;
+        }
+    }
+}
+
+/// How many of the next `n` elements of `[first, last)` actually exist.
+template <std::forward_iterator I, std::sentinel_for<I> S, Integer N>
+[[nodiscard]] constexpr N bounded_count(I first, S last, N n)
+{
+    if (n <= N{0}) {
+        return N{0};
+    }
+    if constexpr (std::sized_sentinel_for<S, I>) {
+        const auto d = last - first;
+        if (d <= 0) {
+            return N{0};
+        }
+        const auto dn = static_cast<N>(d);
+        return n < dn ? n : dn;
+    } else {
+        N k = 0;
+        while (k < n && first != last) {
+            ++first;
+            ++k;
+        }
+        return k;
     }
 }
 

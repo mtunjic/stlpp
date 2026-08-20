@@ -25,7 +25,7 @@ template <std::input_iterator I, std::sentinel_for<I> S, typename P>
 }
 
 template <std::ranges::input_range R, typename P>
-[[nodiscard]] auto span_if(R&& range, P pred)
+[[nodiscard]] auto span_if(R& range, P pred)
 {
     return span_if(std::ranges::begin(range), std::ranges::end(range), std::move(pred));
 }
@@ -39,7 +39,7 @@ template <std::input_iterator I, std::sentinel_for<I> S, typename P>
 }
 
 template <std::ranges::input_range R, typename P>
-[[nodiscard]] auto break_if(R&& range, P pred)
+[[nodiscard]] auto break_if(R& range, P pred)
 {
     return break_if(std::ranges::begin(range), std::ranges::end(range), std::move(pred));
 }
@@ -60,7 +60,7 @@ template <std::input_iterator I, std::sentinel_for<I> S, Integer N>
 }
 
 template <std::ranges::input_range R, Integer N>
-[[nodiscard]] auto split_at(R&& range, N n)
+[[nodiscard]] auto split_at(R& range, N n)
 {
     return split_at(std::ranges::begin(range), std::ranges::end(range), n);
 }

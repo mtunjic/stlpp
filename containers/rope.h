@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <utility>
 
@@ -56,6 +57,9 @@ class rope {
                 n = n->right.get();
             }
         }
+        if (!n || i >= n->leaf.size()) {
+            throw std::out_of_range("rope::at");
+        }
         return n->leaf[i];
     }
 
@@ -80,7 +84,13 @@ public:
     [[nodiscard]] std::size_t size() const { return root_ ? root_->len : 0; }
     [[nodiscard]] bool empty() const { return size() == 0; }
 
-    [[nodiscard]] char at(std::size_t i) const { return at_node(root_.get(), i); }
+    [[nodiscard]] char at(std::size_t i) const
+    {
+        if (i >= size()) {
+            throw std::out_of_range("rope::at");
+        }
+        return at_node(root_.get(), i);
+    }
 
     [[nodiscard]] std::string to_string() const
     {

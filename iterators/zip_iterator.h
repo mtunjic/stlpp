@@ -46,12 +46,34 @@ public:
 
     friend bool operator==(const zip_iterator& x, const zip_iterator& y)
     {
-        return x.a_ == y.a_ || x.b_ == y.b_;
+        return x.a_ == y.a_ && x.b_ == y.b_;
+    }
+
+    [[nodiscard]] bool exhausted(const A& a_last, const B& b_last) const
+    {
+        return a_ == a_last || b_ == b_last;
     }
 
 private:
     A a_{};
     B b_{};
+};
+
+/// Sentinel for `zip_iterator`: equal when either underlying range is exhausted.
+template <std::input_iterator A, std::input_iterator B>
+class zip_sentinel {
+public:
+    zip_sentinel() = default;
+    zip_sentinel(A a_last, B b_last) : a_last_(std::move(a_last)), b_last_(std::move(b_last)) {}
+
+    friend bool operator==(const zip_iterator<A, B>& it, const zip_sentinel& s)
+    {
+        return it.exhausted(s.a_last_, s.b_last_);
+    }
+
+private:
+    A a_last_{};
+    B b_last_{};
 };
 
 template <std::input_iterator A, std::input_iterator B>
@@ -71,7 +93,7 @@ public:
     {}
 
     [[nodiscard]] zip_iterator<A, B> begin() const { return {a_first_, b_first_}; }
-    [[nodiscard]] zip_iterator<A, B> end() const { return {a_last_, b_last_}; }
+    [[nodiscard]] zip_sentinel<A, B> end() const { return {a_last_, b_last_}; }
 };
 
 template <std::input_iterator A, std::input_iterator B>

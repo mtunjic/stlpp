@@ -1,12 +1,18 @@
 #pragma once
 
 #include <iterator>
+#include <optional>
 #include <ranges>
+#include <type_traits>
 #include <utility>
 
 namespace mt {
 
 /// Flatten one level of nested forward ranges.
+///
+/// When `*outer` yields a temporary range, that range is owned for the duration
+/// of the current inner iteration so `begin`/`end` are not taken from two
+/// different temporaries.
 ///
 /// Example:
 ///   std::vector<std::vector<int>> v{{1, 2}, {}, {3}};
@@ -14,7 +20,8 @@ namespace mt {
 template <std::forward_iterator Outer>
 class flatten_iterator {
 public:
-    using Inner = std::ranges::iterator_t<std::iter_reference_t<Outer>>;
+    using InnerRange = std::remove_cvref_t<std::iter_reference_t<Outer>>;
+    using Inner = std::ranges::iterator_t<InnerRange>;
     using iterator_concept = std::forward_iterator_tag;
     using iterator_category = std::forward_iterator_tag;
     using value_type = std::iter_value_t<Inner>;
@@ -33,6 +40,9 @@ public:
 
     flatten_iterator& operator++()
     {
+        if (outer_ == outer_last_) {
+            return *this;
+        }
         ++inner_;
         if (inner_ == inner_last_) {
             ++outer_;
@@ -54,22 +64,38 @@ public:
     }
 
 private:
+    void bind_inner()
+    {
+        if constexpr (std::is_lvalue_reference_v<std::iter_reference_t<Outer>>) {
+            owned_.reset();
+            inner_ = std::ranges::begin(*outer_);
+            inner_last_ = std::ranges::end(*outer_);
+        } else {
+            owned_.emplace(*outer_);
+            inner_ = std::ranges::begin(*owned_);
+            inner_last_ = std::ranges::end(*owned_);
+        }
+    }
+
     void skip_empty()
     {
         while (outer_ != outer_last_) {
-            inner_ = std::ranges::begin(*outer_);
-            inner_last_ = std::ranges::end(*outer_);
+            bind_inner();
             if (inner_ != inner_last_) {
                 return;
             }
             ++outer_;
         }
+        owned_.reset();
+        inner_ = Inner{};
+        inner_last_ = Inner{};
     }
 
     Outer outer_{};
     Outer outer_last_{};
     Inner inner_{};
     Inner inner_last_{};
+    std::optional<InnerRange> owned_{};
 };
 
 template <std::forward_iterator Outer>

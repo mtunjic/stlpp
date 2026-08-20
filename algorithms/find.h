@@ -22,11 +22,32 @@ template <std::input_iterator I, typename P>
 [[nodiscard]] constexpr std::pair<I, Difference_type<I>>
 find_if_n(I first, Difference_type<I> n, P pred)
 {
-    while (n && !std::invoke(pred, *first)) {
+    while (n > 0 && !std::invoke(pred, *first)) {
         ++first;
         --n;
     }
     return {first, n};
+}
+
+/// Walk at most `n` elements of `[first, last)`. Stops at `last` if the count
+/// overruns the range.
+template <std::input_iterator I, std::sentinel_for<I> S, typename P>
+    requires std::predicate<P&, std::iter_reference_t<I>>
+[[nodiscard]] constexpr std::pair<I, Difference_type<I>>
+find_if_n(I first, S last, Difference_type<I> n, P pred)
+{
+    while (n > 0 && first != last && !std::invoke(pred, *first)) {
+        ++first;
+        --n;
+    }
+    return {first, n};
+}
+
+template <std::ranges::input_range R, typename P>
+    requires std::predicate<P&, std::ranges::range_reference_t<R>>
+[[nodiscard]] auto find_if_n(R& range, std::ranges::range_difference_t<R> n, P pred)
+{
+    return find_if_n(std::ranges::begin(range), std::ranges::end(range), n, std::move(pred));
 }
 
 /// Last iterator in `[first, last)` that satisfies `pred`, or `last`.
@@ -63,7 +84,7 @@ template <std::bidirectional_iterator I, typename P>
 [[nodiscard]] constexpr I find_backward_if_n(I first, I last, Difference_type<I> n, P pred)
 {
     const I end = last;
-    while (n && first != last) {
+    while (n > 0 && first != last) {
         --last;
         --n;
         if (std::invoke(pred, *last)) {

@@ -6,14 +6,17 @@
 
 #include <algorithm>
 #include <cctype>
+#include <charconv>
 #include <cstdlib>
 #include <cwctype>
 #include <cstddef>
 #include <functional>
 #include <istream>
+#include <limits>
 #include <locale>
 #include <memory>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -42,13 +45,13 @@ inline bool is_space(char c)
     return is_ascii_space(c);
 }
 
-/// Predicate: `c` is in `set`.
+/// Predicate: `c` is in `set`. Owns a copy so temporaries are safe.
 ///
 /// Example:
 ///   mt::trim_right_if(s, mt::is_any_of(";,.'"));
-[[nodiscard]] inline auto is_any_of(std::string_view set)
+[[nodiscard]] inline auto is_any_of(std::string set)
 {
-    return [set](char c) { return set.find(c) != std::string_view::npos; };
+    return [set = std::move(set)](char c) { return set.find(c) != std::string::npos; };
 }
 
 template <Character Char, typename P>
@@ -205,6 +208,9 @@ inline std::string& capitalize(std::string& s)
 
 [[nodiscard]] inline std::string repeat(std::string_view s, std::size_t n)
 {
+    if (n != 0 && s.size() > std::numeric_limits<std::size_t>::max() / n) {
+        throw std::length_error("repeat overflow");
+    }
     std::string out;
     out.reserve(s.size() * n);
     for (std::size_t i = 0; i < n; ++i) {
@@ -236,7 +242,13 @@ template <typename T>
 {
     T value{};
     std::istringstream in{std::string{s}};
-    in >> value;
+    if (!(in >> value)) {
+        throw std::invalid_argument("from_string");
+    }
+    in >> std::ws;
+    if (!in.eof()) {
+        throw std::invalid_argument("from_string");
+    }
     return value;
 }
 
@@ -449,9 +461,9 @@ inline void setdelim(std::ios& stream, std::string_view extra)
     const char* p = s.data();
     const char* end = p + s.size();
     while (p < end) {
-        char* next = nullptr;
-        const double value = std::strtod(p, &next);
-        if (next != p) {
+        double value = 0;
+        const auto [next, ec] = std::from_chars(p, end, value);
+        if (ec == std::errc{} && next != p) {
             out.push_back(value);
             p = next;
         } else {

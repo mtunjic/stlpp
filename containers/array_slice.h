@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <span>
+#include <stdexcept>
 #include <vector>
 
 namespace mt {
@@ -25,7 +26,7 @@ public:
     using const_iterator = const T*;
 
     array_slice() = default;
-    array_slice(T* data, std::size_t n) : data_(data), size_(n) {}
+    array_slice(T* data, std::size_t n) : data_(data), size_(data == nullptr ? 0 : n) {}
     array_slice(std::span<T> s) : data_(s.data()), size_(s.size()) {}
 
     template <std::size_t N>
@@ -33,19 +34,35 @@ public:
 
     array_slice(std::vector<T>& v) : data_(v.data()), size_(v.size()) {}
     array_slice(std::vector<T>& v, std::size_t start, std::size_t count)
-        : data_(v.data() + start), size_(count)
-    {}
+    {
+        if (start > v.size()) {
+            start = v.size();
+        }
+        if (count > v.size() - start) {
+            count = v.size() - start;
+        }
+        data_ = v.data() + start;
+        size_ = count;
+    }
 
     [[nodiscard]] std::size_t size() const { return size_; }
     [[nodiscard]] bool empty() const { return size_ == 0; }
 
-    [[nodiscard]] T& operator[](std::size_t i) { return data_[i]; }
-    [[nodiscard]] const T& operator[](std::size_t i) const { return data_[i]; }
+    [[nodiscard]] T& operator[](std::size_t i)
+    {
+        check(i);
+        return data_[i];
+    }
+    [[nodiscard]] const T& operator[](std::size_t i) const
+    {
+        check(i);
+        return data_[i];
+    }
 
-    [[nodiscard]] T& front() { return data_[0]; }
-    [[nodiscard]] const T& front() const { return data_[0]; }
-    [[nodiscard]] T& back() { return data_[size_ - 1]; }
-    [[nodiscard]] const T& back() const { return data_[size_ - 1]; }
+    [[nodiscard]] T& front() { return (*this)[0]; }
+    [[nodiscard]] const T& front() const { return (*this)[0]; }
+    [[nodiscard]] T& back() { return (*this)[size_ - 1]; }
+    [[nodiscard]] const T& back() const { return (*this)[size_ - 1]; }
 
     [[nodiscard]] T* data() { return data_; }
     [[nodiscard]] const T* data() const { return data_; }
@@ -64,6 +81,14 @@ public:
             count = size_ - start;
         }
         return {data_ + start, count};
+    }
+
+private:
+    void check(std::size_t i) const
+    {
+        if (i >= size_ || data_ == nullptr) {
+            throw std::out_of_range("array_slice index");
+        }
     }
 };
 

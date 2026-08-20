@@ -26,7 +26,7 @@ I remove_if_not(I first, I last, P pred)
 }
 
 template <std::ranges::forward_range R, typename P>
-auto remove_if_not(R&& range, P pred)
+auto remove_if_not(R& range, P pred)
 {
     return remove_if_not(std::ranges::begin(range), std::ranges::end(range), std::move(pred));
 }

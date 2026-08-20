@@ -4,9 +4,11 @@
 #include "parallel.h"
 
 #include <algorithm>
+#include <cmath>
 #include <functional>
 #include <iterator>
 #include <ranges>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -33,12 +35,15 @@ void psort(I first, I last, Comp comp = {})
         return;
     }
 
-    const unsigned chunks = std::min<unsigned>(t, static_cast<unsigned>(n));
-    const D chunk = n / static_cast<D>(chunks);
+    const unsigned chunks = par::worker_chunks(static_cast<std::size_t>(n));
+    if (chunks == 0) {
+        return;
+    }
     std::vector<I> cuts(chunks + 1);
     cuts[0] = first;
     for (unsigned i = 0; i < chunks; ++i) {
-        cuts[i + 1] = (i + 1 == chunks) ? last : cuts[i] + chunk;
+        cuts[i + 1] = first + static_cast<D>(
+            par::split_at(static_cast<std::size_t>(n), i + 1, chunks));
     }
 
     par::for_index(chunks, [&](std::size_t i) {
@@ -91,7 +96,17 @@ void partial_bucketsort(I first, I last)
     auto [lo_it, hi_it] = std::minmax_element(first, last);
     const T lo = *lo_it;
     const T hi = *hi_it;
+    if constexpr (std::floating_point<T>) {
+        if (std::any_of(first, last, [](T v) { return !std::isfinite(v); })) {
+            std::sort(first, last);
+            return;
+        }
+    }
     if (lo == hi) {
+        return;
+    }
+    if constexpr (std::integral<T> && sizeof(T) > sizeof(int)) {
+        std::sort(first, last);
         return;
     }
 
@@ -105,14 +120,15 @@ void partial_bucketsort(I first, I last)
         return i < B ? i : B - 1;
     };
 
-    const unsigned chunks = std::min<unsigned>(par::thread_count(), static_cast<unsigned>(n));
-    using D = std::iter_difference_t<I>;
-    const D chunk = static_cast<D>(n) / static_cast<D>(chunks);
+    const unsigned chunks = par::worker_chunks(n);
+    if (chunks == 0) {
+        std::sort(first, last);
+        return;
+    }
     std::vector<std::vector<std::vector<T>>> local(chunks, std::vector<std::vector<T>>(B));
 
     par::for_index(chunks, [&](std::size_t c) {
-        I b = first + static_cast<D>(c) * chunk;
-        I e = (c + 1 == chunks) ? last : b + chunk;
+        auto [b, e] = par::chunk_bounds(first, n, static_cast<unsigned>(c), chunks);
         auto& mine = local[c];
         for (; b != e; ++b) {
             mine[bucket_of(*b)].push_back(*b);

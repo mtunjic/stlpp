@@ -10,7 +10,8 @@
 
 namespace mt {
 
-/// Sequential left fold: `op(op(init, a0), a1), ...`.
+/// Sequential left fold: `op(op(init, a0), a1), ...`. Always left-associated.
+/// Use this when `op` is not associative.
 ///
 /// Example:
 ///   std::vector<int> v{1, 2, 3, 4};
@@ -31,8 +32,11 @@ template <std::ranges::input_range R, typename T, typename Op>
                 std::move(op));
 }
 
-/// Parallel reduction. `op` must be associative (and should be commutative).
-/// Sequential below `par::default_cutoff`.
+/// Parallel reduction of a random-access range.
+/// `op` **must be associative** (and should be commutative): chunks are folded
+/// independently and then combined, which is not a strict left fold. Use
+/// `mt::fold` for non-associative operators. Sequential below
+/// `par::default_cutoff`.
 ///
 /// Example:
 ///   std::vector<int> v{1, 2, 3, 4};
@@ -50,12 +54,14 @@ template <std::random_access_iterator I, std::sentinel_for<I> S, typename T, typ
         return fold(first, last, std::move(init), std::move(op));
     }
 
-    const unsigned chunks = std::min<unsigned>(t, static_cast<unsigned>(n));
-    const D chunk = n / static_cast<D>(chunks);
+    const unsigned chunks = par::worker_chunks(static_cast<std::size_t>(n));
+    if (chunks == 0) {
+        return init;
+    }
     std::vector<T> parts(chunks);
     par::for_index(chunks, [&](std::size_t c) {
-        I b = first + static_cast<D>(c) * chunk;
-        I e = (c + 1 == chunks) ? last : b + chunk;
+        auto [b, e] = par::chunk_bounds(first, static_cast<std::size_t>(n),
+                                        static_cast<unsigned>(c), chunks);
         T acc = *b;
         ++b;
         parts[c] = fold(b, e, std::move(acc), op);
@@ -67,11 +73,27 @@ template <std::random_access_iterator I, std::sentinel_for<I> S, typename T, typ
     return acc;
 }
 
+/// Sequential reduce for non-random-access iterators (always a left fold).
+template <std::input_iterator I, std::sentinel_for<I> S, typename T, typename Op>
+    requires (!std::random_access_iterator<I>)
+[[nodiscard]] T reduce(I first, S last, T init, Op op)
+{
+    return fold(first, last, std::move(init), std::move(op));
+}
+
 template <std::ranges::random_access_range R, typename T, typename Op>
 [[nodiscard]] auto reduce(R&& range, T init, Op op)
 {
     return reduce(std::ranges::begin(range), std::ranges::end(range), std::move(init),
                   std::move(op));
+}
+
+template <std::ranges::input_range R, typename T, typename Op>
+    requires (!std::ranges::random_access_range<R>)
+[[nodiscard]] auto reduce(R&& range, T init, Op op)
+{
+    return fold(std::ranges::begin(range), std::ranges::end(range), std::move(init),
+                std::move(op));
 }
 
 template <std::random_access_iterator I, std::sentinel_for<I> S>

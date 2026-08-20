@@ -23,14 +23,17 @@ public:
     using pointer = void;
 
     cycle_iterator() = default;
-    cycle_iterator(I begin, I end, I current, std::size_t trip)
-        : begin_(begin), end_(end), current_(current), trip_(trip)
+    cycle_iterator(I begin, I end, I current, std::size_t trip, std::size_t times)
+        : begin_(begin), end_(end), current_(current), trip_(trip), times_(times)
     {}
 
     [[nodiscard]] reference operator*() const { return *current_; }
 
     cycle_iterator& operator++()
     {
+        if (times_ == 0 || trip_ >= times_) {
+            return *this;
+        }
         ++current_;
         if (current_ == end_) {
             current_ = begin_;
@@ -56,6 +59,7 @@ private:
     I end_{};
     I current_{};
     std::size_t trip_ = 0;
+    std::size_t times_ = 0;
 };
 
 template <std::forward_iterator I>
@@ -75,12 +79,12 @@ public:
         if (times_ == 0 || first_ == last_) {
             return end();
         }
-        return {first_, last_, first_, 0};
+        return {first_, last_, first_, 0, times_};
     }
 
     [[nodiscard]] cycle_iterator<I> end() const
     {
-        return {first_, last_, first_, times_};
+        return {first_, last_, first_, times_, times_};
     }
 };
 

@@ -2,6 +2,7 @@
 
 #include "copy.h"
 #include "integer.h"
+#include "iterator_ops.h"
 
 #include <algorithm>
 #include <iterator>
@@ -21,7 +22,7 @@ namespace mt {
 template <std::forward_iterator I, Integer N>
 I reverse_n(I first, N n)
 {
-    if (n == N{0}) {
+    if (n <= N{0}) {
         return first;
     }
     if (n == N{1}) {
@@ -38,19 +39,31 @@ I reverse_n(I first, N n)
     return result;
 }
 
-/// Reverse `n` elements of a bidirectional range by walking inward.
+/// Reverse the first `n` elements of `[first, last)` (clipped to the range).
 ///
 /// Example:
 ///   std::vector<int> v{1, 2, 3, 4, 5};
 ///   mt::reverse_n(v.begin(), v.end(), 4);  // {4, 3, 2, 1, 5}
-template <std::bidirectional_iterator I, Integer N>
-void reverse_n(I first, I last, N n)
+template <std::bidirectional_iterator I, std::sentinel_for<I> S, Integer N>
+void reverse_n(I first, S last, N n)
 {
-    n = half(n);
-    while (n-- > N{0}) {
-        std::iter_swap(first, --last);
-        ++first;
+    if (n <= N{0} || first == last) {
+        return;
     }
+    I mid = first;
+    N k = n;
+    while (k > N{0} && mid != last) {
+        ++mid;
+        --k;
+    }
+    std::reverse(first, mid);
+}
+
+template <std::forward_iterator I, std::sentinel_for<I> S, Integer N>
+    requires (!std::bidirectional_iterator<I>)
+I reverse_n(I first, S last, N n)
+{
+    return reverse_n(first, bounded_count(first, last, n));
 }
 
 template <std::forward_iterator I>
@@ -93,6 +106,15 @@ template <std::forward_iterator I, Integer N, std::bidirectional_iterator B>
 I reverse_n_with_buffer(I first, N n, B buffer)
 {
     auto [in, buffer_end] = mt::copy_n(first, n, buffer);
+    (void)in;
+    return std::reverse_copy(buffer, buffer_end, first);
+}
+
+template <std::forward_iterator I, std::sentinel_for<I> S, Integer N, std::bidirectional_iterator B>
+    requires std::indirectly_copyable<I, B> && std::indirectly_copyable<B, I>
+I reverse_n_with_buffer(I first, S last, N n, B buffer)
+{
+    auto [in, buffer_end] = mt::copy_n(first, last, n, buffer);
     (void)in;
     return std::reverse_copy(buffer, buffer_end, first);
 }

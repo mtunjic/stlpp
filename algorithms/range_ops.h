@@ -3,6 +3,7 @@
 #include "concepts.h"
 
 #include <algorithm>
+#include <concepts>
 #include <functional>
 #include <iterator>
 #include <ranges>
@@ -101,9 +102,10 @@ O intercalate(const T& sep, I first, S last, O dest)
 }
 
 template <typename T, std::ranges::input_range R>
+    requires std::convertible_to<const T&, std::ranges::range_value_t<R>>
 [[nodiscard]] auto intercalate(const T& sep, R&& range)
 {
-    std::vector<T> out;
+    std::vector<std::ranges::range_value_t<R>> out;
     intercalate(sep, std::ranges::begin(range), std::ranges::end(range), std::back_inserter(out));
     return out;
 }
@@ -121,11 +123,13 @@ O group(I first, S last, O dest)
 {
     while (first != last) {
         std::vector<Value_type<I>> run;
-        auto value = *first;
-        do {
-            run.push_back(value);
+        auto head = *first;
+        run.push_back(head);
+        ++first;
+        while (first != last && *first == head) {
+            run.push_back(*first);
             ++first;
-        } while (first != last && *first == value);
+        }
         *dest = std::move(run);
         ++dest;
     }

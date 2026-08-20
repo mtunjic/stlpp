@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <stdexcept>
 #include <vector>
 
 namespace mt {
@@ -25,7 +26,12 @@ public:
         return adj_.size() - 1;
     }
 
-    void add_edge(std::size_t u, std::size_t v) { adj_[u].push_back(v); }
+    void add_edge(std::size_t u, std::size_t v)
+    {
+        check(u);
+        check(v);
+        adj_[u].push_back(v);
+    }
 
     void add_undirected_edge(std::size_t u, std::size_t v)
     {
@@ -35,8 +41,24 @@ public:
 
     [[nodiscard]] std::size_t size() const { return adj_.size(); }
 
-    [[nodiscard]] const std::vector<std::size_t>& neighbors(std::size_t u) const { return adj_[u]; }
-    [[nodiscard]] std::vector<std::size_t>& neighbors(std::size_t u) { return adj_[u]; }
+    [[nodiscard]] const std::vector<std::size_t>& neighbors(std::size_t u) const
+    {
+        check(u);
+        return adj_[u];
+    }
+    [[nodiscard]] std::vector<std::size_t>& neighbors(std::size_t u)
+    {
+        check(u);
+        return adj_[u];
+    }
+
+private:
+    void check(std::size_t u) const
+    {
+        if (u >= adj_.size()) {
+            throw std::out_of_range("graph vertex");
+        }
+    }
 };
 
 }  // namespace mt

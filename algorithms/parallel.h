@@ -2,8 +2,11 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <exception>
 #include <iterator>
+#include <mutex>
 #include <thread>
+#include <utility>
 #include <vector>
 
 namespace mt::par {
@@ -15,6 +18,60 @@ inline constexpr std::size_t default_cutoff = 4096;
 {
     const unsigned n = std::thread::hardware_concurrency();
     return n == 0 ? 1u : n;
+}
+
+[[nodiscard]] inline unsigned worker_chunks(std::size_t n)
+{
+    if (n == 0) {
+        return 0;
+    }
+    // Use size_t min so a large `n` is not truncated to 0 via `unsigned(n)`.
+    return static_cast<unsigned>(std::min<std::size_t>(thread_count(), n));
+}
+
+[[nodiscard]] inline std::size_t split_at(std::size_t n, unsigned c, unsigned chunks)
+{
+    if (chunks == 0) {
+        return 0;
+    }
+    const std::size_t q = n / chunks;
+    const std::size_t r = n % chunks;
+    return q * static_cast<std::size_t>(c) + r * static_cast<std::size_t>(c) / chunks;
+}
+
+template <std::random_access_iterator I>
+[[nodiscard]] std::pair<I, I> chunk_bounds(I first, std::size_t n, unsigned c, unsigned chunks)
+{
+    using D = std::iter_difference_t<I>;
+    return {first + static_cast<D>(split_at(n, c, chunks)),
+            first + static_cast<D>(split_at(n, c + 1, chunks))};
+}
+
+template <typename F>
+void launch_chunks(unsigned chunks, F work)
+{
+    if (chunks == 0) {
+        return;
+    }
+    std::vector<std::thread> workers;
+    workers.reserve(chunks - 1);
+    auto join = [&] {
+        for (auto& w : workers) {
+            if (w.joinable()) {
+                w.join();
+            }
+        }
+    };
+    try {
+        for (unsigned c = 0; c < chunks - 1; ++c) {
+            workers.emplace_back(work, c);
+        }
+        work(chunks - 1);
+    } catch (...) {
+        join();
+        throw;
+    }
+    join();
 }
 
 /// Call `f(i)` for `i` in `[0, n)`. Uses up to `thread_count()` workers.
@@ -31,22 +88,25 @@ void for_index(std::size_t n, F f)
         }
         return;
     }
-    const unsigned chunks = static_cast<unsigned>(std::min<std::size_t>(t, n));
-    auto work = [n, chunks, f](unsigned c) {
-        const std::size_t b = n * c / chunks;
-        const std::size_t e = n * (c + 1) / chunks;
-        for (std::size_t i = b; i < e; ++i) {
-            f(i);
+    const unsigned chunks = worker_chunks(n);
+    std::mutex mu;
+    std::exception_ptr eptr;
+    launch_chunks(chunks, [n, chunks, f, &mu, &eptr](unsigned c) {
+        try {
+            const std::size_t b = split_at(n, c, chunks);
+            const std::size_t e = split_at(n, c + 1, chunks);
+            for (std::size_t i = b; i < e; ++i) {
+                f(i);
+            }
+        } catch (...) {
+            std::lock_guard<std::mutex> lock(mu);
+            if (!eptr) {
+                eptr = std::current_exception();
+            }
         }
-    };
-    std::vector<std::thread> workers;
-    workers.reserve(chunks - 1);
-    for (unsigned c = 0; c < chunks - 1; ++c) {
-        workers.emplace_back(work, c);
-    }
-    work(chunks - 1);
-    for (auto& w : workers) {
-        w.join();
+    });
+    if (eptr) {
+        std::rethrow_exception(eptr);
     }
 }
 
@@ -65,19 +125,25 @@ void for_chunks(I first, I last, F f, std::size_t cutoff = default_cutoff)
         f(first, last);
         return;
     }
-    const unsigned chunks = std::min<unsigned>(t, static_cast<unsigned>(n));
-    const D chunk = n / static_cast<D>(chunks);
-    std::vector<std::thread> workers;
-    workers.reserve(chunks - 1);
-    I b = first;
-    for (unsigned i = 0; i < chunks - 1; ++i) {
-        I e = b + chunk;
-        workers.emplace_back([f, b, e] { f(b, e); });
-        b = e;
+    const unsigned chunks = worker_chunks(static_cast<std::size_t>(n));
+    if (chunks == 0) {
+        return;
     }
-    f(b, last);
-    for (auto& w : workers) {
-        w.join();
+    std::mutex mu;
+    std::exception_ptr eptr;
+    launch_chunks(chunks, [first, n, chunks, f, &mu, &eptr](unsigned c) {
+        try {
+            auto [b, e] = chunk_bounds(first, static_cast<std::size_t>(n), c, chunks);
+            f(b, e);
+        } catch (...) {
+            std::lock_guard<std::mutex> lock(mu);
+            if (!eptr) {
+                eptr = std::current_exception();
+            }
+        }
+    });
+    if (eptr) {
+        std::rethrow_exception(eptr);
     }
 }
 

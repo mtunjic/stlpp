@@ -11,7 +11,8 @@
 namespace mt {
 
 /// Copy `n` elements from `first` to `dest`. Returns `{in, out}` past the
-/// last copied positions. `n == 0` is a no-op.
+/// last copied positions. `n <= 0` is a no-op. Precondition: at least `n`
+/// readable elements unless a sentinel overload is used.
 ///
 /// Example:
 ///   std::vector<int> src{1, 2, 3, 4};
@@ -21,13 +22,34 @@ template <std::input_iterator I, std::weakly_incrementable O, Integer N>
     requires std::indirectly_copyable<I, O>
 [[nodiscard]] constexpr std::pair<I, O> copy_n(I first, N n, O dest)
 {
-    while (n != N{0}) {
+    while (n > N{0}) {
         *dest = *first;
         ++first;
         ++dest;
         --n;
     }
     return {first, dest};
+}
+
+/// Copy at most `n` elements of `[first, last)` to `dest`.
+template <std::input_iterator I, std::sentinel_for<I> S, std::weakly_incrementable O, Integer N>
+    requires std::indirectly_copyable<I, O>
+[[nodiscard]] constexpr std::pair<I, O> copy_n(I first, S last, N n, O dest)
+{
+    while (n > N{0} && first != last) {
+        *dest = *first;
+        ++first;
+        ++dest;
+        --n;
+    }
+    return {first, dest};
+}
+
+template <std::ranges::input_range R, std::weakly_incrementable O, Integer N>
+    requires std::indirectly_copyable<std::ranges::iterator_t<R>, O>
+[[nodiscard]] constexpr auto copy_n(R& range, N n, O dest)
+{
+    return copy_n(std::ranges::begin(range), std::ranges::end(range), n, dest);
 }
 
 /// Copy `n` elements through `buffer` (useful when source and dest overlap).
@@ -40,8 +62,18 @@ template <std::input_iterator I, Integer N, std::forward_iterator B, std::weakly
 [[nodiscard]] constexpr std::pair<I, O> copy_n_with_buffer(I first, N n, B buffer, O dest)
 {
     auto [in, buf_end] = mt::copy_n(first, n, buffer);
-    auto [buf_again, out] = mt::copy_n(buffer, n, dest);
-    (void)buf_end;
+    auto [buf_again, out] = mt::copy_n(buffer, buf_end, n, dest);
+    (void)buf_again;
+    return {in, out};
+}
+
+template <std::input_iterator I, std::sentinel_for<I> S, Integer N, std::forward_iterator B,
+          std::weakly_incrementable O>
+    requires std::indirectly_copyable<I, B> && std::indirectly_copyable<B, O>
+[[nodiscard]] constexpr std::pair<I, O> copy_n_with_buffer(I first, S last, N n, B buffer, O dest)
+{
+    auto [in, buf_end] = mt::copy_n(first, last, n, buffer);
+    auto [buf_again, out] = mt::copy_n(buffer, buf_end, n, dest);
     (void)buf_again;
     return {in, out};
 }
@@ -57,7 +89,21 @@ template <std::input_iterator I, Integer N, std::forward_iterator B, std::weakly
 template <std::forward_iterator I0, std::forward_iterator I1, Integer N>
 [[nodiscard]] constexpr std::pair<I0, I1> swap_ranges_n(I0 first0, I1 first1, N n)
 {
-    while (n != N{0}) {
+    while (n > N{0}) {
+        std::iter_swap(first0, first1);
+        ++first0;
+        ++first1;
+        --n;
+    }
+    return {first0, first1};
+}
+
+template <std::forward_iterator I0, std::sentinel_for<I0> S0, std::forward_iterator I1,
+          std::sentinel_for<I1> S1, Integer N>
+[[nodiscard]] constexpr std::pair<I0, I1>
+swap_ranges_n(I0 first0, S0 last0, I1 first1, S1 last1, N n)
+{
+    while (n > N{0} && first0 != last0 && first1 != last1) {
         std::iter_swap(first0, first1);
         ++first0;
         ++first1;

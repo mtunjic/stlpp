@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <numeric>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -32,6 +33,7 @@ public:
 
     std::size_t find(std::size_t x)
     {
+        check(x);
         std::size_t r = x;
         while (parent_[r] != r) {
             r = parent_[r];
@@ -66,6 +68,14 @@ public:
     [[nodiscard]] bool connected(std::size_t a, std::size_t b) { return find(a) == find(b); }
 
     [[nodiscard]] std::size_t component_size(std::size_t x) { return size_[find(x)]; }
+
+private:
+    void check(std::size_t x) const
+    {
+        if (x >= parent_.size()) {
+            throw std::out_of_range("disjoint_set index");
+        }
+    }
 };
 
 }  // namespace mt

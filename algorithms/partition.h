@@ -1,6 +1,7 @@
 #pragma once
 
 #include "integer.h"
+#include "iterator_ops.h"
 
 #include <algorithm>
 #include <functional>
@@ -77,7 +78,7 @@ template <std::forward_iterator I, Integer N, typename P>
     requires std::predicate<P&, std::iter_reference_t<I>>
 I partition_point_n(I first, N n, P pred)
 {
-    while (n) {
+    while (n > N{0}) {
         const N h = half(n);
         I middle = first;
         std::advance(middle, static_cast<Difference_type<I>>(h));
@@ -89,6 +90,13 @@ I partition_point_n(I first, N n, P pred)
         }
     }
     return first;
+}
+
+template <std::forward_iterator I, std::sentinel_for<I> S, Integer N, typename P>
+    requires std::predicate<P&, std::iter_reference_t<I>>
+I partition_point_n(I first, S last, N n, P pred)
+{
+    return partition_point_n(first, bounded_count(first, last, n), std::move(pred));
 }
 
 }  // namespace mt

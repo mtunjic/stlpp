@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <concepts>
 #include <functional>
 #include <iterator>
 #include <numeric>
@@ -49,11 +50,13 @@ O group_by(I first, S last, Pred same, O dest)
 {
     while (first != last) {
         std::vector<std::iter_value_t<I>> run;
-        auto value = *first;
-        do {
-            run.push_back(value);
+        auto head = *first;
+        run.push_back(head);
+        ++first;
+        while (first != last && std::invoke(same, head, *first)) {
+            run.push_back(*first);
             ++first;
-        } while (first != last && std::invoke(same, value, *first));
+        }
         *dest = std::move(run);
         ++dest;
     }
@@ -69,22 +72,28 @@ template <std::ranges::input_range R, typename Pred>
     return out;
 }
 
-/// Dot product (default `+` of `*`).
+/// Dot product (default `+` of `*`). Stops when either range ends.
 ///
 /// Example:
 ///   mt::inner_product(std::vector{1, 2, 3}, std::vector{4, 5, 6});  // 32
-template <std::input_iterator I1, std::sentinel_for<I1> S1, std::input_iterator I2, typename T,
-          typename Op1 = std::plus<>, typename Op2 = std::multiplies<>>
-[[nodiscard]] T inner_product(I1 a, S1 a_last, I2 b, T init, Op1 add = {}, Op2 mul = {})
+template <std::input_iterator I1, std::sentinel_for<I1> S1, std::input_iterator I2,
+          std::sentinel_for<I2> S2, typename T, typename Op1 = std::plus<>,
+          typename Op2 = std::multiplies<>>
+    requires (!std::convertible_to<S2, T>)
+[[nodiscard]] T inner_product(I1 a, S1 a_last, I2 b, S2 b_last, T init, Op1 add = {}, Op2 mul = {})
 {
-    return std::inner_product(a, a_last, b, std::move(init), std::move(add), std::move(mul));
+    for (; a != a_last && b != b_last; ++a, ++b) {
+        init = std::invoke(add, std::move(init), std::invoke(mul, *a, *b));
+    }
+    return init;
 }
 
 template <std::ranges::input_range R1, std::ranges::input_range R2>
 [[nodiscard]] auto inner_product(R1&& a, R2&& b)
 {
     using T = std::ranges::range_value_t<R1>;
-    return inner_product(std::ranges::begin(a), std::ranges::end(a), std::ranges::begin(b), T{});
+    return inner_product(std::ranges::begin(a), std::ranges::end(a), std::ranges::begin(b),
+                         std::ranges::end(b), T{});
 }
 
 /// `out[0] = in[0]`; `out[i] = op(in[i], in[i-1])` (default minus).

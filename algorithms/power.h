@@ -15,6 +15,11 @@ namespace mt {
 template <typename A, Integer N, typename Op>
 [[nodiscard]] A power(A a, N n, Op op)
 {
+    // n > 0 is required (n == 0 needs an identity; use the 4-argument overload).
+    // Returning `a` avoids the even(0) infinite loop without inventing an identity.
+    if (n <= N{0}) {
+        return a;
+    }
     while (even(n)) {
         a = op(a, a);
         n = half(n);
@@ -44,7 +49,7 @@ template <typename A, Integer N, typename Op>
 template <typename A, Integer N, typename Op>
 [[nodiscard]] A power(A a, N n, Op op, A identity)
 {
-    if (n == N{0}) {
+    if (n <= N{0}) {
         return identity;
     }
     return power(std::move(a), n, std::move(op));

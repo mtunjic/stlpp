@@ -38,7 +38,7 @@ slice(I first, I last, Difference_type<I> start, Difference_type<I> count)
 }
 
 template <std::ranges::random_access_range R>
-[[nodiscard]] auto slice(R&& range, std::ranges::range_difference_t<R> start,
+[[nodiscard]] auto slice(R& range, std::ranges::range_difference_t<R> start,
                          std::ranges::range_difference_t<R> count)
 {
     auto [a, b] = slice(std::ranges::begin(range), std::ranges::end(range), start, count);

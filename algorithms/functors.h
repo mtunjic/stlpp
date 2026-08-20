@@ -7,11 +7,13 @@
 #include <cctype>
 #include <iostream>
 #include <ostream>
+#include <stdexcept>
+#include <type_traits>
 #include <utility>
 
 namespace mt {
 
-/// Modular product: `(n * m) % modulus`.
+/// Modular product: `(n * m) % modulus` with a wider intermediate product.
 ///
 /// Example:
 ///   mt::modulo_multiply<int> op{5};
@@ -20,7 +22,49 @@ template <Integer I>
 struct modulo_multiply {
     I modulus{};
     explicit modulo_multiply(I m) : modulus(std::move(m)) {}
-    I operator()(const I& n, const I& m) const { return (n * m) % modulus; }
+    I operator()(const I& n, const I& m) const
+    {
+        if (modulus == I{0}) {
+            throw std::domain_error("modulo_multiply: zero modulus");
+        }
+        using U = std::conditional_t<std::unsigned_integral<I>, I, std::make_unsigned_t<I>>;
+        const U mod = [&] {
+            if constexpr (std::unsigned_integral<I>) {
+                return static_cast<U>(modulus);
+            } else {
+                const U u = static_cast<U>(modulus);
+                return modulus < I{0} ? static_cast<U>(0) - u : u;
+            }
+        }();
+        auto reduce = [mod](I x) -> U {
+            if constexpr (std::unsigned_integral<I>) {
+                return static_cast<U>(x % static_cast<I>(mod));
+            } else {
+                I r = static_cast<I>(x % static_cast<I>(mod));
+                if (r < I{0}) {
+                    r += static_cast<I>(mod);
+                }
+                return static_cast<U>(r);
+            }
+        };
+        auto addmod = [mod](U x, U y) -> U {
+            if (x >= mod - y) {
+                return x - (mod - y);
+            }
+            return x + y;
+        };
+        U a = reduce(n);
+        U b = reduce(m);
+        U r = 0;
+        while (b != U{0}) {
+            if ((b & U{1}) != U{0}) {
+                r = addmod(r, a);
+            }
+            a = addmod(a, a);
+            b >>= 1;
+        }
+        return static_cast<I>(r);
+    }
 };
 
 template <Integer I>

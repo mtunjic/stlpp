@@ -33,8 +33,10 @@ public:
 
     filter_iterator& operator++()
     {
-        ++current_;
-        satisfy();
+        if (current_ != last_) {
+            ++current_;
+            satisfy();
+        }
         return *this;
     }
 

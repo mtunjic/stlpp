@@ -31,11 +31,13 @@ public:
     unfold_iterator() = default;
     unfold_iterator(F f, State state) : f_(std::move(f)), step_(std::invoke(f_, state)) {}
 
-    [[nodiscard]] reference operator*() const { return step_->first; }
+    [[nodiscard]] reference operator*() const { return step_.value().first; }
 
     unfold_iterator& operator++()
     {
-        step_ = std::invoke(f_, step_->second);
+        if (step_) {
+            step_ = std::invoke(f_, step_->second);
+        }
         return *this;
     }
 

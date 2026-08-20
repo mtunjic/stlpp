@@ -1,6 +1,7 @@
 #pragma once
 
 #include "integer.h"
+#include "iterator_ops.h"
 #include "partition.h"
 
 #include <algorithm>
@@ -21,7 +22,7 @@ namespace mt {
 template <std::forward_iterator I, Integer N, typename T, typename Comp = std::less<>>
 I upper_bound_n(I first, N n, const T& value, Comp comp = {})
 {
-    while (n) {
+    while (n > N{0}) {
         const N h = half(n);
         I middle = first;
         std::advance(middle, static_cast<Difference_type<I>>(h));
@@ -44,7 +45,7 @@ I upper_bound_n(I first, N n, const T& value, Comp comp = {})
 template <std::forward_iterator I, Integer N, typename T, typename Comp = std::less<>>
 I lower_bound_n(I first, N n, const T& value, Comp comp = {})
 {
-    while (n) {
+    while (n > N{0}) {
         const N h = half(n);
         I middle = first;
         std::advance(middle, static_cast<Difference_type<I>>(h));
@@ -58,6 +59,20 @@ I lower_bound_n(I first, N n, const T& value, Comp comp = {})
     return first;
 }
 
+template <std::forward_iterator I, std::sentinel_for<I> S, Integer N, typename T,
+          typename Comp = std::less<>>
+I upper_bound_n(I first, S last, N n, const T& value, Comp comp = {})
+{
+    return upper_bound_n(first, bounded_count(first, last, n), value, std::move(comp));
+}
+
+template <std::forward_iterator I, std::sentinel_for<I> S, Integer N, typename T,
+          typename Comp = std::less<>>
+I lower_bound_n(I first, S last, N n, const T& value, Comp comp = {})
+{
+    return lower_bound_n(first, bounded_count(first, last, n), value, std::move(comp));
+}
+
 /// Insertion sort of `n` elements using binary search for the insertion point
 /// (Stepanov).
 ///
@@ -68,12 +83,22 @@ I lower_bound_n(I first, N n, const T& value, Comp comp = {})
 template <std::random_access_iterator I, Integer N, typename Comp = std::less<>>
 void binary_insertion_sort_n(I first, N n, Comp comp = {})
 {
+    if (n <= N{0}) {
+        return;
+    }
     for (N i = 1; i < n; ++i) {
         auto value = std::move(first[static_cast<Difference_type<I>>(i)]);
         I insertion = upper_bound_n(first, i, value, comp);
         std::move_backward(insertion, first + i, first + i + 1);
         *insertion = std::move(value);
     }
+}
+
+template <std::random_access_iterator I, std::sentinel_for<I> S, Integer N,
+          typename Comp = std::less<>>
+void binary_insertion_sort_n(I first, S last, N n, Comp comp = {})
+{
+    binary_insertion_sort_n(first, bounded_count(first, last, n), std::move(comp));
 }
 
 /// Make `[first1, last1)` the sorted subrange of `[first0, last0)` that
@@ -153,10 +178,10 @@ void median_sort(I first, I last, Comp comp = {})
     median_sort(mid + 1, last, comp);
 }
 
-template <std::ranges::random_access_range R>
-void median_sort(R&& range)
+template <std::ranges::random_access_range R, typename Comp = std::less<>>
+void median_sort(R&& range, Comp comp = {})
 {
-    median_sort(std::ranges::begin(range), std::ranges::end(range));
+    median_sort(std::ranges::begin(range), std::ranges::end(range), std::move(comp));
 }
 
 }  // namespace mt

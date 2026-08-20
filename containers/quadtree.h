@@ -68,20 +68,31 @@ class quadtree {
         if (!n.box.contains(p)) {
             return false;
         }
+        auto into_child = [&](point_2d q) {
+            return insert_into(*n.nw, q) || insert_into(*n.ne, q) || insert_into(*n.sw, q) ||
+                   insert_into(*n.se, q);
+        };
+
         if (!n.divided()) {
             if (n.points.size() < capacity) {
                 n.points.push_back(p);
                 return true;
             }
             n.divide();
+            std::vector<point_2d> keep;
+            keep.reserve(n.points.size());
             for (point_2d q : n.points) {
-                (void)(insert_into(*n.nw, q) || insert_into(*n.ne, q) || insert_into(*n.sw, q) ||
-                       insert_into(*n.se, q));
+                if (!into_child(q)) {
+                    keep.push_back(q);
+                }
             }
-            n.points.clear();
+            n.points = std::move(keep);
         }
-        return insert_into(*n.nw, p) || insert_into(*n.ne, p) || insert_into(*n.sw, p) ||
-               insert_into(*n.se, p);
+        if (into_child(p)) {
+            return true;
+        }
+        n.points.push_back(p);
+        return true;
     }
 
     static void query_into(const node& n, rect_2d range, std::vector<point_2d>& out)

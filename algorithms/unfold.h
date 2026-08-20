@@ -58,6 +58,9 @@ template <typename N, typename T, typename F>
 [[nodiscard]] auto iterate_n(N n, T x, F f)
 {
     std::vector<T> out;
+    if (n <= N{0}) {
+        return out;
+    }
     out.reserve(static_cast<std::size_t>(n));
     iterate_n(n, std::move(x), std::move(f), std::back_inserter(out));
     return out;

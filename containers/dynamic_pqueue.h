@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <functional>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -91,11 +92,26 @@ public:
         return h;
     }
 
-    [[nodiscard]] const T& top() const { return heap_.front().value; }
-    [[nodiscard]] handle top_handle() const { return heap_.front().handle; }
+    [[nodiscard]] const T& top() const
+    {
+        if (heap_.empty()) {
+            throw std::out_of_range("dynamic_pqueue::top");
+        }
+        return heap_.front().value;
+    }
+    [[nodiscard]] handle top_handle() const
+    {
+        if (heap_.empty()) {
+            throw std::out_of_range("dynamic_pqueue::top_handle");
+        }
+        return heap_.front().handle;
+    }
 
     void pop()
     {
+        if (heap_.empty()) {
+            return;
+        }
         const handle h = heap_.front().handle;
         swap_nodes(0, heap_.size() - 1);
         heap_.pop_back();
@@ -113,6 +129,9 @@ public:
 
     void update(handle h, T value)
     {
+        if (!contains(h)) {
+            return;
+        }
         const std::size_t i = where_[h];
         heap_[i].value = std::move(value);
         sift_up(i);

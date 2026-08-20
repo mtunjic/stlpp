@@ -23,13 +23,17 @@ public:
     using pointer = void;
 
     window_iterator() = default;
-    window_iterator(I current, difference_type k) : current_(current), k_(k) {}
+    window_iterator(I current, I stop, difference_type k)
+        : current_(current), stop_(stop), k_(k)
+    {}
 
     [[nodiscard]] reference operator*() const { return {current_, current_ + k_}; }
 
     window_iterator& operator++()
     {
-        ++current_;
+        if (current_ != stop_) {
+            ++current_;
+        }
         return *this;
     }
 
@@ -47,6 +51,7 @@ public:
 
 private:
     I current_{};
+    I stop_{};
     difference_type k_{1};
 };
 
@@ -64,18 +69,23 @@ public:
 
     [[nodiscard]] window_iterator<I> begin() const
     {
-        if (k_ <= 0 || last_ - first_ < k_) {
-            return {first_, k_};
-        }
-        return {first_, k_};
+        const I stop = end_pos();
+        return {first_, stop, k_};
     }
 
     [[nodiscard]] window_iterator<I> end() const
     {
+        const I stop = end_pos();
+        return {stop, stop, k_};
+    }
+
+private:
+    [[nodiscard]] I end_pos() const
+    {
         if (k_ <= 0 || last_ - first_ < k_) {
-            return {first_, k_};
+            return first_;
         }
-        return {last_ - (k_ - 1), k_};
+        return last_ - (k_ - 1);
     }
 };
 
@@ -117,7 +127,9 @@ public:
 
     chunk_iterator& operator++()
     {
-        current_ += std::min(k_, last_ - current_);
+        if (current_ != last_) {
+            current_ += std::min(k_, last_ - current_);
+        }
         return *this;
     }
 
@@ -151,7 +163,13 @@ public:
         : first_(first), last_(last), k_(k)
     {}
 
-    [[nodiscard]] chunk_iterator<I> begin() const { return {first_, last_, k_ <= 0 ? 1 : k_}; }
+    [[nodiscard]] chunk_iterator<I> begin() const
+    {
+        if (k_ <= 0 || first_ == last_) {
+            return end();
+        }
+        return {first_, last_, k_};
+    }
     [[nodiscard]] chunk_iterator<I> end() const { return {last_, last_, k_ <= 0 ? 1 : k_}; }
 };
 

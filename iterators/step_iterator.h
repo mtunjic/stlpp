@@ -2,6 +2,7 @@
 
 #include "concepts.h"
 
+#include <algorithm>
 #include <iterator>
 #include <ranges>
 #include <utility>
@@ -9,7 +10,8 @@
 namespace mt {
 
 /// Random-access adaptor that walks an underlying iterator in strides of `step`.
-/// Precondition: `step > 0`.
+/// Precondition: `step > 0`. Stores a logical index so comparisons never form a
+/// pointer past one-past-the-end; `base()` clamps to the underlying `last`.
 ///
 /// Example:
 ///   std::vector<int> v{0, 1, 2, 3, 4, 5};
@@ -26,14 +28,16 @@ public:
     using pointer = I;
 
     step_iterator() = default;
-    step_iterator(I current, difference_type step) : current_(current), step_(step) {}
+    step_iterator(I origin, I limit, difference_type index, difference_type step)
+        : origin_(origin), limit_(limit), index_(index), step_(step)
+    {}
 
-    [[nodiscard]] reference operator*() const { return *current_; }
-    [[nodiscard]] pointer operator->() const { return current_; }
+    [[nodiscard]] reference operator*() const { return *(origin_ + index_ * step_); }
+    [[nodiscard]] pointer operator->() const { return base(); }
 
     step_iterator& operator++()
     {
-        current_ += step_;
+        ++index_;
         return *this;
     }
 
@@ -46,7 +50,7 @@ public:
 
     step_iterator& operator--()
     {
-        current_ -= step_;
+        --index_;
         return *this;
     }
 
@@ -59,7 +63,7 @@ public:
 
     step_iterator& operator+=(difference_type n)
     {
-        current_ += n * step_;
+        index_ += n;
         return *this;
     }
 
@@ -73,24 +77,40 @@ public:
 
     friend difference_type operator-(step_iterator a, step_iterator b)
     {
-        return (a.current_ - b.current_) / a.step_;
+        return a.index_ - b.index_;
     }
 
     friend bool operator==(step_iterator a, step_iterator b)
     {
-        return a.current_ == b.current_;
+        return a.origin_ == b.origin_ && a.index_ == b.index_;
     }
 
-    friend bool operator<(step_iterator a, step_iterator b) { return a.current_ < b.current_; }
+    friend bool operator<(step_iterator a, step_iterator b)
+    {
+        return a.origin_ == b.origin_ ? a.index_ < b.index_ : a.origin_ < b.origin_;
+    }
     friend bool operator>(step_iterator a, step_iterator b) { return b < a; }
     friend bool operator<=(step_iterator a, step_iterator b) { return !(b < a); }
     friend bool operator>=(step_iterator a, step_iterator b) { return !(a < b); }
 
-    [[nodiscard]] I base() const { return current_; }
+    [[nodiscard]] I base() const
+    {
+        const difference_type span = limit_ - origin_;
+        const difference_type offset = index_ * step_;
+        if (offset >= span) {
+            return limit_;
+        }
+        if (offset <= 0) {
+            return origin_;
+        }
+        return origin_ + offset;
+    }
     [[nodiscard]] difference_type step() const { return step_; }
 
 private:
-    I current_{};
+    I origin_{};
+    I limit_{};
+    difference_type index_{0};
     difference_type step_{1};
 };
 
@@ -106,16 +126,17 @@ public:
         : first_(first), last_(last), step_(step)
     {}
 
-    [[nodiscard]] step_iterator<I> begin() const { return {first_, step_}; }
+    [[nodiscard]] step_iterator<I> begin() const { return {first_, last_, 0, step_}; }
 
     [[nodiscard]] step_iterator<I> end() const
     {
-        const auto n = last_ - first_;
+        using D = std::iter_difference_t<I>;
+        const D n = last_ - first_;
         if (n <= 0 || step_ <= 0) {
-            return {first_, step_};
+            return {first_, last_, 0, step_};
         }
-        const auto count = (n + step_ - 1) / step_;
-        return {first_ + count * step_, step_};
+        const D count = (n + step_ - 1) / step_;
+        return {first_, last_, count, step_};
     }
 };
 

@@ -31,12 +31,14 @@ template <std::random_access_iterator I, std::sentinel_for<I> S, typename P>
         return std::find_if(first, last, std::move(pred));
     }
 
-    const unsigned chunks = std::min<unsigned>(t, static_cast<unsigned>(n));
-    const D chunk = n / static_cast<D>(chunks);
+    const unsigned chunks = par::worker_chunks(static_cast<std::size_t>(n));
+    if (chunks == 0) {
+        return last;
+    }
     std::vector<I> hits(chunks, last);
     par::for_index(chunks, [&](std::size_t c) {
-        I b = first + static_cast<D>(c) * chunk;
-        I e = (c + 1 == chunks) ? last : b + chunk;
+        auto [b, e] = par::chunk_bounds(first, static_cast<std::size_t>(n),
+                                        static_cast<unsigned>(c), chunks);
         auto it = std::find_if(b, e, pred);
         if (it != e) {
             hits[c] = it;
@@ -52,7 +54,7 @@ template <std::random_access_iterator I, std::sentinel_for<I> S, typename P>
 }
 
 template <std::ranges::random_access_range R, typename P>
-[[nodiscard]] auto pfind_if(R&& range, P pred)
+[[nodiscard]] auto pfind_if(R& range, P pred)
 {
     return pfind_if(std::ranges::begin(range), std::ranges::end(range), std::move(pred));
 }
@@ -69,7 +71,7 @@ template <std::random_access_iterator I, std::sentinel_for<I> S, typename T>
 }
 
 template <std::ranges::random_access_range R, typename T>
-[[nodiscard]] auto pfind(R&& range, const T& value)
+[[nodiscard]] auto pfind(R& range, const T& value)
 {
     return pfind(std::ranges::begin(range), std::ranges::end(range), value);
 }

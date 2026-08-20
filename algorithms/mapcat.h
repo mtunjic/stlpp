@@ -43,7 +43,8 @@ template <std::input_iterator I, std::sentinel_for<I> S, std::weakly_incrementab
 O flatten(I first, S last, O dest)
 {
     for (; first != last; ++first) {
-        dest = std::copy(std::ranges::begin(*first), std::ranges::end(*first), dest);
+        auto&& inner = *first;
+        dest = std::copy(std::ranges::begin(inner), std::ranges::end(inner), dest);
     }
     return dest;
 }

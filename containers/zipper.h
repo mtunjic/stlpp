@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <deque>
 #include <optional>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -39,8 +40,20 @@ public:
     [[nodiscard]] bool at_left() const { return left_.empty(); }
     [[nodiscard]] bool at_right() const { return right_.empty(); }
 
-    [[nodiscard]] T& focus() { return *focus_; }
-    [[nodiscard]] const T& focus() const { return *focus_; }
+    [[nodiscard]] T& focus()
+    {
+        if (!focus_) {
+            throw std::out_of_range("zipper::focus");
+        }
+        return *focus_;
+    }
+    [[nodiscard]] const T& focus() const
+    {
+        if (!focus_) {
+            throw std::out_of_range("zipper::focus");
+        }
+        return *focus_;
+    }
 
     bool move_right()
     {

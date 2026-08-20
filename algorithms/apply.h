@@ -52,7 +52,7 @@ I apply_until(I first, S last, F f, P pred)
 }
 
 template <std::ranges::forward_range R, typename F, typename P>
-auto apply_until(R&& range, F f, P pred)
+auto apply_until(R& range, F f, P pred)
 {
     return apply_until(std::ranges::begin(range), std::ranges::end(range),
                        std::move(f), std::move(pred));

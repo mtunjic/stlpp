@@ -20,7 +20,23 @@ template <std::input_iterator I1, std::input_iterator I2, Integer N, std::weakly
     requires std::indirectly_writable<O, std::pair<Value_type<I1>, Value_type<I2>>>
 [[nodiscard]] constexpr O zip_n(I1 first1, I2 first2, N n, O dest)
 {
-    while (n != N{0}) {
+    while (n > N{0}) {
+        *dest = std::pair<Value_type<I1>, Value_type<I2>>{*first1, *first2};
+        ++first1;
+        ++first2;
+        ++dest;
+        --n;
+    }
+    return dest;
+}
+
+/// Write at most `n` pairs from `[first1, last1)` and `[first2, last2)`.
+template <std::input_iterator I1, std::sentinel_for<I1> S1, std::input_iterator I2,
+          std::sentinel_for<I2> S2, Integer N, std::weakly_incrementable O>
+    requires std::indirectly_writable<O, std::pair<Value_type<I1>, Value_type<I2>>>
+[[nodiscard]] constexpr O zip_n(I1 first1, S1 last1, I2 first2, S2 last2, N n, O dest)
+{
+    while (n > N{0} && first1 != last1 && first2 != last2) {
         *dest = std::pair<Value_type<I1>, Value_type<I2>>{*first1, *first2};
         ++first1;
         ++first2;
