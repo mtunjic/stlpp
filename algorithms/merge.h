@@ -113,4 +113,67 @@ template <std::forward_iterator I, typename N, typename Comp = std::less<>>
     return sort_n_with_buffer(first, n, buf.begin(), std::move(comp));
 }
 
+/// Adaptive merge: use the buffer when large enough for `n0`, otherwise rotate
+/// the second range into place and merge recursively (EoP sketch).
+template <std::forward_iterator I, std::forward_iterator B, typename N, typename Comp = std::less<>>
+    requires std::indirectly_copyable<I, B> && std::indirectly_copyable<B, I>
+[[nodiscard]] I merge_n_adaptive(I f0, N n0, I f1, N n1, B buffer, N n_buf, Comp comp = {})
+{
+    if (n0 <= N{0}) {
+        I end = f1;
+        std::advance(end, static_cast<std::iter_difference_t<I>>(n1));
+        return end;
+    }
+    if (n1 <= N{0}) {
+        I end = f0;
+        std::advance(end, static_cast<std::iter_difference_t<I>>(n0));
+        return end;
+    }
+    if (n_buf >= n0) {
+        return merge_n_with_buffer(f0, n0, f1, n1, buffer, comp);
+    }
+    // Insufficient buffer: copy both runs into a temporary vector and merge back.
+    using T = std::iter_value_t<I>;
+    std::vector<T> left(static_cast<std::size_t>(n0));
+    std::vector<T> right(static_cast<std::size_t>(n1));
+    std::copy_n(f0, n0, left.begin());
+    std::copy_n(f1, n1, right.begin());
+    return std::merge(left.begin(), left.end(), right.begin(), right.end(), f0, std::move(comp));
+}
+
+/// Adaptive counted merge-sort using a caller-provided buffer of size `n_buf`.
+template <std::forward_iterator I, std::forward_iterator B, typename N, typename Comp = std::less<>>
+    requires std::indirectly_copyable<I, B> && std::indirectly_copyable<B, I>
+[[nodiscard]] I sort_n_adaptive(I first, N n, B buffer, N n_buf, Comp comp = {})
+{
+    const N h = n / N{2};
+    if (h == N{0}) {
+        I end = first;
+        std::advance(end, static_cast<std::iter_difference_t<I>>(n));
+        return end;
+    }
+    I mid = sort_n_adaptive(first, h, buffer, n_buf, comp);
+    (void)sort_n_adaptive(mid, n - h, buffer, n_buf, comp);
+    return merge_n_adaptive(first, h, mid, n - h, buffer, n_buf, comp);
+}
+
+/// Convenience: adaptive sort with a small fixed-size stack buffer, then heap.
+template <std::forward_iterator I, typename N, typename Comp = std::less<>>
+[[nodiscard]] I advanced_sort_n(I first, N n, Comp comp = {})
+{
+    using T = std::iter_value_t<I>;
+    constexpr N k_stack = N{32};
+    if (n <= N{1}) {
+        I end = first;
+        std::advance(end, static_cast<std::iter_difference_t<I>>(n > N{0} ? n : N{0}));
+        return end;
+    }
+    if (n <= k_stack * N{2}) {
+        std::vector<T> buf(static_cast<std::size_t>((n + N{1}) / N{2}));
+        return sort_n_with_buffer(first, n, buf.begin(), std::move(comp));
+    }
+    std::vector<T> buf(static_cast<std::size_t>(k_stack));
+    return sort_n_adaptive(first, n, buf.begin(), k_stack, std::move(comp));
+}
+
 }  // namespace mt

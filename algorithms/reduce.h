@@ -1,5 +1,6 @@
 #pragma once
 
+#include "binary_counter.h"
 #include "parallel.h"
 
 #include <functional>
@@ -107,6 +108,29 @@ template <std::ranges::random_access_range R>
 [[nodiscard]] auto reduce(R&& range)
 {
     return reduce(std::ranges::begin(range), std::ranges::end(range));
+}
+
+/// Balanced binary-counter reduce (EoP). Prefer for associative ops when a
+/// more balanced association tree than left-fold is desired.
+///
+/// Example:
+///   std::vector<int> v{1, 2, 3, 4};
+///   mt::reduce_balanced(v.begin(), v.end(), std::plus<>{}, 0);  // 10
+template <std::input_iterator I, std::sentinel_for<I> S, typename Op, typename T>
+[[nodiscard]] T reduce_balanced(I first, S last, Op op, T zero)
+{
+    binary_counter<T, Op> c(std::move(op), std::move(zero));
+    for (; first != last; ++first) {
+        c.add(*first);
+    }
+    return c.reduce();
+}
+
+template <std::ranges::input_range R, typename Op, typename T>
+[[nodiscard]] auto reduce_balanced(R&& range, Op op, T zero)
+{
+    return reduce_balanced(std::ranges::begin(range), std::ranges::end(range), std::move(op),
+                           std::move(zero));
 }
 
 }  // namespace mt
