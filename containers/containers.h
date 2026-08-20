@@ -1,6 +1,7 @@
 #pragma once
 
 #include "array_slice.h"
+#include "btree.h"
 #include "disjoint_set.h"
 #include "dynamic_pqueue.h"
 #include "graph.h"

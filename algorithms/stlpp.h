@@ -7,6 +7,7 @@
 
 #include "apply.h"
 #include "binary_counter.h"
+#include "bifurcate.h"
 #include "border.h"
 #include "combination.h"
 #include "compare.h"
