@@ -31,6 +31,26 @@ auto remove_if_not(R& range, P pred)
     return remove_if_not(std::ranges::begin(range), std::ranges::end(range), std::move(pred));
 }
 
+/// EoP / STL `remove_if`: compact elements that do **not** satisfy `pred`.
+/// Returns the new logical end.
+///
+/// Example:
+///   std::vector<int> v{1, 2, 3, 4};
+///   auto p = mt::remove_if(v.begin(), v.end(), [](int x) { return x % 2 == 0; });
+///   // [v.begin(), p) == {1, 3}
+template <std::forward_iterator I, typename P>
+    requires std::predicate<P&, std::iter_reference_t<I>>
+[[nodiscard]] I remove_if(I first, I last, P pred)
+{
+    return std::remove_if(first, last, std::move(pred));
+}
+
+template <std::ranges::forward_range R, typename P>
+auto remove_if(R& range, P pred)
+{
+    return remove_if(std::ranges::begin(range), std::ranges::end(range), std::move(pred));
+}
+
 /// Compact from the back: keep elements that satisfy `pred`, shifting them
 /// toward `last`. Returns the new logical begin of the kept suffix.
 /// Drop the discarded prefix with `erase(first, write)` or ignore `[first, write)`.

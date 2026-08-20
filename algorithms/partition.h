@@ -99,4 +99,76 @@ I partition_point_n(I first, S last, N n, P pred)
     return partition_point_n(first, bounded_count(first, last, n), std::move(pred));
 }
 
+/// Stable partition: elements satisfying `pred` precede those that do not
+/// (preserves relative order). Alias for the EoP `partition_stable` name.
+template <std::bidirectional_iterator I, typename P>
+    requires std::predicate<P&, std::iter_reference_t<I>>
+[[nodiscard]] I partition_stable(I first, I last, P pred)
+{
+    return std::stable_partition(first, last, std::move(pred));
+}
+
+/// Buffer-assisted stable partition (EoP). `buffer` must hold at least the
+/// number of false elements (or use `partition_stable`).
+template <std::forward_iterator I, std::forward_iterator B, typename P>
+    requires std::predicate<P&, std::iter_reference_t<I>> &&
+             std::indirectly_copyable<I, B> && std::indirectly_copyable<B, I>
+[[nodiscard]] I partition_stable_with_buffer(I first, I last, B buffer, P pred)
+{
+    I write = first;
+    B buf = buffer;
+    for (I i = first; i != last; ++i) {
+        if (std::invoke(pred, *i)) {
+            if (write != i) {
+                *write = std::move(*i);
+            }
+            ++write;
+        } else {
+            *buf = std::move(*i);
+            ++buf;
+        }
+    }
+    return std::move(buffer, buf, write);
+}
+
+/// Semistable partition (EoP): elements **not** satisfying `pred` precede
+/// those that do (`false*` then `true*`, matching `mt::partitioned`). Relative
+/// order of the `true` group is not required.
+template <std::forward_iterator I, typename P>
+    requires std::predicate<P&, std::iter_reference_t<I>>
+[[nodiscard]] I partition_semistable(I first, I last, P pred)
+{
+    first = std::find_if(first, last, pred);
+    if (first == last) {
+        return first;
+    }
+    I j = first;
+    ++j;
+    while (true) {
+        j = std::find_if_not(j, last, pred);
+        if (j == last) {
+            return first;
+        }
+        std::iter_swap(first, j);
+        ++first;
+        ++j;
+    }
+}
+
+/// Bidirectional partition (EoP name; uses `std::partition`).
+template <std::bidirectional_iterator I, typename P>
+    requires std::predicate<P&, std::iter_reference_t<I>>
+[[nodiscard]] I partition_bidirectional(I first, I last, P pred)
+{
+    return std::partition(first, last, std::move(pred));
+}
+
+/// Forward partition via `std::partition` (EoP `partition_forward` name).
+template <std::forward_iterator I, typename P>
+    requires std::predicate<P&, std::iter_reference_t<I>>
+[[nodiscard]] I partition_forward(I first, I last, P pred)
+{
+    return std::partition(first, last, std::move(pred));
+}
+
 }  // namespace mt
