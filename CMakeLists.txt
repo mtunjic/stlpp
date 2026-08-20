@@ -14,6 +14,7 @@ endif()
 
 option(STLPP_BUILD_TESTING "Build GoogleTest suite" ${STLPP_IS_TOPLEVEL})
 option(STLPP_BUILD_BENCHMARKS "Build Google Benchmark suite" ${STLPP_IS_TOPLEVEL})
+option(STLPP_BUILD_EXAMPLES "Build interactive example runner" OFF)
 option(STLPP_SANITIZE "Build tests with ASan and UBSan (requires libasan/libubsan)" OFF)
 
 include(GNUInstallDirs)
@@ -128,6 +129,10 @@ if(STLPP_BUILD_BENCHMARKS)
         test/fp_bench.cpp)
     target_link_libraries(stlpp_bench PRIVATE stlpp benchmark::benchmark)
     stlpp_warnings(stlpp_bench)
+endif()
+
+if(STLPP_BUILD_EXAMPLES AND STLPP_IS_TOPLEVEL)
+    add_subdirectory(examples)
 endif()
 
 install(TARGETS stlpp EXPORT stlppTargets)

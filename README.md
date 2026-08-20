@@ -47,6 +47,8 @@ python scripts/bench_history.py --min-time 0.1s
 
 Or with presets: `cmake --preset sanitize && cmake --build --preset sanitize && ctest --preset sanitize`.
 
+**Examples** (interactive demos): `-DSTLPP_BUILD_EXAMPLES=ON`, then `./build/examples/stlpp_examples`. See [`examples/README.md`](examples/README.md) for the Conan consumer skeleton.
+
 Dated JSON + SVG land in `bench/` (`stlpp-bench-YYYY-MM-DD`); `bench/stlpp-bench-history.svg` overlays every run. See `bench.md`.
 
 Optional: `-DSTLPP_SANITIZE=ON` for ASan/UBSan (needs `libasan`/`libubsan`; off by default on this MinGW). Packaging (`cmake --install`, Conan, vcpkg) uses `-DSTLPP_BUILD_TESTING=OFF -DSTLPP_BUILD_BENCHMARKS=OFF` so GoogleTest/Benchmark are not fetched.
