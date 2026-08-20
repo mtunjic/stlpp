@@ -87,6 +87,7 @@ if(STLPP_BUILD_TESTING)
         test/concept_axioms_test.cpp
         test/generic_compare_test.cpp
         test/generic_copy_rotate_test.cpp
+        test/generic_partition_sort_test.cpp
         test/generic_algorithms_test.cpp
         test/generic_iterators_test.cpp
         test/generic_parallel_test.cpp
