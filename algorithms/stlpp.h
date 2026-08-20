@@ -9,6 +9,7 @@
 #include "binary_counter.h"
 #include "border.h"
 #include "combination.h"
+#include "compare.h"
 #include "concepts.h"
 #include "copy.h"
 #include "find.h"
