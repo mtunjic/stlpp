@@ -159,4 +159,34 @@ template <std::input_iterator I, std::sentinel_for<I> S, std::bidirectional_iter
     return result;
 }
 
+/// Combine two ranges into one by selecting from the left or right under
+/// predicate `use_left`, writing backward into `result` (EoP).
+template <std::bidirectional_iterator I0, std::bidirectional_iterator I1,
+          std::bidirectional_iterator O, typename P>
+    requires std::predicate<P&, std::iter_reference_t<I0>, std::iter_reference_t<I1>>
+[[nodiscard]] O combine_copy_backward(I0 f0, I0 l0, I1 f1, I1 l1, O result, P use_left)
+{
+    while (f0 != l0 || f1 != l1) {
+        if (f0 == l0) {
+            *--result = *--l1;
+        } else if (f1 == l1) {
+            *--result = *--l0;
+        } else if (std::invoke(use_left, *std::prev(l0), *std::prev(l1))) {
+            *--result = *--l0;
+        } else {
+            *--result = *--l1;
+        }
+    }
+    return result;
+}
+
+/// Merge two sorted ranges backward into `result` (EoP `merge_copy_backward`).
+template <std::bidirectional_iterator I0, std::bidirectional_iterator I1,
+          std::bidirectional_iterator O, typename Comp = std::less<>>
+[[nodiscard]] O merge_copy_backward(I0 f0, I0 l0, I1 f1, I1 l1, O result, Comp comp = {})
+{
+    return combine_copy_backward(f0, l0, f1, l1, result,
+                                 [&](const auto& a, const auto& b) { return !comp(a, b); });
+}
+
 }  // namespace mt

@@ -119,4 +119,49 @@ I reverse_n_with_buffer(I first, S last, N n, B buffer)
     return std::reverse_copy(buffer, buffer_end, first);
 }
 
+/// Adaptive reverse: use buffer when `n_buf >= n`, otherwise fall back to
+/// recursive `reverse_n` (EoP `reverse_n_adaptive` idea).
+template <std::forward_iterator I, Integer N, std::bidirectional_iterator B>
+    requires std::indirectly_copyable<I, B> && std::indirectly_copyable<B, I>
+I reverse_n_adaptive(I first, N n, B buffer, N n_buf)
+{
+    if (n <= N{0}) {
+        return first;
+    }
+    if (n_buf >= n) {
+        return reverse_n_with_buffer(first, n, buffer);
+    }
+    return reverse_n(first, n);
+}
+
+/// Cycle values along a transformation of iterators (EoP `cycle_to`):
+/// repeatedly exchange `*i` with `*f(i)` around the orbit.
+template <std::forward_iterator I, typename F>
+    requires std::invocable<F&, I> && std::same_as<std::invoke_result_t<F&, I>, I>
+void cycle_to(I i, F f)
+{
+    I k = std::invoke(f, i);
+    while (k != i) {
+        std::iter_swap(i, k);
+        k = std::invoke(f, k);
+    }
+}
+
+/// Cycle values from a permutation: move `*f(i)` into `*i` along the orbit
+/// (EoP `cycle_from`).
+template <std::forward_iterator I, typename F>
+    requires std::invocable<F&, I> && std::same_as<std::invoke_result_t<F&, I>, I>
+void cycle_from(I i, F f)
+{
+    auto tmp = std::move(*i);
+    I j = i;
+    I k = std::invoke(f, i);
+    while (k != i) {
+        *j = std::move(*k);
+        j = k;
+        k = std::invoke(f, k);
+    }
+    *j = std::move(tmp);
+}
+
 }  // namespace mt
