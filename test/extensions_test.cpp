@@ -6,6 +6,7 @@
 #include <cctype>
 #include <list>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include <thread>
 #include <utility>
@@ -102,6 +103,8 @@ TEST(StringExt, CasePrefixSanitize) {
     mt::sanitize(bad);
     EXPECT_EQ(mt::digits_copy(bad), L"12112971011888");
     EXPECT_EQ(mt::letters_copy(bad), L"somescripttestosss");
+
+    EXPECT_EQ(mt::floats_copy("1.5x2.25"), (std::vector<double>{1.5, 2.25}));
 }
 
 TEST(StringExt, PalindromeParseRepeat) {
@@ -110,6 +113,8 @@ TEST(StringExt, PalindromeParseRepeat) {
     EXPECT_TRUE(mt::is_digit("42"));
     EXPECT_TRUE(mt::is_alpha("Hi"));
     EXPECT_EQ(mt::to_int("12"), 12);
+    EXPECT_THROW((void)mt::to_int("12x"), std::invalid_argument);
+    EXPECT_THROW((void)mt::from_string<int>(""), std::invalid_argument);
     EXPECT_EQ(mt::repeat("ab", 3), "ababab");
     EXPECT_EQ(mt::repeat_char('x', 4), "xxxx");
     EXPECT_TRUE(mt::eq_ignore_case("AbC", "aBc"));

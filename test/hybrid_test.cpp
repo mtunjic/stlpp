@@ -52,6 +52,15 @@ TEST(Fold, LeftFoldPlus) {
     EXPECT_EQ(mt::fold(std::vector<int>{}, 7, std::plus<>{}), 7);
 }
 
+TEST(Fold, LeftAssociatedMinus) {
+    EXPECT_EQ(mt::fold(std::vector{1, 2, 3}, 0, std::minus<>{}), -6);
+}
+
+TEST(Reduce, SequentialForForwardRange) {
+    std::list<int> lst{1, 2, 3, 4};
+    EXPECT_EQ(mt::reduce(lst, 0, std::plus<>{}), 10);
+}
+
 TEST(Reduce, MatchesFoldOnPlus) {
     auto v = iota_n(static_cast<int>(mt::par::default_cutoff) + 50);
     const int sequential = mt::fold(v, 0, std::plus<>{});

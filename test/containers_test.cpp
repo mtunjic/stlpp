@@ -2,6 +2,8 @@
 
 #include <functional>
 #include <initializer_list>
+#include <limits>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -54,6 +56,7 @@ TEST(Rope, ConcatAppendAndIndex) {
 TEST(Rope, EmptyAndIndependentCopyShare) {
     mt::rope empty;
     EXPECT_TRUE(empty.empty());
+    EXPECT_THROW((void)empty.at(0), std::out_of_range);
     EXPECT_EQ(mt::concat(empty, mt::rope{"x"}).to_string(), "x");
 
     mt::rope a{"ab"};
@@ -76,6 +79,11 @@ TEST(ArraySlice, WindowAndSubClip) {
 
     mt::array_slice<int> whole{v};
     EXPECT_EQ(whole.size(), 5);
+
+    mt::array_slice<int> clipped_ctor{v, 10, 3};
+    EXPECT_TRUE(clipped_ctor.empty());
+    EXPECT_THROW((void)clipped_ctor[0], std::out_of_range);
+    EXPECT_THROW((void)s[3], std::out_of_range);
 }
 
 TEST(Htable, InsertFindOverwriteErase) {
@@ -85,8 +93,11 @@ TEST(Htable, InsertFindOverwriteErase) {
     ASSERT_NE(t.find(3), nullptr);
     EXPECT_EQ(*t.find(3), "three");
     EXPECT_EQ(t.find(9), nullptr);
+    EXPECT_TRUE(t.contains(3));
 
-    t.insert(3, "III");
+    EXPECT_FALSE(t.insert(3, "III"));
+    EXPECT_EQ(*t.find(3), "three");
+    EXPECT_FALSE(t.insert_or_assign(3, "III"));
     EXPECT_EQ(*t.find(3), "III");
     EXPECT_EQ(t.size(), 2);
 
@@ -115,6 +126,19 @@ TEST(Htable, RehashAndTombReuse) {
     EXPECT_EQ(*t.find(19), 190);
 }
 
+TEST(Htable, AcceptsNonDefaultConstructibleValue) {
+    struct ND {
+        int v;
+        explicit ND(int x) : v(x) {}
+    };
+    mt::htable<int, ND> t;
+    EXPECT_TRUE(t.insert(1, ND{7}));
+    ASSERT_NE(t.find(1), nullptr);
+    EXPECT_EQ(t.find(1)->v, 7);
+    EXPECT_FALSE(t.insert(1, ND{8}));
+    EXPECT_EQ(t.find(1)->v, 7);
+}
+
 TEST(VectorNd, TwoAndThreeDIndexing) {
     mt::vector_2d<int> m(2, 3, 0);
     m(1, 2) = 7;
@@ -122,6 +146,9 @@ TEST(VectorNd, TwoAndThreeDIndexing) {
     EXPECT_EQ(m.cols(), 3);
     EXPECT_EQ(m(1, 2), 7);
     EXPECT_EQ(m(0, 0), 0);
+    EXPECT_THROW((void)m(2, 0), std::out_of_range);
+    EXPECT_THROW((void)mt::vector_2d<int>(std::numeric_limits<std::size_t>::max(), 2),
+                 std::length_error);
 
     mt::vector_3d<int> v(2, 2, 2, 0);
     v(1, 0, 1) = 4;
@@ -140,6 +167,12 @@ TEST(Grid, Neighbors4AtCornerAndCenter) {
     EXPECT_EQ(corner.size(), 2);
 }
 
+TEST(Graph, OutOfRangeVertexThrows) {
+    mt::graph g(2);
+    EXPECT_THROW(g.add_edge(0, 2), std::out_of_range);
+    EXPECT_THROW((void)g.neighbors(9), std::out_of_range);
+}
+
 TEST(Graph, DirectedAndUndirectedEdges) {
     mt::graph g(3);
     g.add_edge(0, 1);
@@ -152,6 +185,14 @@ TEST(Graph, DirectedAndUndirectedEdges) {
     g.add_undirected_edge(2, v);
     EXPECT_EQ(g.neighbors(2), (std::vector<std::size_t>{v}));
     EXPECT_EQ(g.neighbors(v), (std::vector<std::size_t>{2}));
+}
+
+TEST(Quadtree, SplitKeepsEveryInsertedPoint) {
+    mt::quadtree q({0, 0, 64, 64});
+    for (int i = 0; i < 8; ++i) {
+        EXPECT_TRUE(q.insert({static_cast<double>(i) + 0.5, 0.5}));
+    }
+    EXPECT_EQ(q.query({0, 0, 64, 64}).size(), 8u);
 }
 
 TEST(DynamicPQueue, MinHeapUpdateDecreaseKey) {
@@ -169,6 +210,17 @@ TEST(DynamicPQueue, MinHeapUpdateDecreaseKey) {
     EXPECT_EQ(q.top(), 3);
     EXPECT_FALSE(q.contains(h5));
     EXPECT_TRUE(q.contains(h3));
+}
+
+TEST(DynamicPQueue, EmptyPopAndStaleUpdateAreSafe) {
+    mt::dynamic_pqueue<int> q;
+    q.pop();
+    EXPECT_THROW((void)q.top(), std::out_of_range);
+    q.update(99, 1);
+    auto h = q.push(3);
+    q.pop();
+    q.update(h, 0);
+    EXPECT_TRUE(q.empty());
 }
 
 TEST(DynamicPQueue, MaxHeapDefaultCompare) {
@@ -238,6 +290,13 @@ TEST(Zipper, MoveInsertErase) {
     EXPECT_EQ(z.focus(), 9);
 }
 
+TEST(RingBuffer, ZeroCapacityDoesNotModuloZero) {
+    mt::ring_buffer<int> r(0);
+    EXPECT_TRUE(r.empty());
+    EXPECT_FALSE(r.try_push(1));
+    EXPECT_THROW((void)r[0], std::out_of_range);
+}
+
 TEST(RingBuffer, PushPopWrap) {
     mt::ring_buffer<int> r(2);
     EXPECT_TRUE(r.try_push(1));
@@ -262,4 +321,5 @@ TEST(DisjointSet, UniteFindComponents) {
     EXPECT_EQ(ds.component_size(0), 2u);
     ds.unite(1, 2);
     EXPECT_EQ(ds.components(), 1u);
+    EXPECT_THROW((void)ds.find(4), std::out_of_range);
 }

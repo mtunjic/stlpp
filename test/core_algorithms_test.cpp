@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <functional>
 #include <list>
+#include <limits>
 #include <numeric>
 #include <string>
 #include <vector>
@@ -24,6 +25,8 @@ TEST(IteratorOps, SuccessorPredecessorAdvance) {
     auto it = v.begin();
     mt::advance(it, 2);
     EXPECT_EQ(*it, 30);
+    mt::advance(it, v.end(), 99);
+    EXPECT_EQ(it, v.end());
     EXPECT_EQ(*mt::successor(v.begin()), 20);
     EXPECT_EQ(*mt::predecessor(v.end()), 40);
 }
@@ -41,11 +44,25 @@ TEST(ApplyUntil, StopsBeforeMatchingElement) {
     EXPECT_EQ(*stop, 3);
 }
 
+TEST(FindIfN, StopsAtSentinelWhenCountOverruns) {
+    std::vector<int> v{1, 3, 5};
+    auto [it, left] = mt::find_if_n(v.begin(), v.end(), 99, [](int x) { return x % 2 == 0; });
+    EXPECT_EQ(it, v.end());
+    EXPECT_EQ(left, 96);
+}
+
 TEST(FindIfN, ReturnsIteratorAndRemaining) {
     std::vector<int> v{1, 3, 4, 6};
     auto [it, left] = mt::find_if_n(v.begin(), 4, [](int x) { return x % 2 == 0; });
     EXPECT_EQ(*it, 4);
     EXPECT_EQ(left, 2);
+}
+
+TEST(FindIfN, RangeStopsAtEnd) {
+    std::vector<int> v{1, 3, 5};
+    auto [it, left] = mt::find_if_n(v, 99, [](int x) { return x % 2 == 0; });
+    EXPECT_EQ(it, v.end());
+    EXPECT_EQ(left, 96);
 }
 
 TEST(FindBackward, LastMatchOrEnd) {
@@ -94,6 +111,12 @@ TEST(RemoveIfNotBackward, KeepsSuffixOfMatches) {
     EXPECT_EQ(std::vector<int>(w, v.end()), (std::vector<int>{0, 1, 4}));
 }
 
+TEST(ReverseN, ReversesPrefixOfBidirectionalRange) {
+    std::vector<int> v{1, 2, 3, 4, 5};
+    mt::reverse_n(v.begin(), v.end(), 4);
+    EXPECT_EQ(v, (std::vector<int>{4, 3, 2, 1, 5}));
+}
+
 TEST(ReverseN, ReversesForwardIteratorRange) {
     std::list<int> xs{1, 2, 3, 4};
     mt::reverse_n(xs.begin(), 4);
@@ -113,6 +136,22 @@ TEST(ReverseNWithBuffer, ReversesThroughBuffer) {
     int buf[4]{};
     mt::reverse_n_with_buffer(xs.begin(), 4, buf);
     EXPECT_EQ(xs, (std::list<int>{4, 3, 2, 1}));
+}
+
+TEST(CopyN, StopsAtSentinelWhenCountOverruns) {
+    std::vector<int> src{1, 2};
+    std::vector<int> dst{9, 9, 9};
+    auto [in, out] = mt::copy_n(src.begin(), src.end(), 8, dst.begin());
+    EXPECT_EQ(in, src.end());
+    EXPECT_EQ(dst, (std::vector<int>{1, 2, 9}));
+    EXPECT_EQ(out, dst.begin() + 2);
+}
+
+TEST(CopyN, NegativeCountIsNoOp) {
+    std::vector<int> src{1, 2, 3};
+    std::vector<int> dst{9, 9};
+    (void)mt::copy_n(src.begin(), -1, dst.begin());
+    EXPECT_EQ(dst, (std::vector<int>{9, 9}));
 }
 
 TEST(CopyN, CopiesCountedPrefix) {
@@ -161,6 +200,7 @@ TEST(PartitionPointN, FirstFalseInPartition) {
     std::vector<int> v{1, 2, 3, 8, 9};
     auto p = mt::partition_point_n(v.begin(), 5, [](int x) { return x < 5; });
     EXPECT_EQ(*p, 8);
+    EXPECT_EQ(mt::partition_point_n(v.begin(), v.end(), 99, [](int x) { return x < 5; }), p);
 }
 
 TEST(Sort, BinaryInsertionAndSubrange) {
@@ -183,6 +223,9 @@ TEST(MedianSort, SortsWholeRange) {
     std::vector<int> v{9, 1, 8, 2, 7, 3, 6, 4, 5, 0, 11, 10, 12, 14, 13, 15, 16};
     mt::median_sort(v);
     EXPECT_TRUE(std::is_sorted(v.begin(), v.end()));
+
+    mt::median_sort(v, std::greater<>{});
+    EXPECT_TRUE(std::is_sorted(v.begin(), v.end(), std::greater<>{}));
 }
 
 TEST(Slice, ClipsToBounds) {
@@ -196,6 +239,15 @@ TEST(Slice, ClipsToBounds) {
 TEST(Gcd, SteinAndExtended) {
     EXPECT_EQ(mt::stein_gcd(48, 18), 6);
     EXPECT_EQ(mt::stein_gcd(0, 7), 7);
+    EXPECT_EQ(mt::stein_gcd(std::numeric_limits<int>::min(), 1), 1);
+    EXPECT_EQ(mt::stein_gcd(std::numeric_limits<int>::min(), 2), 2);
+    {
+        auto [g, x, y] = mt::extended_gcd(std::numeric_limits<int>::min(), -1);
+        EXPECT_EQ(g, 1);
+        EXPECT_EQ(static_cast<long long>(std::numeric_limits<int>::min()) * x +
+                      static_cast<long long>(-1) * y,
+                  1);
+    }
     auto [g, x, y] = mt::extended_gcd(30, 12);
     EXPECT_EQ(g, 6);
     EXPECT_EQ(30 * x + 12 * y, 6);
@@ -259,9 +311,9 @@ TEST(ZipWithZipN, CombinesAndCounts) {
     EXPECT_EQ(summed, (std::vector<int>{11, 22}));
 
     std::vector<std::pair<int, int>> pairs;
-    auto written = mt::zip_n(a.begin(), b.begin(), 2, std::back_inserter(pairs));
+    auto written = mt::zip_n(a.begin(), a.end(), b.begin(), b.end(), 99, std::back_inserter(pairs));
     (void)written;
-    EXPECT_EQ(pairs.front(), (std::pair<int, int>{1, 10}));
+    EXPECT_EQ(pairs, (std::vector<std::pair<int, int>>{{1, 10}, {2, 20}}));
 }
 
 TEST(StartsEndsWith, PrefixAndSuffix) {
@@ -302,6 +354,7 @@ TEST(Intercalate, InsertsSeparator) {
     std::string s;
     mt::intercalate(',', letters.begin(), letters.end(), std::back_inserter(s));
     EXPECT_EQ(s, "a,b,c");
+    EXPECT_EQ(mt::intercalate(',', letters), (std::vector<char>{'a', ',', 'b', ',', 'c'}));
 }
 
 TEST(Group, ConsecutiveRuns) {
