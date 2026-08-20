@@ -1,15 +1,11 @@
+// Low-level iterator idioms (half-open numeric copy, stride-3 step, iterator_adapter demo).
+
 #include "stlpp.h"
 
 #include <algorithm>
-#include <iterator>
-#include <numeric>
 #include <vector>
 
 #include <gtest/gtest.h>
-
-static_assert(std::random_access_iterator<mt::numeric_iterator<int>>);
-static_assert(std::random_access_iterator<mt::step_iterator<int*>>);
-static_assert(std::forward_iterator<mt::edge_iterator<int*>>);
 
 TEST(NumericIterator, CopiesHalfOpenRange) {
     std::vector<int> v;
@@ -17,25 +13,11 @@ TEST(NumericIterator, CopiesHalfOpenRange) {
     EXPECT_EQ(v, (std::vector<int>{0, 1, 2, 3}));
 }
 
-TEST(NumericIterator, RangeForAndDistance) {
-    std::vector<int> v;
-    for (int x : mt::numeric_range(10, 13)) {
-        v.push_back(x);
-    }
-    EXPECT_EQ(v, (std::vector<int>{10, 11, 12}));
-    EXPECT_EQ(mt::numeric_range(0, 10).size(), 10);
+TEST(NumericIterator, IteratorDistance) {
     EXPECT_EQ(mt::numeric_iterator<int>{7} - mt::numeric_iterator<int>{2}, 5);
 }
 
-TEST(StepIterator, StridesByTwo) {
-    std::vector<int> v{0, 1, 2, 3, 4, 5};
-    std::vector<int> out;
-    auto s = mt::step(v, 2);
-    std::copy(s.begin(), s.end(), std::back_inserter(out));
-    EXPECT_EQ(out, (std::vector<int>{0, 2, 4}));
-}
-
-TEST(StepIterator, CountWhenLengthNotMultipleOfStep) {
+TEST(StepIterator, StrideThreeOnLongRange) {
     std::vector<int> v{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     std::vector<int> out;
     auto s = mt::step(v.begin(), v.end(), 3);
@@ -44,25 +26,7 @@ TEST(StepIterator, CountWhenLengthNotMultipleOfStep) {
     EXPECT_EQ(s.end() - s.begin(), 4);
 }
 
-TEST(EdgeIterator, ConsecutivePairs) {
-    std::vector<int> v{1, 2, 3, 4};
-    std::vector<std::pair<int, int>> out;
-    for (auto [from, to] : mt::edges(v)) {
-        out.emplace_back(from, to);
-    }
-    EXPECT_EQ(out, (std::vector<std::pair<int, int>>{{1, 2}, {2, 3}, {3, 4}}));
-}
-
-TEST(EdgeIterator, EmptyAndSingletonHaveNoEdges) {
-    std::vector<int> empty;
-    EXPECT_TRUE(mt::edges(empty).begin() == mt::edges(empty).end());
-
-    std::vector<int> one{7};
-    auto e = mt::edges(one);
-    EXPECT_TRUE(e.begin() == e.end());
-}
-
-TEST(IteratorAdapter, CountingBasisIsRandomAccess) {
+TEST(IteratorAdapter, CountingBasisRandomAccessCopy) {
     struct counting_basis {
         using state_type = int;
         using value_type = int;

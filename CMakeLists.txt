@@ -89,7 +89,9 @@ if(STLPP_BUILD_TESTING)
         test/generic_iterators_test.cpp
         test/generic_parallel_test.cpp
         test/generic_containers_test.cpp
-        test/generic_extensions_test.cpp)
+        test/generic_extensions_test.cpp
+        test/generic_random_test.cpp
+        test/generic_fp_test.cpp)
     target_link_libraries(stlpp_tests PRIVATE stlpp GTest::gtest_main)
     stlpp_warnings(stlpp_tests)
     stlpp_sanitize(stlpp_tests)
