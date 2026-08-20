@@ -7,6 +7,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     set(STLPP_IS_TOPLEVEL ON)
+    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 else()
     set(STLPP_IS_TOPLEVEL OFF)
 endif()
@@ -25,7 +26,8 @@ target_include_directories(stlpp INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/extensions>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/iterators>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/containers>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>)
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}/stlpp>)
 target_compile_features(stlpp INTERFACE cxx_std_20)
 
 set(THREADS_PREFER_PTHREAD_FLAG ON)
@@ -71,7 +73,7 @@ if(STLPP_BUILD_TESTING)
     enable_testing()
     include(GoogleTest)
 
-    add_executable(stlpp_tests)
+    add_executable(stlpp_tests
         test/binary_counter_test.cpp
         test/split_join_test.cpp
         test/random_test.cpp
@@ -99,7 +101,7 @@ if(STLPP_BUILD_BENCHMARKS)
     set(BENCHMARK_ENABLE_WERROR OFF CACHE BOOL "" FORCE)
     FetchContent_MakeAvailable(benchmark)
 
-    add_executable(stlpp_bench)
+    add_executable(stlpp_bench
         test/bench_main.cpp
         test/binary_counter_bench.cpp
         test/split_join_bench.cpp
@@ -116,10 +118,16 @@ endif()
 
 install(TARGETS stlpp EXPORT stlppTargets)
 
+set(STLPP_INSTALL_INCLUDEDIR "${CMAKE_INSTALL_INCLUDEDIR}/stlpp")
 install(DIRECTORY algorithms/ containers/ iterators/ extensions/
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    DESTINATION ${STLPP_INSTALL_INCLUDEDIR}
     FILES_MATCHING PATTERN "*.h")
-install(FILES utils.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+install(FILES utils.h DESTINATION ${STLPP_INSTALL_INCLUDEDIR})
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/install_stlpp.h"
+    "#pragma once\n#include \"stlpp/stlpp.h\"\n")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/install_stlpp.h"
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    RENAME stlpp.h)
 
 install(EXPORT stlppTargets
     FILE stlppTargets.cmake

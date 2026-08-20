@@ -1,6 +1,6 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy
+from conan.tools.files import copy, save
 import os
 
 
@@ -46,10 +46,15 @@ class StlppConan(ConanFile):
         self.cpp.package.libdirs = []
 
     def package(self):
-        dest = os.path.join(self.package_folder, "include")
+        dest = os.path.join(self.package_folder, "include", "stlpp")
         for folder in ("algorithms", "containers", "iterators", "extensions"):
             copy(self, "*.h", os.path.join(self.source_folder, folder), dest)
         copy(self, "utils.h", self.source_folder, dest)
+        save(
+            self,
+            os.path.join(self.package_folder, "include", "stlpp.h"),
+            '#pragma once\n#include "stlpp/stlpp.h"\n',
+        )
         copy(self, "LICENSE", self.source_folder, os.path.join(self.package_folder, "licenses"))
 
     def package_info(self):

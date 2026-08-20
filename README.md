@@ -45,6 +45,8 @@ ctest --test-dir build --output-on-failure
 python scripts/bench_history.py --min-time 0.1s
 ```
 
+Or with presets: `cmake --preset sanitize && cmake --build --preset sanitize && ctest --preset sanitize`.
+
 Dated JSON + SVG land in `bench/` (`stlpp-bench-YYYY-MM-DD`); `bench/stlpp-bench-history.svg` overlays every run. See `bench.md`.
 
 Optional: `-DSTLPP_SANITIZE=ON` for ASan/UBSan (needs `libasan`/`libubsan`; off by default on this MinGW). Packaging (`cmake --install`, Conan, vcpkg) uses `-DSTLPP_BUILD_TESTING=OFF -DSTLPP_BUILD_BENCHMARKS=OFF` so GoogleTest/Benchmark are not fetched.
@@ -89,6 +91,8 @@ From this repo:
 cmake -S . -B build-pkg -DSTLPP_BUILD_TESTING=OFF -DSTLPP_BUILD_BENCHMARKS=OFF
 cmake --install build-pkg --prefix /path/to/prefix
 ```
+
+Headers land in `<prefix>/include/stlpp/` (so they do not collide with other `find.h` files). `stlpp::stlpp` adds that path; `#include "stlpp.h"` still works. There is also `<prefix>/include/stlpp.h` that forwards to the umbrella.
 
 In your app:
 
