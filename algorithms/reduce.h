@@ -33,6 +33,22 @@ template <std::ranges::input_range R, typename T, typename Op>
                 std::move(op));
 }
 
+/// Reduce a non-empty range with no identity (EoP `reduce_nonempty`).
+/// Precondition: `first != last`.
+template <std::input_iterator I, std::sentinel_for<I> S, typename Op>
+[[nodiscard]] auto reduce_nonempty(I first, S last, Op op)
+{
+    auto acc = *first;
+    ++first;
+    return fold(first, last, std::move(acc), std::move(op));
+}
+
+template <std::ranges::input_range R, typename Op>
+[[nodiscard]] auto reduce_nonempty(R&& range, Op op)
+{
+    return reduce_nonempty(std::ranges::begin(range), std::ranges::end(range), std::move(op));
+}
+
 /// Parallel reduction of a random-access range.
 /// `op` **must be associative** (and should be commutative): chunks are folded
 /// independently and then combined, which is not a strict left fold. Use

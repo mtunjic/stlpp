@@ -132,4 +132,40 @@ template <std::ranges::forward_range R, typename T>
     return hits;
 }
 
+/// Last iterator in `[first, last)`, or `last` if empty (EoP `find_last`).
+template <std::forward_iterator I>
+[[nodiscard]] constexpr I find_last(I first, I last)
+{
+    if (first == last) {
+        return last;
+    }
+    I prev = first;
+    while (++first != last) {
+        prev = first;
+    }
+    return prev;
+}
+
+/// Advance while `!pred(*it)` with no end check (EoP). Precondition: a match exists.
+template <std::input_iterator I, typename P>
+    requires std::predicate<P&, std::iter_reference_t<I>>
+[[nodiscard]] constexpr I find_if_unguarded(I first, P pred)
+{
+    while (!std::invoke(pred, *first)) {
+        ++first;
+    }
+    return first;
+}
+
+/// Advance while `pred(*it)` with no end check (EoP). Precondition: a failing element exists.
+template <std::input_iterator I, typename P>
+    requires std::predicate<P&, std::iter_reference_t<I>>
+[[nodiscard]] constexpr I find_if_not_unguarded(I first, P pred)
+{
+    while (std::invoke(pred, *first)) {
+        ++first;
+    }
+    return first;
+}
+
 }  // namespace mt

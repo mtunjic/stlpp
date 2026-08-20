@@ -65,4 +65,29 @@ template <std::ranges::input_range R, typename P>
     return count_if(std::ranges::begin(range), std::ranges::end(range), std::move(pred));
 }
 
+template <std::input_iterator I, std::sentinel_for<I> S, typename P>
+    requires std::predicate<P&, std::iter_reference_t<I>>
+[[nodiscard]] std::iter_difference_t<I> count_if_not(I first, S last, P pred)
+{
+    return std::count_if(first, last, std::not_fn(std::move(pred)));
+}
+
+template <std::ranges::input_range R, typename P>
+[[nodiscard]] auto count_if_not(R&& range, P pred)
+{
+    return count_if_not(std::ranges::begin(range), std::ranges::end(range), std::move(pred));
+}
+
+template <std::input_iterator I, std::sentinel_for<I> S, typename T>
+[[nodiscard]] std::iter_difference_t<I> count_not(I first, S last, const T& value)
+{
+    return std::count_if(first, last, [&](const auto& x) { return !(x == value); });
+}
+
+template <std::ranges::input_range R, typename T>
+[[nodiscard]] auto count_not(R&& range, const T& value)
+{
+    return count_not(std::ranges::begin(range), std::ranges::end(range), value);
+}
+
 }  // namespace mt
