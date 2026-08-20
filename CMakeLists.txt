@@ -85,6 +85,7 @@ if(STLPP_BUILD_TESTING)
         test/fp_algorithms_test.cpp
         test/fp_iterators_test.cpp
         test/concept_axioms_test.cpp
+        test/generic_compare_test.cpp
         test/generic_algorithms_test.cpp
         test/generic_iterators_test.cpp
         test/generic_parallel_test.cpp
