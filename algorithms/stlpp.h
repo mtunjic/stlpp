@@ -37,6 +37,7 @@
 #include "reverse.h"
 #include "rotate.h"
 #include "scan.h"
+#include "select.h"
 #include "skip_take.h"
 #include "slice.h"
 #include "sort.h"
