@@ -46,5 +46,7 @@ conan create . --build=missing -s compiler.cppstd=20
 | `components` | Grid components via `graph` + `disjoint_set` |
 | `pipeline` | `numeric_range` → `filter` → `windows` → fold |
 | `adaptive` | `sort_n_adaptive` with tiny vs large merge buffer |
-
-More ideas are tracked in the root `TODO.md` (Examples section).
+| `quadtree` | Point-cloud range query vs brute scan; nearest with refine |
+| `dijkstra` | Decrease-key Dijkstra on `dynamic_pqueue` |
+| `text` | `lines` / `starts_with` / `words` / `group_by` on a corpus |
+| `combo` | In-place `next_combination` vs `next_permutation` |

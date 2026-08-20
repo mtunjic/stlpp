@@ -7,6 +7,7 @@
 #include <cmath>
 #include <iomanip>
 #include <iostream>
+#include <limits>
 #include <numeric>
 #include <random>
 #include <string>
@@ -59,6 +60,18 @@ struct SortProbe {
 
 long long SortProbe::moves = 0;
 long long SortProbe::comps = 0;
+
+struct DijkstraNode {
+    int dist = 0;
+    std::size_t vertex = 0;
+    friend bool operator>(const DijkstraNode& a, const DijkstraNode& b)
+    {
+        if (a.dist != b.dist) {
+            return a.dist > b.dist;
+        }
+        return a.vertex > b.vertex;
+    }
+};
 
 }  // namespace
 
@@ -704,6 +717,382 @@ void demo_adaptive_sort()
     std::cout << "Same algorithm, different buffer budget: adaptive merge falls\n"
                  "back toward in-place work when scratch is scarce — EoP-style\n"
                  "complexity that tracks real machine resources.\n";
+}
+
+void demo_quadtree_query()
+{
+    banner("Quadtree — range query vs brute scan, nearest with refine");
+
+    constexpr double extent = 256.0;
+    constexpr int n_random = 20'000;
+    constexpr int n_cluster = 400;
+    mt::rect_2d world{0.0, 0.0, extent, extent};
+    mt::rect_2d viewport{20.0, 20.0, 60.0, 60.0};
+    const mt::point_2d probe{200.5, 180.25};
+
+    std::mt19937 rng{2026};
+    std::uniform_real_distribution<double> uni(0.0, extent * 0.999);
+    std::normal_distribution<double> blob(40.0, 4.0);
+
+    std::vector<mt::point_2d> cloud;
+    cloud.reserve(static_cast<std::size_t>(n_random + n_cluster));
+    for (int i = 0; i < n_random; ++i) {
+        cloud.push_back({uni(rng), uni(rng)});
+    }
+    for (int i = 0; i < n_cluster; ++i) {
+        const double x = std::clamp(blob(rng), 0.0, extent * 0.999);
+        const double y = std::clamp(blob(rng), 0.0, extent * 0.999);
+        cloud.push_back({x, y});
+    }
+
+    auto t0 = std::chrono::steady_clock::now();
+    mt::quadtree tree(world);
+    int inserted = 0;
+    for (const auto& p : cloud) {
+        inserted += static_cast<int>(tree.insert(p));
+    }
+    auto t1 = std::chrono::steady_clock::now();
+    const auto insert_us = elapsed_us(t0, t1);
+
+    t0 = std::chrono::steady_clock::now();
+    const auto hits = tree.query(viewport);
+    t1 = std::chrono::steady_clock::now();
+    const auto query_us = elapsed_us(t0, t1);
+
+    t0 = std::chrono::steady_clock::now();
+    std::vector<mt::point_2d> brute;
+    for (const auto& p : cloud) {
+        if (viewport.contains(p)) {
+            brute.push_back(p);
+        }
+    }
+    t1 = std::chrono::steady_clock::now();
+    const auto brute_us = elapsed_us(t0, t1);
+
+    auto dist2 = [](mt::point_2d a, mt::point_2d b) {
+        const double dx = a.x - b.x;
+        const double dy = a.y - b.y;
+        return dx * dx + dy * dy;
+    };
+    auto nearest_of = [&](const std::vector<mt::point_2d>& pts) -> mt::point_2d {
+        mt::point_2d best = pts.front();
+        double best_d = dist2(probe, best);
+        for (const auto& p : pts) {
+            const double d = dist2(probe, p);
+            if (d < best_d) {
+                best_d = d;
+                best = p;
+            }
+        }
+        return best;
+    };
+
+    // Expand an axis-aligned box until it contains at least one point. The first
+    // hit can be a far corner (Chebyshev vs Euclidean), so refine at radius d.
+    double half = 0.5;
+    std::vector<mt::point_2d> box_hits;
+    while (box_hits.empty() && half < extent * 2) {
+        box_hits = tree.query({probe.x - half, probe.y - half, probe.x + half, probe.y + half});
+        if (box_hits.empty()) {
+            half *= 2.0;
+        }
+    }
+    if (box_hits.empty()) {
+        std::cout << "cloud empty — nothing to query.\n";
+        return;
+    }
+    const mt::point_2d first_guess = nearest_of(box_hits);
+    const double first_d = std::sqrt(dist2(probe, first_guess));
+    const double refine_r = first_d + 1e-9;
+    const auto refined_hits = tree.query(
+        {probe.x - refine_r, probe.y - refine_r, probe.x + refine_r, probe.y + refine_r});
+    const mt::point_2d refined = nearest_of(refined_hits);
+
+    t0 = std::chrono::steady_clock::now();
+    const mt::point_2d brute_nn = nearest_of(cloud);
+    t1 = std::chrono::steady_clock::now();
+    const auto nn_brute_us = elapsed_us(t0, t1);
+
+    std::cout << "World [0," << extent << ")²  random=" << n_random
+              << "  cluster@ (40,40) n=" << n_cluster << "\n";
+    std::cout << "inserted " << inserted << " / " << cloud.size() << "  (" << insert_us
+              << " µs)\n\n";
+    std::cout << "Range query viewport [" << viewport.x0 << "," << viewport.y0 << ")–["
+              << viewport.x1 << "," << viewport.y1 << ")\n";
+    std::cout << "  quadtree.query:  " << hits.size() << " hits in " << query_us << " µs\n";
+    std::cout << "  brute scan:      " << brute.size() << " hits in " << brute_us << " µs\n";
+    std::cout << "  counts match?    " << std::boolalpha << (hits.size() == brute.size())
+              << "\n\n";
+
+    constexpr int gw = 24;
+    constexpr int gh = 12;
+    std::cout << "Occupancy of the viewport (" << gw << "×" << gh << " cells):\n";
+    for (int row = gh - 1; row >= 0; --row) {
+        std::cout << "  ";
+        for (int col = 0; col < gw; ++col) {
+            const double x0 =
+                viewport.x0 + (viewport.x1 - viewport.x0) * static_cast<double>(col) / gw;
+            const double x1 =
+                viewport.x0 + (viewport.x1 - viewport.x0) * static_cast<double>(col + 1) / gw;
+            const double y0 =
+                viewport.y0 + (viewport.y1 - viewport.y0) * static_cast<double>(row) / gh;
+            const double y1 =
+                viewport.y0 + (viewport.y1 - viewport.y0) * static_cast<double>(row + 1) / gh;
+            int cell = 0;
+            for (const auto& p : hits) {
+                if (p.x >= x0 && p.x < x1 && p.y >= y0 && p.y < y1) {
+                    ++cell;
+                }
+            }
+            std::cout << (cell == 0 ? '.' : (cell < 4 ? 'o' : '@'));
+        }
+        std::cout << "\n";
+    }
+
+    std::cout << "\nNearest to probe (" << probe.x << ", " << probe.y << "):\n";
+    std::cout << "  first box (half=" << half << "):  (" << first_guess.x << ", "
+              << first_guess.y << ")  d=" << first_d << "\n";
+    std::cout << "  refined (Chebyshev r=d): (" << refined.x << ", " << refined.y
+              << ")  d=" << std::sqrt(dist2(probe, refined)) << "\n";
+    std::cout << "  brute Euclidean:         (" << brute_nn.x << ", " << brute_nn.y
+              << ")  d=" << std::sqrt(dist2(probe, brute_nn)) << "  (" << nn_brute_us
+              << " µs)\n";
+    const bool nn_ok = dist2(refined, brute_nn) < 1e-18;
+    std::cout << "  refined == brute?        " << std::boolalpha << nn_ok << "\n\n";
+    std::cout << "A square of Chebyshev radius r can hit a far corner before a\n"
+                 "closer axial neighbour — one extra query at r = d repairs that.\n"
+                 "The tree still beats a full scan by pruning empty quadrants.\n";
+}
+
+void demo_dijkstra()
+{
+    banner("Dijkstra — decrease-key on mt::dynamic_pqueue");
+
+    // Textbook decrease-key: HQ→Dock looks cheap until Gate relaxes Dock.
+    //   HQ --10--> Dock --1--> Yard
+    //   HQ --1-->  Gate --100--> Yard
+    //   Gate --1--> Dock
+    // Shortest HQ ↝ Yard is HQ → Gate → Dock → Yard = 3, not the 11-walk.
+    constexpr std::size_t n = 4;
+    const char* name[] = {"HQ", "Gate", "Dock", "Yard"};
+    constexpr std::size_t HQ = 0;
+    constexpr std::size_t Gate = 1;
+    constexpr std::size_t Dock = 2;
+    constexpr std::size_t Yard = 3;
+
+    mt::graph g(n);
+    std::vector<std::vector<int>> w(n, std::vector<int>(n, 0));
+    auto link = [&](std::size_t u, std::size_t v, int weight) {
+        g.add_edge(u, v);
+        w[u][v] = weight;
+    };
+    link(HQ, Dock, 10);
+    link(HQ, Gate, 1);
+    link(Gate, Yard, 100);
+    link(Gate, Dock, 1);
+    link(Dock, Yard, 1);
+
+    std::cout << "Directed weighted graph:\n";
+    for (std::size_t u = 0; u < n; ++u) {
+        std::cout << "  " << name[u] << ":";
+        if (g.neighbors(u).empty()) {
+            std::cout << "  (no outs)";
+        }
+        for (std::size_t v : g.neighbors(u)) {
+            std::cout << "  -" << w[u][v] << "→ " << name[v];
+        }
+        std::cout << "\n";
+    }
+
+    constexpr int Inf = std::numeric_limits<int>::max() / 4;
+    std::vector<int> dist(n, Inf);
+    std::vector<std::size_t> parent(n, n);
+    mt::dynamic_pqueue<DijkstraNode, std::greater<DijkstraNode>> pq;
+    std::vector<mt::dynamic_pqueue<DijkstraNode, std::greater<DijkstraNode>>::handle> handle(n);
+
+    dist[HQ] = 0;
+    for (std::size_t v = 0; v < n; ++v) {
+        handle[v] = pq.push({dist[v], v});
+    }
+
+    int pops = 0;
+    int decrease_keys = 0;
+    while (!pq.empty()) {
+        const DijkstraNode u = pq.top();
+        pq.pop();
+        ++pops;
+        if (u.dist != dist[u.vertex]) {
+            continue;
+        }
+        for (std::size_t v : g.neighbors(u.vertex)) {
+            const int cand = dist[u.vertex] + w[u.vertex][v];
+            if (cand < dist[v]) {
+                dist[v] = cand;
+                parent[v] = u.vertex;
+                pq.update(handle[v], {cand, v});
+                ++decrease_keys;
+            }
+        }
+    }
+
+    std::cout << "\nShortest paths from HQ (decrease-key Dijkstra):\n";
+    for (std::size_t v = 0; v < n; ++v) {
+        std::cout << "  dist(" << name[v] << ") = ";
+        if (dist[v] >= Inf) {
+            std::cout << "∞\n";
+            continue;
+        }
+        std::cout << dist[v] << "   path ";
+        std::vector<std::size_t> walk;
+        for (std::size_t x = v; x != n; x = parent[x]) {
+            walk.push_back(x);
+            if (x == HQ) {
+                break;
+            }
+        }
+        std::reverse(walk.begin(), walk.end());
+        for (std::size_t i = 0; i < walk.size(); ++i) {
+            std::cout << name[walk[i]] << (i + 1 < walk.size() ? " → " : "\n");
+        }
+    }
+
+    std::cout << "\npops = " << pops << "  decrease-key updates = " << decrease_keys << "\n";
+    std::cout << "naive first hop HQ→Dock (10) is later improved when Gate\n"
+                 "relaxes Dock to 2 — that is the handle-stable update() the\n"
+                 "heap exists for. std::priority_queue cannot decrease-key.\n";
+}
+
+void demo_text_pipeline()
+{
+    banner("Text pipeline — lines / starts_with / words / group_by");
+
+    const std::string corpus =
+        "# Notes from EoP\n"
+        "\n"
+        "ERROR: power(a, 0) must not loop\n"
+        "Counted copy_n rejects n <= 0.\n"
+        "# Algebra\n"
+        "fold is always left-associated.\n"
+        "ERROR: parallel reduce needs an associative op\n"
+        "reduce_balanced is the tree-shaped cousin.\n"
+        "fold is the sequential walk.\n";
+
+    const auto rows = mt::lines(corpus);
+    std::vector<std::string> headings;
+    std::vector<std::string> errors;
+    std::vector<std::string> body;
+    for (const auto& row : rows) {
+        if (row.empty()) {
+            continue;
+        }
+        if (mt::starts_with(row, "# ")) {
+            headings.push_back(row);
+        } else if (mt::starts_with(row, "ERROR")) {
+            errors.push_back(row);
+        } else {
+            body.push_back(row);
+        }
+    }
+
+    std::cout << "Corpus: " << rows.size() << " lines (lines() keeps blanks for round-trip)\n";
+    std::cout << "unlines(lines) == corpus? " << std::boolalpha
+              << (mt::unlines(rows) == corpus) << "\n\n";
+
+    std::cout << "Headings (starts_with \"# \"):\n";
+    for (const auto& h : headings) {
+        std::cout << "  " << h << "\n";
+    }
+    std::cout << "Errors (starts_with \"ERROR\"):\n";
+    for (const auto& e : errors) {
+        std::cout << "  " << e << "\n";
+    }
+    std::cout << "Body lines: " << body.size() << "\n";
+    std::cout << "unlines(headings):\n---\n" << mt::unlines(headings) << "\n---\n\n";
+
+    auto tokens = mt::words(mt::unlines(body));
+    for (auto& t : tokens) {
+        t = mt::to_lower_copy(t);
+    }
+    std::sort(tokens.begin(), tokens.end());
+    const auto runs = mt::group_by(tokens, std::equal_to<>{});
+
+    struct Freq {
+        std::string word;
+        int n = 0;
+    };
+    std::vector<Freq> freq;
+    freq.reserve(runs.size());
+    for (const auto& run : runs) {
+        freq.push_back({run.front(), static_cast<int>(run.size())});
+    }
+    mt::psort(freq.begin(), freq.end(), [](const Freq& a, const Freq& b) {
+        if (a.n != b.n) {
+            return a.n > b.n;
+        }
+        return a.word < b.word;
+    });
+
+    std::cout << "Body words (lowercased) = " << tokens.size() << "  unique = " << runs.size()
+              << "\n";
+    std::cout << "Top frequencies (group_by after sort, then psort):\n";
+    for (std::size_t i = 0; i < std::min<std::size_t>(8, freq.size()); ++i) {
+        std::cout << "  " << std::setw(14) << freq[i].word << "  ×" << freq[i].n << "\n";
+    }
+    std::cout << "\nunwords(first 8 body tokens, original order) =\n  ";
+    auto original = mt::words(mt::unlines(body));
+    if (original.size() > 8) {
+        original.resize(8);
+    }
+    std::cout << mt::unwords(original) << " …\n\n";
+    std::cout << "Split / filter / group are the same generic algorithms as on\n"
+                 "vectors of ints — the corpus is just another sequence.\n";
+}
+
+void demo_combinations()
+{
+    banner("Combinations — next_combination vs next_permutation");
+
+    const std::vector<std::string> people{"Ada", "Bjorn", "Cora", "Drew", "Eve", "Fay"};
+    constexpr int k = 3;
+    std::vector<std::string> v = people;
+
+    std::cout << "Choose " << k << " of " << people.size()
+              << " (C(6,3)=20). Each step mutates the range in place:\n"
+                 "  [selected | rest]  — both sides stay sorted (Hinnant).\n\n";
+
+    int combo_count = 0;
+    do {
+        std::cout << "  { ";
+        for (int i = 0; i < k; ++i) {
+            std::cout << v[static_cast<std::size_t>(i)]
+                      << (i + 1 < k ? ", " : " ");
+        }
+        std::cout << "}    rest:";
+        for (std::size_t i = static_cast<std::size_t>(k); i < v.size(); ++i) {
+            std::cout << " " << v[i];
+        }
+        std::cout << "\n";
+        ++combo_count;
+    } while (mt::next_combination(v.begin(), v.begin() + k, v.end()));
+
+    std::cout << "\nwalked " << combo_count << " combinations; next_combination returned false\n";
+    std::cout << "range restored to first combo / sorted rest? " << std::boolalpha
+              << (v == people) << "\n\n";
+
+    std::vector<std::string> trio{"Ada", "Bjorn", "Cora"};
+    std::cout << "Same three people, now next_permutation (order matters, P(3,3)=6):\n";
+    int perm_count = 0;
+    do {
+        std::cout << "  " << trio[0] << " → " << trio[1] << " → " << trio[2] << "\n";
+        ++perm_count;
+    } while (mt::next_permutation(trio));
+
+    std::cout << "\nwalked " << perm_count << " permutations; wrapping restores sorted order? "
+              << std::boolalpha << (trio == std::vector<std::string>{"Ada", "Bjorn", "Cora"})
+              << "\n\n";
+    std::cout << "Combinations ignore order (committee); permutations do not\n"
+                 "(speaking order). Both are in-place generators — no extra\n"
+                 "allocation per tuple, just a bidirectional rearrangement.\n";
 }
 
 }  // namespace stlpp_examples

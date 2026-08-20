@@ -21,5 +21,9 @@ void demo_cards_gather();
 void demo_components();
 void demo_lazy_pipeline();
 void demo_adaptive_sort();
+void demo_quadtree_query();
+void demo_dijkstra();
+void demo_text_pipeline();
+void demo_combinations();
 
 }  // namespace stlpp_examples

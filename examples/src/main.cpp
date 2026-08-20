@@ -41,6 +41,18 @@ const Demo kDemos[] = {
     {"adaptive", "Adaptive sort_n buffer story",
      "Same input, tiny vs large merge buffer — compare moves and time.",
      &stlpp_examples::demo_adaptive_sort},
+    {"quadtree", "Quadtree range + nearest",
+     "Point-cloud range query vs brute scan; expanding-box nearest with refine.",
+     &stlpp_examples::demo_quadtree_query},
+    {"dijkstra", "Dijkstra via dynamic_pqueue",
+     "Decrease-key shortest path on a small weighted graph.",
+     &stlpp_examples::demo_dijkstra},
+    {"text", "Text lines / words pipeline",
+     "lines → starts_with filters → words → group_by frequencies.",
+     &stlpp_examples::demo_text_pipeline},
+    {"combo", "Combinations vs permutations",
+     "In-place next_combination walk; contrast with next_permutation order.",
+     &stlpp_examples::demo_combinations},
 };
 
 void print_menu()
