@@ -29,9 +29,9 @@ namespace mt {
 //   c.reduce();  // 10
 
 template <Forward_iterator I, Binary_operation<Value_type<I>> Op>
-  requires Regular<Value_type<I>>
-[[nodiscard]] constexpr Value_type<I> add_to_counter(
-    I first, I last, Op op, Value_type<I> carry, const Value_type<I>& zero)
+    requires Regular<Value_type<I>>
+[[nodiscard]] constexpr Value_type<I> add_to_counter(I first, I last, Op op, Value_type<I> carry,
+                                                     const Value_type<I>& zero)
 {
     while (first != last) {
         if (*first == zero) {
@@ -46,9 +46,9 @@ template <Forward_iterator I, Binary_operation<Value_type<I>> Op>
 }
 
 template <Input_iterator I, Binary_operation<Value_type<I>> Op>
-  requires Regular<Value_type<I>>
-[[nodiscard]] constexpr Value_type<I> reduce_counter(
-    I first, I last, Op op, const Value_type<I>& zero)
+    requires Regular<Value_type<I>>
+[[nodiscard]] constexpr Value_type<I> reduce_counter(I first, I last, Op op,
+                                                     const Value_type<I>& zero)
 {
     while (first != last && *first == zero) {
         ++first;
@@ -71,17 +71,18 @@ template <Input_iterator I, Binary_operation<Value_type<I>> Op>
 template <Regular T, Binary_operation<T> Op>
 class binary_counter {
 public:
-    binary_counter(Op op, T zero)
-        : op_(std::move(op)), zero_(std::move(zero)) {}
+    binary_counter(Op op, T zero) : op_(std::move(op)), zero_(std::move(zero)) {}
 
-    void add(T value) {
+    void add(T value)
+    {
         value = add_to_counter(digits_.begin(), digits_.end(), op_, std::move(value), zero_);
         if (value != zero_) {
             digits_.push_back(std::move(value));
         }
     }
 
-    [[nodiscard]] T reduce() const {
+    [[nodiscard]] T reduce() const
+    {
         return reduce_counter(digits_.cbegin(), digits_.cend(), op_, zero_);
     }
 

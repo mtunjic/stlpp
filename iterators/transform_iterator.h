@@ -61,7 +61,9 @@ class transform_range {
 public:
     transform_range() = default;
     transform_range(I first, I last, F f)
-        : first_(std::move(first)), last_(std::move(last)), f_(std::move(f))
+        : first_(std::move(first)),
+          last_(std::move(last)),
+          f_(std::move(f))
     {}
 
     [[nodiscard]] transform_iterator<I, F> begin() const { return {first_, f_}; }

@@ -11,21 +11,25 @@
 
 namespace {
 
-TEST(NumericIteratorGeneric, RangeSizeAndDistance) {
+TEST(NumericIteratorGeneric, RangeSizeAndDistance)
+{
     const auto r = mt::numeric_range(10, 15);
     EXPECT_EQ(r.size(), 5);
     EXPECT_EQ(*r.begin(), 10);
     EXPECT_EQ(r.end() - r.begin(), 5);
-    mt::test::expect_ranges_equal(std::vector<int>(r.begin(), r.end()), mt::test::iota_vector(5, 10));
+    mt::test::expect_ranges_equal(std::vector<int>(r.begin(), r.end()),
+                                  mt::test::iota_vector(5, 10));
 }
 
-TEST(NumericIteratorGeneric, EmptyRange) {
+TEST(NumericIteratorGeneric, EmptyRange)
+{
     const auto r = mt::numeric_range(5, 5);
     EXPECT_EQ(r.size(), 0u);
     EXPECT_TRUE(r.begin() == r.end());
 }
 
-TEST(StepIteratorGeneric, EndDoesNotPassOnePastEnd) {
+TEST(StepIteratorGeneric, EndDoesNotPassOnePastEnd)
+{
     std::vector<int> v{0, 1, 2, 3, 4};
     auto s = mt::step(v, 2);
     EXPECT_EQ(s.end() - s.begin(), 3);
@@ -34,7 +38,8 @@ TEST(StepIteratorGeneric, EndDoesNotPassOnePastEnd) {
     EXPECT_EQ(out, (std::vector<int>{0, 2, 4}));
 }
 
-TEST(FilterIteratorGeneric, EndIncrementIsNoOp) {
+TEST(FilterIteratorGeneric, EndIncrementIsNoOp)
+{
     std::vector<int> v{1, 2, 3, 4};
     auto range = mt::filter(v, [](int x) { return x % 2 == 0; });
     auto e = range.end();
@@ -42,7 +47,8 @@ TEST(FilterIteratorGeneric, EndIncrementIsNoOp) {
     EXPECT_TRUE(e == range.end());
 }
 
-TEST(ZipIteratorGeneric, DistinctPositionsNotEqual) {
+TEST(ZipIteratorGeneric, DistinctPositionsNotEqual)
+{
     std::vector<int> a{1, 2};
     std::vector<int> b{10, 20};
     mt::zip_iterator it{a.begin(), b.begin()};
@@ -50,7 +56,8 @@ TEST(ZipIteratorGeneric, DistinctPositionsNotEqual) {
     EXPECT_FALSE(it == it2);
 }
 
-TEST(CycleIteratorGeneric, RepeatsNTimesAndEndSafe) {
+TEST(CycleIteratorGeneric, RepeatsNTimesAndEndSafe)
+{
     std::vector<int> v{1, 2};
     auto cyc = mt::cycle(v, 2);
     std::vector<int> out;
@@ -63,7 +70,8 @@ TEST(CycleIteratorGeneric, RepeatsNTimesAndEndSafe) {
     EXPECT_TRUE(e == cyc.end());
 }
 
-TEST(WindowIteratorGeneric, WindowCountAndEndSafe) {
+TEST(WindowIteratorGeneric, WindowCountAndEndSafe)
+{
     std::vector<int> v{1, 2, 3, 4};
     auto wr = mt::windows(v, 2);
     int count = 0;
@@ -77,7 +85,8 @@ TEST(WindowIteratorGeneric, WindowCountAndEndSafe) {
     EXPECT_TRUE(we == wr.end());
 }
 
-TEST(UnfoldIteratorGeneric, EndIncrementAndDeref) {
+TEST(UnfoldIteratorGeneric, EndIncrementAndDeref)
+{
     auto step = [](int n) -> std::optional<std::pair<int, int>> {
         if (n <= 0) {
             return std::nullopt;
@@ -90,7 +99,8 @@ TEST(UnfoldIteratorGeneric, EndIncrementAndDeref) {
     EXPECT_THROW((void)*end, std::bad_optional_access);
 }
 
-TEST(FlattenIteratorGeneric, FlattensOneLevel) {
+TEST(FlattenIteratorGeneric, FlattensOneLevel)
+{
     std::vector<std::vector<int>> nested{{1, 2}, {}, {3}};
     std::vector<int> out;
     for (int x : mt::flattened(nested)) {
@@ -99,7 +109,8 @@ TEST(FlattenIteratorGeneric, FlattensOneLevel) {
     mt::test::expect_ranges_equal(out, std::vector<int>{1, 2, 3});
 }
 
-TEST(FlattenIteratorGeneric, EndIncrementIsNoOp) {
+TEST(FlattenIteratorGeneric, EndIncrementIsNoOp)
+{
     std::vector<std::vector<int>> nested{{1}};
     auto range = mt::flattened(nested);
     auto e = range.end();
@@ -107,7 +118,8 @@ TEST(FlattenIteratorGeneric, EndIncrementIsNoOp) {
     EXPECT_TRUE(e == range.end());
 }
 
-TEST(ChunksIteratorGeneric, PartitionCoverAndEndSafe) {
+TEST(ChunksIteratorGeneric, PartitionCoverAndEndSafe)
+{
     std::vector<int> v{1, 2, 3, 4, 5};
     std::vector<std::vector<int>> chunks;
     for (auto c : mt::chunks(v, 2)) {
@@ -121,7 +133,8 @@ TEST(ChunksIteratorGeneric, PartitionCoverAndEndSafe) {
     EXPECT_TRUE(e == empty.end());
 }
 
-TEST(EdgeIteratorGeneric, ConsecutivePairsCount) {
+TEST(EdgeIteratorGeneric, ConsecutivePairsCount)
+{
     std::vector<int> v{1, 2, 3, 4};
     std::vector<std::pair<int, int>> out;
     for (auto e : mt::edges(v)) {
@@ -132,7 +145,8 @@ TEST(EdgeIteratorGeneric, ConsecutivePairsCount) {
     EXPECT_TRUE(mt::edges(single).begin() == mt::edges(single).end());
 }
 
-TEST(TransformIteratorGeneric, AppliesFunctionOnDeref) {
+TEST(TransformIteratorGeneric, AppliesFunctionOnDeref)
+{
     std::vector<int> v{1, 2, 3};
     auto t = mt::transform(v, [](int x) { return x + 10; });
     std::vector<int> out;
@@ -142,7 +156,8 @@ TEST(TransformIteratorGeneric, AppliesFunctionOnDeref) {
     mt::test::expect_ranges_equal(out, (std::vector<int>{11, 12, 13}));
 }
 
-TEST(CountingOutputIteratorGeneric, CountsAssignments) {
+TEST(CountingOutputIteratorGeneric, CountsAssignments)
+{
     std::vector<int> v{1, 2, 3, 4};
     mt::counting_output_iterator out;
     std::copy(v.begin(), v.end(), out);

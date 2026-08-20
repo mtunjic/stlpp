@@ -82,10 +82,7 @@ class htable {
         return nullptr;
     }
 
-    const slot* locate(const K& key) const
-    {
-        return const_cast<htable*>(this)->locate(key);
-    }
+    const slot* locate(const K& key) const { return const_cast<htable*>(this)->locate(key); }
 
     template <typename Put>
     bool place(K key, V value, Put put)
@@ -129,8 +126,7 @@ public:
     /// Insert only if `key` is absent. Returns true when a new slot was filled.
     bool insert(K key, V value)
     {
-        return place(std::move(key), std::move(value),
-                     [](slot&, K&&, V&&) { return false; });
+        return place(std::move(key), std::move(value), [](slot&, K&&, V&&) { return false; });
     }
 
     /// Insert or overwrite. Returns true when a new key was inserted.

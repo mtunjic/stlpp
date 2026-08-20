@@ -26,15 +26,15 @@ class FindMismatchGeneric : public ::testing::Test {};
 
 TYPED_TEST_SUITE(FindMismatchGeneric, mt::test::EopCoreContainers);
 
-TYPED_TEST(FindMismatchGeneric, MatchesManualEqualOracle) {
+TYPED_TEST(FindMismatchGeneric, MatchesManualEqualOracle)
+{
     auto a = mt::test::make_iota_container<TypeParam>(6);
     auto b = mt::test::make_iota_container<TypeParam>(6);
     const auto a_last = mt::test::filled_end(a, 6);
     const auto b_last = mt::test::filled_end(b, 6);
     const auto oracle =
         manual_find_mismatch(a.begin(), a_last, b.begin(), b_last, std::equal_to<>{});
-    const auto got =
-        mt::find_mismatch(a.begin(), a_last, b.begin(), b_last, std::equal_to<>{});
+    const auto got = mt::find_mismatch(a.begin(), a_last, b.begin(), b_last, std::equal_to<>{});
     EXPECT_EQ(oracle, got);
 
     if constexpr (!mt::test::is_std_array_v<TypeParam>) {
@@ -44,8 +44,7 @@ TYPED_TEST(FindMismatchGeneric, MatchesManualEqualOracle) {
     }
     const auto oracle2 =
         manual_find_mismatch(a.begin(), a_last, b.begin(), b_last, std::equal_to<>{});
-    const auto got2 =
-        mt::find_mismatch(a.begin(), a_last, b.begin(), b_last, std::equal_to<>{});
+    const auto got2 = mt::find_mismatch(a.begin(), a_last, b.begin(), b_last, std::equal_to<>{});
     EXPECT_EQ(oracle2, got2);
 }
 
@@ -54,7 +53,8 @@ class LexicographicalGeneric : public ::testing::Test {};
 
 TYPED_TEST_SUITE(LexicographicalGeneric, mt::test::EopCoreContainers);
 
-TYPED_TEST(LexicographicalGeneric, EqualMatchesStdEqual) {
+TYPED_TEST(LexicographicalGeneric, EqualMatchesStdEqual)
+{
     constexpr int n = 5;
     auto a = mt::test::make_iota_container<TypeParam>(n);
     auto b = mt::test::make_iota_container<TypeParam>(n);
@@ -65,7 +65,8 @@ TYPED_TEST(LexicographicalGeneric, EqualMatchesStdEqual) {
               std::equal(a.begin(), a_last, b.begin(), b_last));
 }
 
-TYPED_TEST(LexicographicalGeneric, LessMatchesStdLexicographicalCompare) {
+TYPED_TEST(LexicographicalGeneric, LessMatchesStdLexicographicalCompare)
+{
     constexpr int n = 6;
     auto shorter = mt::test::make_iota_container<TypeParam>(n - 1);
     auto longer = mt::test::make_iota_container<TypeParam>(n);
@@ -82,7 +83,8 @@ class OrderPredicateGeneric : public ::testing::Test {};
 
 TYPED_TEST_SUITE(OrderPredicateGeneric, mt::test::EopCoreContainers);
 
-TYPED_TEST(OrderPredicateGeneric, StrictlyIncreasingOnIota) {
+TYPED_TEST(OrderPredicateGeneric, StrictlyIncreasingOnIota)
+{
     constexpr int n = 6;
     auto c = mt::test::make_iota_container<TypeParam>(n);
     const auto last = mt::test::filled_end(c, n);
@@ -91,7 +93,8 @@ TYPED_TEST(OrderPredicateGeneric, StrictlyIncreasingOnIota) {
     EXPECT_TRUE(mt::increasing_range(c.begin(), c.begin(), std::less<>{}));
 }
 
-TYPED_TEST(OrderPredicateGeneric, IncreasingAllowsPlateaus) {
+TYPED_TEST(OrderPredicateGeneric, IncreasingAllowsPlateaus)
+{
     TypeParam c{};
     if constexpr (mt::test::is_std_array_v<TypeParam>) {
         c = {0, 0, 1, 2, 2, 3, 4, 5};
@@ -106,7 +109,8 @@ TYPED_TEST(OrderPredicateGeneric, IncreasingAllowsPlateaus) {
     EXPECT_NE(mismatch, last);
 }
 
-TYPED_TEST(OrderPredicateGeneric, PartitionedMatchesSuffixTrueLaw) {
+TYPED_TEST(OrderPredicateGeneric, PartitionedMatchesSuffixTrueLaw)
+{
     constexpr int n = 6;
     auto c = mt::test::make_iota_container<TypeParam>(n);
     const auto last = mt::test::filled_end(c, n);
@@ -123,7 +127,8 @@ class EqualRangeGeneric : public ::testing::Test {};
 
 TYPED_TEST_SUITE(EqualRangeGeneric, mt::test::EopCoreContainers);
 
-TYPED_TEST(EqualRangeGeneric, CountedRangeWidthMatchesManualScan) {
+TYPED_TEST(EqualRangeGeneric, CountedRangeWidthMatchesManualScan)
+{
     std::vector<int> sorted{0, 1, 1, 2, 3, 3, 3, 4};
     const int n = static_cast<int>(sorted.size());
     for (int value : {1, 3, 0, 4, 9}) {
@@ -136,7 +141,8 @@ TYPED_TEST(EqualRangeGeneric, CountedRangeWidthMatchesManualScan) {
     }
 }
 
-TYPED_TEST(EqualRangeGeneric, BoundedEqualRangeMatchesCounted) {
+TYPED_TEST(EqualRangeGeneric, BoundedEqualRangeMatchesCounted)
+{
     std::vector<int> sorted{0, 1, 1, 2, 3, 3, 3, 4};
     const int value = 3;
     const auto bounded = mt::equal_range(sorted.begin(), sorted.end(), value);
@@ -144,19 +150,21 @@ TYPED_TEST(EqualRangeGeneric, BoundedEqualRangeMatchesCounted) {
     EXPECT_EQ(bounded, counted);
 }
 
-TEST(CompareExtras, AdjacentMismatchForwardMatchesInputOnVector) {
+TEST(CompareExtras, AdjacentMismatchForwardMatchesInputOnVector)
+{
     std::vector<int> v{1, 2, 2, 3};
     const auto input = mt::find_adjacent_mismatch(v.begin(), v.end(), std::less<>{});
-    const auto forward =
-        mt::find_adjacent_mismatch_forward(v.begin(), v.end(), std::less<>{});
+    const auto forward = mt::find_adjacent_mismatch_forward(v.begin(), v.end(), std::less<>{});
     EXPECT_EQ(input, forward);
 }
 
-TEST(CompareExtras, LexicographicalEquivalentUsesRelation) {
+TEST(CompareExtras, LexicographicalEquivalentUsesRelation)
+{
     std::vector<int> a{1, 2, 3};
     std::vector<int> b{1, 2, 5};
     const auto same_parity = [](int x, int y) { return (x % 2) == (y % 2); };
-    EXPECT_TRUE(mt::lexicographical_equivalent(a.begin(), a.end(), b.begin(), b.end(), same_parity));
+    EXPECT_TRUE(
+        mt::lexicographical_equivalent(a.begin(), a.end(), b.begin(), b.end(), same_parity));
     EXPECT_FALSE(mt::lexicographical_equal(a.begin(), a.end(), b.begin(), b.end()));
 }
 

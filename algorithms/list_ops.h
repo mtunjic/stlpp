@@ -33,11 +33,11 @@ std::pair<T, O> map_accum(I first, S last, T acc, F f, O dest)
 template <std::ranges::input_range R, typename T, typename F>
 [[nodiscard]] auto map_accum(R&& range, T acc, F f)
 {
-    using Y = std::tuple_element_t<1, std::invoke_result_t<F&, T, std::ranges::range_reference_t<R>>>;
+    using Y =
+        std::tuple_element_t<1, std::invoke_result_t<F&, T, std::ranges::range_reference_t<R>>>;
     std::vector<std::remove_cvref_t<Y>> out;
-    auto result =
-        map_accum(std::ranges::begin(range), std::ranges::end(range), std::move(acc), std::move(f),
-                  std::back_inserter(out));
+    auto result = map_accum(std::ranges::begin(range), std::ranges::end(range), std::move(acc),
+                            std::move(f), std::back_inserter(out));
     return std::pair{std::move(result.first), std::move(out)};
 }
 
@@ -79,7 +79,7 @@ template <std::ranges::input_range R, typename Pred>
 template <std::input_iterator I1, std::sentinel_for<I1> S1, std::input_iterator I2,
           std::sentinel_for<I2> S2, typename T, typename Op1 = std::plus<>,
           typename Op2 = std::multiplies<>>
-    requires (!std::convertible_to<S2, T>)
+    requires(!std::convertible_to<S2, T>)
 [[nodiscard]] T inner_product(I1 a, S1 a_last, I2 b, S2 b_last, T init, Op1 add = {}, Op2 mul = {})
 {
     for (; a != a_last && b != b_last; ++a, ++b) {
@@ -111,8 +111,8 @@ template <std::ranges::input_range R, typename Op = std::minus<>>
 [[nodiscard]] auto adjacent_difference(R&& range, Op op = {})
 {
     std::vector<std::ranges::range_value_t<R>> out;
-    adjacent_difference(std::ranges::begin(range), std::ranges::end(range),
-                        std::back_inserter(out), std::move(op));
+    adjacent_difference(std::ranges::begin(range), std::ranges::end(range), std::back_inserter(out),
+                        std::move(op));
     return out;
 }
 

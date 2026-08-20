@@ -66,20 +66,11 @@ public:
 
     [[nodiscard]] T operator[](difference_type n) const { return *(*this + n); }
 
-    friend numeric_iterator operator+(numeric_iterator i, difference_type n)
-    {
-        return i += n;
-    }
+    friend numeric_iterator operator+(numeric_iterator i, difference_type n) { return i += n; }
 
-    friend numeric_iterator operator+(difference_type n, numeric_iterator i)
-    {
-        return i += n;
-    }
+    friend numeric_iterator operator+(difference_type n, numeric_iterator i) { return i += n; }
 
-    friend numeric_iterator operator-(numeric_iterator i, difference_type n)
-    {
-        return i += -n;
-    }
+    friend numeric_iterator operator-(numeric_iterator i, difference_type n) { return i += -n; }
 
     friend difference_type operator-(numeric_iterator a, numeric_iterator b)
     {

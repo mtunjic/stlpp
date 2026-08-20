@@ -30,7 +30,9 @@ public:
     array_slice(std::span<T> s) : data_(s.data()), size_(s.size()) {}
 
     template <std::size_t N>
-    explicit array_slice(T (&arr)[N]) : data_(arr), size_(N) {}
+    explicit array_slice(T (&arr)[N]) : data_(arr),
+                                        size_(N)
+    {}
 
     array_slice(std::vector<T>& v) : data_(v.data()), size_(v.size()) {}
     array_slice(std::vector<T>& v, std::size_t start, std::size_t count)

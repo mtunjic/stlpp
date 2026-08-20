@@ -50,8 +50,8 @@ template <std::input_iterator I0, std::input_iterator I1>
 template <std::ranges::input_range R0, std::ranges::input_range R1, typename Rel>
 [[nodiscard]] constexpr auto find_mismatch(R0&& r0, R1&& r1, Rel r)
 {
-    return find_mismatch(std::ranges::begin(r0), std::ranges::end(r0),
-                         std::ranges::begin(r1), std::ranges::end(r1), std::move(r));
+    return find_mismatch(std::ranges::begin(r0), std::ranges::end(r0), std::ranges::begin(r1),
+                         std::ranges::end(r1), std::move(r));
 }
 
 template <std::ranges::input_range R0, std::ranges::input_range R1>
@@ -174,8 +174,7 @@ template <std::ranges::input_range R0, std::ranges::input_range R1, typename Rel
 [[nodiscard]] constexpr bool lexicographical_equivalent(R0&& r0, R1&& r1, Rel rel)
 {
     return lexicographical_equivalent(std::ranges::begin(r0), std::ranges::end(r0),
-                                      std::ranges::begin(r1), std::ranges::end(r1),
-                                      std::move(rel));
+                                      std::ranges::begin(r1), std::ranges::end(r1), std::move(rel));
 }
 
 template <std::ranges::input_range R0, std::ranges::input_range R1>
@@ -189,8 +188,7 @@ template <std::ranges::input_range R0, std::ranges::input_range R1, typename Rel
 [[nodiscard]] constexpr bool lexicographical_compare(R0&& r0, R1&& r1, Rel rel)
 {
     return lexicographical_compare(std::ranges::begin(r0), std::ranges::end(r0),
-                                   std::ranges::begin(r1), std::ranges::end(r1),
-                                   std::move(rel));
+                                   std::ranges::begin(r1), std::ranges::end(r1), std::move(rel));
 }
 
 template <std::ranges::input_range R0, std::ranges::input_range R1>

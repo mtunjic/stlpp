@@ -19,8 +19,8 @@ namespace mt {
 ///   // *it == 4, left == 2
 template <std::input_iterator I, typename P>
     requires std::predicate<P&, std::iter_reference_t<I>>
-[[nodiscard]] constexpr std::pair<I, Difference_type<I>>
-find_if_n(I first, Difference_type<I> n, P pred)
+[[nodiscard]] constexpr std::pair<I, Difference_type<I>> find_if_n(I first, Difference_type<I> n,
+                                                                   P pred)
 {
     while (n > 0 && !std::invoke(pred, *first)) {
         ++first;
@@ -33,8 +33,8 @@ find_if_n(I first, Difference_type<I> n, P pred)
 /// overruns the range.
 template <std::input_iterator I, std::sentinel_for<I> S, typename P>
     requires std::predicate<P&, std::iter_reference_t<I>>
-[[nodiscard]] constexpr std::pair<I, Difference_type<I>>
-find_if_n(I first, S last, Difference_type<I> n, P pred)
+[[nodiscard]] constexpr std::pair<I, Difference_type<I>> find_if_n(I first, S last,
+                                                                   Difference_type<I> n, P pred)
 {
     while (n > 0 && first != last && !std::invoke(pred, *first)) {
         ++first;

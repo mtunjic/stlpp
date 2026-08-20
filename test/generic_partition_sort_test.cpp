@@ -16,7 +16,8 @@ class PartitionStableGeneric : public ::testing::Test {};
 
 TYPED_TEST_SUITE(PartitionStableGeneric, mt::test::EopCoreContainers);
 
-TYPED_TEST(PartitionStableGeneric, PreservesRelativeOrderOfMatches) {
+TYPED_TEST(PartitionStableGeneric, PreservesRelativeOrderOfMatches)
+{
     TypeParam c{};
     if constexpr (mt::test::is_std_array_v<TypeParam>) {
         c = {1, 2, 3, 4, 5, 6, 7, 8};
@@ -38,7 +39,8 @@ TYPED_TEST(PartitionStableGeneric, PreservesRelativeOrderOfMatches) {
     EXPECT_EQ(odds_after, odds_before);
 }
 
-TEST(PartitionVariants, SemistableAndForwardPartition) {
+TEST(PartitionVariants, SemistableAndForwardPartition)
+{
     std::vector<int> a{1, 2, 3, 4, 5, 6};
     std::vector<int> b = a;
     const auto odd = [](int x) { return x % 2 != 0; };
@@ -53,7 +55,8 @@ TEST(PartitionVariants, SemistableAndForwardPartition) {
     (void)ma;
 }
 
-TEST(PartitionVariants, BidirectionalAndBufferStable) {
+TEST(PartitionVariants, BidirectionalAndBufferStable)
+{
     std::vector<int> a{9, 0, 1, 4, 7, 2};
     std::vector<int> b = a;
     const auto lt5 = [](int x) { return x < 5; };
@@ -64,7 +67,8 @@ TEST(PartitionVariants, BidirectionalAndBufferStable) {
     EXPECT_TRUE(std::is_partitioned(b.begin(), b.end(), lt5));
 }
 
-TEST(RemoveIfGeneric, MatchesStdRemoveIfOracle) {
+TEST(RemoveIfGeneric, MatchesStdRemoveIfOracle)
+{
     std::vector<int> a{1, 2, 3, 4, 5, 6};
     std::vector<int> b = a;
     const auto even = [](int x) { return x % 2 == 0; };
@@ -73,7 +77,8 @@ TEST(RemoveIfGeneric, MatchesStdRemoveIfOracle) {
     EXPECT_EQ(std::vector<int>(a.begin(), pa), std::vector<int>(b.begin(), pb));
 }
 
-TEST(FillGeneric, FillAndFillNWriteValue) {
+TEST(FillGeneric, FillAndFillNWriteValue)
+{
     std::vector<int> v(5, -1);
     EXPECT_EQ(mt::fill(v.begin(), v.end(), 7), v.end());
     EXPECT_TRUE(std::all_of(v.begin(), v.end(), [](int x) { return x == 7; }));
@@ -82,7 +87,8 @@ TEST(FillGeneric, FillAndFillNWriteValue) {
     EXPECT_EQ(v, (std::vector<int>{3, 3, 7, 7, 7}));
 }
 
-TEST(SortNGeneric, SortNIsIdempotentAndSorted) {
+TEST(SortNGeneric, SortNIsIdempotentAndSorted)
+{
     std::vector<int> v{9, 1, 8, 2, 7, 3, 0};
     const auto end = mt::sort_n(v.begin(), static_cast<int>(v.size()));
     EXPECT_EQ(end, v.end());
@@ -92,7 +98,8 @@ TEST(SortNGeneric, SortNIsIdempotentAndSorted) {
     EXPECT_EQ(again, v);
 }
 
-TEST(MergeNWithBufferGeneric, MergesTwoSortedHalves) {
+TEST(MergeNWithBufferGeneric, MergesTwoSortedHalves)
+{
     std::vector<int> v{1, 3, 5, 0, 2, 4};
     std::vector<int> buf(3);
     const auto end = mt::merge_n_with_buffer(v.begin(), 3, v.begin() + 3, 3, buf.begin());
@@ -100,7 +107,8 @@ TEST(MergeNWithBufferGeneric, MergesTwoSortedHalves) {
     EXPECT_EQ(v, (std::vector<int>{0, 1, 2, 3, 4, 5}));
 }
 
-TEST(SortNWithBufferGeneric, MatchesSortN) {
+TEST(SortNWithBufferGeneric, MatchesSortN)
+{
     std::vector<int> a{4, 1, 3, 2, 0};
     std::vector<int> b = a;
     std::vector<int> buf((a.size() + 1) / 2);

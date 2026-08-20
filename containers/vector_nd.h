@@ -37,7 +37,9 @@ class vector_2d {
 public:
     vector_2d() = default;
     vector_2d(std::size_t rows, std::size_t cols, T fill = T{})
-        : rows_(rows), cols_(cols), data_(detail::mul_extent(rows, cols), std::move(fill))
+        : rows_(rows),
+          cols_(cols),
+          data_(detail::mul_extent(rows, cols), std::move(fill))
     {}
 
     [[nodiscard]] std::size_t rows() const { return rows_; }
@@ -92,7 +94,10 @@ class vector_3d {
 public:
     vector_3d() = default;
     vector_3d(std::size_t d0, std::size_t d1, std::size_t d2, T fill = T{})
-        : d0_(d0), d1_(d1), d2_(d2), data_(detail::mul_extent(detail::mul_extent(d0, d1), d2), std::move(fill))
+        : d0_(d0),
+          d1_(d1),
+          d2_(d2),
+          data_(detail::mul_extent(detail::mul_extent(d0, d1), d2), std::move(fill))
     {}
 
     [[nodiscard]] std::size_t extent(std::size_t dim) const
@@ -146,8 +151,8 @@ public:
     [[nodiscard]] T& operator()(std::size_t r, std::size_t c) { return cells_(r, c); }
     [[nodiscard]] const T& operator()(std::size_t r, std::size_t c) const { return cells_(r, c); }
 
-    [[nodiscard]] std::vector<std::pair<std::size_t, std::size_t>>
-    neighbors4(std::size_t r, std::size_t c) const
+    [[nodiscard]] std::vector<std::pair<std::size_t, std::size_t>> neighbors4(std::size_t r,
+                                                                              std::size_t c) const
     {
         std::vector<std::pair<std::size_t, std::size_t>> out;
         if (r < rows() && c < cols()) {

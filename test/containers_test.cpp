@@ -9,7 +9,8 @@
 
 #include <gtest/gtest.h>
 
-TEST(Tape, InitList_ReadWriteAndMove) {
+TEST(Tape, InitList_ReadWriteAndMove)
+{
     mt::tape<int> t{1, 2, 3};
     EXPECT_EQ(t.size(), 3);
     EXPECT_EQ(t.position(), 0);
@@ -24,7 +25,8 @@ TEST(Tape, InitList_ReadWriteAndMove) {
     EXPECT_EQ(t.read(), 1);
 }
 
-TEST(Tape, LeftOffStart_GrowsDefaultCell) {
+TEST(Tape, LeftOffStart_GrowsDefaultCell)
+{
     mt::tape<int> t{7};
     t.left();
     EXPECT_EQ(t.size(), 2);
@@ -34,13 +36,15 @@ TEST(Tape, LeftOffStart_GrowsDefaultCell) {
     EXPECT_EQ(t.read(), 7);
 }
 
-TEST(Tape, EmptyInitList_StillHasOneCell) {
+TEST(Tape, EmptyInitList_StillHasOneCell)
+{
     mt::tape<int> t{std::initializer_list<int>{}};
     EXPECT_EQ(t.size(), 1);
     EXPECT_EQ(t.read(), 0);
 }
 
-TEST(Rope, ConcatAppendAndIndex) {
+TEST(Rope, ConcatAppendAndIndex)
+{
     mt::rope a{"hello "};
     mt::rope b{"world"};
     auto c = mt::concat(a, b);
@@ -53,7 +57,8 @@ TEST(Rope, ConcatAppendAndIndex) {
     EXPECT_EQ(c.to_string(), "hello world!");
 }
 
-TEST(Rope, EmptyAndIndependentCopyShare) {
+TEST(Rope, EmptyAndIndependentCopyShare)
+{
     mt::rope empty;
     EXPECT_TRUE(empty.empty());
     EXPECT_THROW((void)empty.at(0), std::out_of_range);
@@ -66,7 +71,8 @@ TEST(Rope, EmptyAndIndependentCopyShare) {
     EXPECT_EQ(b.to_string(), "ab");
 }
 
-TEST(ArraySlice, WindowAndSubClip) {
+TEST(ArraySlice, WindowAndSubClip)
+{
     std::vector<int> v{0, 1, 2, 3, 4};
     mt::array_slice<int> s{v.data() + 1, 3};
     EXPECT_EQ(s.size(), 3);
@@ -86,7 +92,8 @@ TEST(ArraySlice, WindowAndSubClip) {
     EXPECT_THROW((void)s[3], std::out_of_range);
 }
 
-TEST(Htable, InsertFindOverwriteErase) {
+TEST(Htable, InsertFindOverwriteErase)
+{
     mt::htable<int, std::string> t;
     t.insert(3, "three");
     t.insert(1, "one");
@@ -107,7 +114,8 @@ TEST(Htable, InsertFindOverwriteErase) {
     EXPECT_EQ(*t.find(3), "III");
 }
 
-TEST(Htable, RehashAndTombReuse) {
+TEST(Htable, RehashAndTombReuse)
+{
     mt::htable<int, int> t;
     for (int i = 0; i < 20; ++i) {
         t.insert(i, i * 10);
@@ -126,7 +134,8 @@ TEST(Htable, RehashAndTombReuse) {
     EXPECT_EQ(*t.find(19), 190);
 }
 
-TEST(Htable, AcceptsNonDefaultConstructibleValue) {
+TEST(Htable, AcceptsNonDefaultConstructibleValue)
+{
     struct ND {
         int v;
         explicit ND(int x) : v(x) {}
@@ -139,7 +148,8 @@ TEST(Htable, AcceptsNonDefaultConstructibleValue) {
     EXPECT_EQ(t.find(1)->v, 7);
 }
 
-TEST(VectorNd, TwoAndThreeDIndexing) {
+TEST(VectorNd, TwoAndThreeDIndexing)
+{
     mt::vector_2d<int> m(2, 3, 0);
     m(1, 2) = 7;
     EXPECT_EQ(m.rows(), 2);
@@ -157,7 +167,8 @@ TEST(VectorNd, TwoAndThreeDIndexing) {
     EXPECT_EQ(v.size(), 8);
 }
 
-TEST(Grid, Neighbors4AtCornerAndCenter) {
+TEST(Grid, Neighbors4AtCornerAndCenter)
+{
     mt::grid<int> g(3, 3, 0);
     g(1, 1) = 1;
     auto center = g.neighbors4(1, 1);
@@ -167,13 +178,15 @@ TEST(Grid, Neighbors4AtCornerAndCenter) {
     EXPECT_EQ(corner.size(), 2);
 }
 
-TEST(Graph, OutOfRangeVertexThrows) {
+TEST(Graph, OutOfRangeVertexThrows)
+{
     mt::graph g(2);
     EXPECT_THROW(g.add_edge(0, 2), std::out_of_range);
     EXPECT_THROW((void)g.neighbors(9), std::out_of_range);
 }
 
-TEST(Graph, DirectedAndUndirectedEdges) {
+TEST(Graph, DirectedAndUndirectedEdges)
+{
     mt::graph g(3);
     g.add_edge(0, 1);
     g.add_edge(1, 2);
@@ -187,7 +200,8 @@ TEST(Graph, DirectedAndUndirectedEdges) {
     EXPECT_EQ(g.neighbors(v), (std::vector<std::size_t>{2}));
 }
 
-TEST(Quadtree, SplitKeepsEveryInsertedPoint) {
+TEST(Quadtree, SplitKeepsEveryInsertedPoint)
+{
     mt::quadtree q({0, 0, 64, 64});
     for (int i = 0; i < 8; ++i) {
         EXPECT_TRUE(q.insert({static_cast<double>(i) + 0.5, 0.5}));
@@ -195,7 +209,8 @@ TEST(Quadtree, SplitKeepsEveryInsertedPoint) {
     EXPECT_EQ(q.query({0, 0, 64, 64}).size(), 8u);
 }
 
-TEST(DynamicPQueue, MinHeapUpdateDecreaseKey) {
+TEST(DynamicPQueue, MinHeapUpdateDecreaseKey)
+{
     mt::dynamic_pqueue<int, std::greater<int>> q;
     auto h5 = q.push(5);
     auto h3 = q.push(3);
@@ -212,7 +227,8 @@ TEST(DynamicPQueue, MinHeapUpdateDecreaseKey) {
     EXPECT_TRUE(q.contains(h3));
 }
 
-TEST(DynamicPQueue, EmptyPopAndStaleUpdateAreSafe) {
+TEST(DynamicPQueue, EmptyPopAndStaleUpdateAreSafe)
+{
     mt::dynamic_pqueue<int> q;
     q.pop();
     EXPECT_THROW((void)q.top(), std::out_of_range);
@@ -223,7 +239,8 @@ TEST(DynamicPQueue, EmptyPopAndStaleUpdateAreSafe) {
     EXPECT_TRUE(q.empty());
 }
 
-TEST(DynamicPQueue, MaxHeapDefaultCompare) {
+TEST(DynamicPQueue, MaxHeapDefaultCompare)
+{
     mt::dynamic_pqueue<int> q;
     q.push(2);
     q.push(8);
@@ -233,7 +250,8 @@ TEST(DynamicPQueue, MaxHeapDefaultCompare) {
     EXPECT_EQ(q.top(), 5);
 }
 
-TEST(Quadtree, InsertAndRangeQuery) {
+TEST(Quadtree, InsertAndRangeQuery)
+{
     mt::quadtree q({0, 0, 100, 100});
     EXPECT_TRUE(q.insert({10, 10}));
     EXPECT_TRUE(q.insert({50, 50}));
@@ -246,7 +264,8 @@ TEST(Quadtree, InsertAndRangeQuery) {
     EXPECT_EQ(hits[0].y, 10);
 }
 
-TEST(Quadtree, SplitThenQuery) {
+TEST(Quadtree, SplitThenQuery)
+{
     mt::quadtree q({0, 0, 64, 64});
     for (int i = 0; i < 16; ++i) {
         EXPECT_TRUE(q.insert({static_cast<double>(i) + 0.5, static_cast<double>(i) + 0.5}));
@@ -255,7 +274,8 @@ TEST(Quadtree, SplitThenQuery) {
     EXPECT_EQ(hits.size(), 4);
 }
 
-TEST(TsAdaptors, StackQueuePriorityTryPop) {
+TEST(TsAdaptors, StackQueuePriorityTryPop)
+{
     mt::ts_stack<int> s;
     EXPECT_FALSE(s.try_pop().has_value());
     s.push(1);
@@ -279,7 +299,8 @@ TEST(TsAdaptors, StackQueuePriorityTryPop) {
     EXPECT_EQ(pq.try_pop(), 1);
 }
 
-TEST(Zipper, MoveInsertErase) {
+TEST(Zipper, MoveInsertErase)
+{
     mt::zipper<int> z{std::vector<int>{1, 2, 3}};
     EXPECT_EQ(z.focus(), 1);
     EXPECT_TRUE(z.move_right());
@@ -290,14 +311,16 @@ TEST(Zipper, MoveInsertErase) {
     EXPECT_EQ(z.focus(), 9);
 }
 
-TEST(RingBuffer, ZeroCapacityDoesNotModuloZero) {
+TEST(RingBuffer, ZeroCapacityDoesNotModuloZero)
+{
     mt::ring_buffer<int> r(0);
     EXPECT_TRUE(r.empty());
     EXPECT_FALSE(r.try_push(1));
     EXPECT_THROW((void)r[0], std::out_of_range);
 }
 
-TEST(RingBuffer, PushPopWrap) {
+TEST(RingBuffer, PushPopWrap)
+{
     mt::ring_buffer<int> r(2);
     EXPECT_TRUE(r.try_push(1));
     EXPECT_TRUE(r.try_push(2));
@@ -310,7 +333,8 @@ TEST(RingBuffer, PushPopWrap) {
     EXPECT_FALSE(r.try_pop().has_value());
 }
 
-TEST(DisjointSet, UniteFindComponents) {
+TEST(DisjointSet, UniteFindComponents)
+{
     mt::disjoint_set ds(4);
     EXPECT_EQ(ds.components(), 4u);
     EXPECT_TRUE(ds.unite(0, 1));

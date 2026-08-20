@@ -50,8 +50,8 @@ template <std::ranges::forward_range R>
 /// Example:
 ///   std::vector<int> a{1, 2}, b{3};
 ///   auto c = mt::concat(a, b);  // {1, 2, 3}
-template <std::input_iterator I1, std::sentinel_for<I1> S1,
-          std::input_iterator I2, std::sentinel_for<I2> S2, std::weakly_incrementable O>
+template <std::input_iterator I1, std::sentinel_for<I1> S1, std::input_iterator I2,
+          std::sentinel_for<I2> S2, std::weakly_incrementable O>
     requires std::indirectly_writable<O, Value_type<I1>> &&
              std::indirectly_writable<O, Value_type<I2>>
 O concat(I1 a, S1 a_last, I2 b, S2 b_last, O dest)
@@ -70,8 +70,8 @@ template <std::ranges::input_range R1, std::ranges::input_range R2>
 [[nodiscard]] auto concat(R1&& a, R2&& b)
 {
     std::vector<std::ranges::range_value_t<R1>> out;
-    concat(std::ranges::begin(a), std::ranges::end(a),
-           std::ranges::begin(b), std::ranges::end(b), std::back_inserter(out));
+    concat(std::ranges::begin(a), std::ranges::end(a), std::ranges::begin(b), std::ranges::end(b),
+           std::back_inserter(out));
     return out;
 }
 

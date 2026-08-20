@@ -40,8 +40,7 @@ bool is_sorted_range(I first, I last, Comp comp = {})
 
 template <typename Op, typename T>
 concept AssociativeOp =
-    std::regular_invocable<Op, T, T> &&
-    std::convertible_to<std::invoke_result_t<Op, T, T>, T>;
+    std::regular_invocable<Op, T, T> && std::convertible_to<std::invoke_result_t<Op, T, T>, T>;
 
 template <typename Op, typename T>
 void check_associative_spot(Op op, T a, T b, T c)
@@ -86,7 +85,7 @@ auto filled_end(Container& c, int requested_fill)
 }
 
 template <typename Container>
-  requires is_std_array_v<Container>
+    requires is_std_array_v<Container>
 Container make_iota_container(int n, ContainerValue<Container> start = {})
 {
     Container c{};
@@ -98,11 +97,14 @@ Container make_iota_container(int n, ContainerValue<Container> start = {})
 }
 
 template <typename Container>
-  requires(!is_std_array_v<Container>)
+    requires(!is_std_array_v<Container>)
 Container make_iota_container(int n, ContainerValue<Container> start = {})
 {
     Container c;
-    if constexpr (requires { c.resize(static_cast<std::size_t>(n)); c[0]; }) {
+    if constexpr (requires {
+                      c.resize(static_cast<std::size_t>(n));
+                      c[0];
+                  }) {
         c.resize(static_cast<std::size_t>(n));
         for (int i = 0; i < n; ++i) {
             c[static_cast<std::size_t>(i)] = static_cast<ContainerValue<Container>>(start + i);

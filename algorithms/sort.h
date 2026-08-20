@@ -158,8 +158,8 @@ void sort_subrange(I first0, I last0, I first1, I last1)
 ///   std::vector<int> sums;
 ///   mt::sort_sums(a.begin(), a.end(), b.begin(), b.end(), std::back_inserter(sums));
 ///   // sums == {1, 3, 11, 13}
-template <std::input_iterator I1, std::sentinel_for<I1> S1,
-          std::input_iterator I2, std::sentinel_for<I2> S2, std::weakly_incrementable O>
+template <std::input_iterator I1, std::sentinel_for<I1> S1, std::input_iterator I2,
+          std::sentinel_for<I2> S2, std::weakly_incrementable O>
 O sort_sums(I1 a, S1 a_last, I2 b, S2 b_last, O dest)
 {
     using Sum = decltype(*a + *b);
@@ -179,8 +179,8 @@ template <std::ranges::input_range R1, std::ranges::input_range R2>
 {
     using Sum = decltype(*std::ranges::begin(a) + *std::ranges::begin(b));
     std::vector<Sum> out;
-    sort_sums(std::ranges::begin(a), std::ranges::end(a),
-              std::ranges::begin(b), std::ranges::end(b), std::back_inserter(out));
+    sort_sums(std::ranges::begin(a), std::ranges::end(a), std::ranges::begin(b),
+              std::ranges::end(b), std::back_inserter(out));
     return out;
 }
 

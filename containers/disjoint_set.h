@@ -22,8 +22,7 @@ class disjoint_set {
     std::size_t components_ = 0;
 
 public:
-    explicit disjoint_set(std::size_t n)
-        : parent_(n), rank_(n, 0), size_(n, 1), components_(n)
+    explicit disjoint_set(std::size_t n) : parent_(n), rank_(n, 0), size_(n, 1), components_(n)
     {
         std::iota(parent_.begin(), parent_.end(), 0);
     }

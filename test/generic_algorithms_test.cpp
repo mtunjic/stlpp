@@ -21,7 +21,8 @@ class CopyNGeneric : public ::testing::Test {};
 
 TYPED_TEST_SUITE(CopyNGeneric, mt::test::EopCoreContainers);
 
-TYPED_TEST(CopyNGeneric, PreservesPrefix) {
+TYPED_TEST(CopyNGeneric, PreservesPrefix)
+{
     constexpr int fill = 6;
     auto src = mt::test::make_iota_container<TypeParam>(fill);
     const auto last = mt::test::filled_end(src, fill);
@@ -32,7 +33,8 @@ TYPED_TEST(CopyNGeneric, PreservesPrefix) {
     EXPECT_EQ(std::vector<int>(dst.begin(), dst.begin() + n), mt::test::iota_vector(n));
 }
 
-TYPED_TEST(CopyNGeneric, SentinelOverrunStopsAtEnd) {
+TYPED_TEST(CopyNGeneric, SentinelOverrunStopsAtEnd)
+{
     constexpr int fill = 3;
     auto src = mt::test::make_iota_container<TypeParam>(fill);
     const auto last = mt::test::filled_end(src, fill);
@@ -48,7 +50,8 @@ class ZipNGeneric : public ::testing::Test {};
 
 TYPED_TEST_SUITE(ZipNGeneric, mt::test::EopCoreContainers);
 
-TYPED_TEST(ZipNGeneric, LengthIsMinimum) {
+TYPED_TEST(ZipNGeneric, LengthIsMinimum)
+{
     constexpr int fill_a = 5;
     constexpr int fill_b = 3;
     auto a = mt::test::make_iota_container<TypeParam>(fill_a);
@@ -67,7 +70,8 @@ class SwapRangesNGeneric : public ::testing::Test {};
 
 TYPED_TEST_SUITE(SwapRangesNGeneric, mt::test::EopCoreContainers);
 
-TYPED_TEST(SwapRangesNGeneric, InvolutionOnPrefix) {
+TYPED_TEST(SwapRangesNGeneric, InvolutionOnPrefix)
+{
     constexpr int fill = 5;
     auto a = mt::test::make_iota_container<TypeParam>(fill);
     auto b = mt::test::make_iota_container<TypeParam>(fill, 100);
@@ -86,7 +90,8 @@ class SkipTakeGeneric : public ::testing::Test {};
 
 TYPED_TEST_SUITE(SkipTakeGeneric, mt::test::EopCoreContainers);
 
-TYPED_TEST(SkipTakeGeneric, SkipTakePartitionSize) {
+TYPED_TEST(SkipTakeGeneric, SkipTakePartitionSize)
+{
     const int fill = mt::test::effective_fill<TypeParam>(8);
     auto c = mt::test::make_iota_container<TypeParam>(fill);
     const auto n = fill;
@@ -100,7 +105,8 @@ TYPED_TEST(SkipTakeGeneric, SkipTakePartitionSize) {
     EXPECT_EQ(*skipped.begin(), 3);
 }
 
-TYPED_TEST(SkipTakeGeneric, TakeWhileLength) {
+TYPED_TEST(SkipTakeGeneric, TakeWhileLength)
+{
     std::vector<int> v{-1, -2, 3, 4};
     auto [a, b] = mt::take_while(v, [](int x) { return x < 0; });
     EXPECT_EQ(std::distance(a, b), 2);
@@ -111,7 +117,8 @@ class ReverseNGeneric : public ::testing::Test {};
 
 TYPED_TEST_SUITE(ReverseNGeneric, mt::test::EopCoreContainers);
 
-TYPED_TEST(ReverseNGeneric, PrefixReverseBidirectional) {
+TYPED_TEST(ReverseNGeneric, PrefixReverseBidirectional)
+{
     if constexpr (std::bidirectional_iterator<typename TypeParam::iterator>) {
         constexpr int fill = 6;
         auto c = mt::test::make_iota_container<TypeParam>(fill);
@@ -124,7 +131,8 @@ TYPED_TEST(ReverseNGeneric, PrefixReverseBidirectional) {
     }
 }
 
-TEST(ReverseNGeneric, ForwardWithBuffer) {
+TEST(ReverseNGeneric, ForwardWithBuffer)
+{
     std::list<int> lst{0, 1, 2, 3, 4};
     int buf[5]{};
     mt::reverse_n_with_buffer(lst.begin(), lst.end(), 5, buf);
@@ -136,7 +144,8 @@ class PartitionSortGeneric : public ::testing::Test {};
 
 TYPED_TEST_SUITE(PartitionSortGeneric, mt::test::EopCoreContainers);
 
-TYPED_TEST(PartitionSortGeneric, PartitionPointOnSortedPredicate) {
+TYPED_TEST(PartitionSortGeneric, PartitionPointOnSortedPredicate)
+{
     constexpr int fill = 5;
     auto v = mt::test::make_iota_container<TypeParam>(fill);
     const auto last = mt::test::filled_end(v, fill);
@@ -144,7 +153,8 @@ TYPED_TEST(PartitionSortGeneric, PartitionPointOnSortedPredicate) {
     mt::test::expect_partitioned_at(v.begin(), p, last, [](int x) { return x < 3; });
 }
 
-TYPED_TEST(PartitionSortGeneric, LowerUpperBoundMatchStd) {
+TYPED_TEST(PartitionSortGeneric, LowerUpperBoundMatchStd)
+{
     if constexpr (std::random_access_iterator<typename TypeParam::iterator>) {
         constexpr int fill = 6;
         auto v = mt::test::make_iota_container<TypeParam>(fill);
@@ -160,7 +170,8 @@ TYPED_TEST(PartitionSortGeneric, LowerUpperBoundMatchStd) {
     }
 }
 
-TYPED_TEST(PartitionSortGeneric, BinaryInsertionSortSorted) {
+TYPED_TEST(PartitionSortGeneric, BinaryInsertionSortSorted)
+{
     if constexpr (std::random_access_iterator<typename TypeParam::iterator>) {
         constexpr int fill = 6;
         auto v = mt::test::make_iota_container<TypeParam>(fill);
@@ -176,32 +187,38 @@ class FoldScanGeneric : public ::testing::Test {};
 
 TYPED_TEST_SUITE(FoldScanGeneric, mt::test::EopCoreContainers);
 
-TYPED_TEST(FoldScanGeneric, FoldMatchesManualPlus) {
+TYPED_TEST(FoldScanGeneric, FoldMatchesManualPlus)
+{
     constexpr int fill = 5;
     auto c = mt::test::make_iota_container<TypeParam>(fill);
     const auto slice = mt::test::to_filled_vector(c, fill);
     mt::test::expect_fold_matches_manual(slice, 0, std::plus<>{});
 }
 
-TYPED_TEST(FoldScanGeneric, InclusiveScanPrefixLaw) {
+TYPED_TEST(FoldScanGeneric, InclusiveScanPrefixLaw)
+{
     constexpr int fill = 4;
     auto in = mt::test::make_iota_container<TypeParam>(fill);
     const auto last = mt::test::filled_end(in, fill);
     std::vector<int> out;
     mt::scan(in.begin(), last, std::back_inserter(out), std::plus<>{});
-    mt::test::expect_inclusive_scan_prefix(mt::test::to_filled_vector(in, fill), out, std::plus<>{});
+    mt::test::expect_inclusive_scan_prefix(mt::test::to_filled_vector(in, fill), out,
+                                           std::plus<>{});
 }
 
-TYPED_TEST(FoldScanGeneric, ExclusiveScanPrefixLaw) {
+TYPED_TEST(FoldScanGeneric, ExclusiveScanPrefixLaw)
+{
     constexpr int fill = 4;
     auto in = mt::test::make_iota_container<TypeParam>(fill);
     const auto last = mt::test::filled_end(in, fill);
     std::vector<int> out;
     mt::exclusive_scan(in.begin(), last, std::back_inserter(out), 0, std::plus<>{});
-    mt::test::expect_exclusive_scan_prefix(mt::test::to_filled_vector(in, fill), out, 0, std::plus<>{});
+    mt::test::expect_exclusive_scan_prefix(mt::test::to_filled_vector(in, fill), out, 0,
+                                           std::plus<>{});
 }
 
-TEST(FoldScanGeneric, BinaryCounterMatchesLinearFold) {
+TEST(FoldScanGeneric, BinaryCounterMatchesLinearFold)
+{
     mt::binary_counter<int, std::plus<>> c(std::plus<>{}, 0);
     for (int x : {1, 2, 3, 4}) {
         c.add(x);
@@ -209,7 +226,8 @@ TEST(FoldScanGeneric, BinaryCounterMatchesLinearFold) {
     EXPECT_EQ(c.reduce(), mt::fold(std::vector<int>{1, 2, 3, 4}, 0, std::plus<>{}));
 }
 
-TEST(IntegerPowerGcd, OddHalfPowerLaws) {
+TEST(IntegerPowerGcd, OddHalfPowerLaws)
+{
     EXPECT_TRUE(mt::odd(3));
     EXPECT_FALSE(mt::odd(4));
     EXPECT_EQ(mt::half(7), 3);
@@ -217,26 +235,30 @@ TEST(IntegerPowerGcd, OddHalfPowerLaws) {
     mt::test::expect_power_equals_repeat(3, 5, std::plus<>{}, 0);
 }
 
-TEST(IntegerPowerGcd, GcdDividesAndExtendedBezout) {
+TEST(IntegerPowerGcd, GcdDividesAndExtendedBezout)
+{
     mt::test::expect_gcd_divides(48, 18, mt::stein_gcd(48, 18));
     mt::test::expect_extended_gcd_bezout(30, 12);
     mt::test::expect_extended_gcd_bezout(17, 13);
 }
 
-TEST(OrbitGeneric, TerminatingCollision) {
+TEST(OrbitGeneric, TerminatingCollision)
+{
     auto f = [](int x) { return x + 1; };
     auto p = [](int x) { return x < 5; };
     EXPECT_EQ(mt::collision_point(0, f, p), 5);
 }
 
-TEST(OrbitGeneric, CircularCollisionOnMod) {
+TEST(OrbitGeneric, CircularCollisionOnMod)
+{
     auto f = [](int x) { return (x + 1) % 4; };
     const int cp = mt::collision_point(0, f);
     EXPECT_GE(cp, 0);
     EXPECT_LT(cp, 4);
 }
 
-TEST(IteratorOpsGeneric, AdvanceBounded) {
+TEST(IteratorOpsGeneric, AdvanceBounded)
+{
     std::vector<int> v{0, 1, 2, 3};
     auto it = v.begin();
     mt::advance(it, v.end(), 99);
@@ -248,7 +270,8 @@ class FindIfNGeneric : public ::testing::Test {};
 
 TYPED_TEST_SUITE(FindIfNGeneric, mt::test::EopCoreContainers);
 
-TYPED_TEST(FindIfNGeneric, FindsWithinCount) {
+TYPED_TEST(FindIfNGeneric, FindsWithinCount)
+{
     constexpr int fill = 6;
     auto c = mt::test::make_iota_container<TypeParam>(fill);
     const auto last = mt::test::filled_end(c, fill);
@@ -257,7 +280,8 @@ TYPED_TEST(FindIfNGeneric, FindsWithinCount) {
     EXPECT_EQ(left, 1);
 }
 
-TYPED_TEST(FindIfNGeneric, SentinelOverrunReturnsEnd) {
+TYPED_TEST(FindIfNGeneric, SentinelOverrunReturnsEnd)
+{
     constexpr int fill = 3;
     auto c = mt::test::make_iota_container<TypeParam>(fill);
     const auto last = mt::test::filled_end(c, fill);
@@ -266,7 +290,8 @@ TYPED_TEST(FindIfNGeneric, SentinelOverrunReturnsEnd) {
     EXPECT_GT(left, 0);
 }
 
-TEST(ListOpsGeneric, GroupByPreservesDistinctElements) {
+TEST(ListOpsGeneric, GroupByPreservesDistinctElements)
+{
     std::vector<std::string> words{"aa", "ab", "bb", "bc"};
     auto groups = mt::group_by(words, [](const std::string& a, const std::string& b) {
         return !a.empty() && !b.empty() && a[0] == b[0];
@@ -276,14 +301,16 @@ TEST(ListOpsGeneric, GroupByPreservesDistinctElements) {
     EXPECT_EQ(groups[1], (std::vector<std::string>{"bb", "bc"}));
 }
 
-TEST(ListOpsGeneric, MapAccumCarriesState) {
+TEST(ListOpsGeneric, MapAccumCarriesState)
+{
     auto f = [](int acc, int x) { return std::pair{acc + x, acc + x}; };
     auto [sum, prefixes] = mt::map_accum(std::vector{1, 2, 3}, 0, f);
     EXPECT_EQ(sum, 6);
     EXPECT_EQ(prefixes, (std::vector<int>{1, 3, 6}));
 }
 
-TEST(ListOpsGeneric, InnerProductStopsAtShorterRange) {
+TEST(ListOpsGeneric, InnerProductStopsAtShorterRange)
+{
     EXPECT_EQ(mt::inner_product(std::vector{1, 2, 3}, std::vector{4, 5}), 14);
 }
 
@@ -292,7 +319,8 @@ class FindBackwardGeneric : public ::testing::Test {};
 
 TYPED_TEST_SUITE(FindBackwardGeneric, mt::test::EopCoreContainers);
 
-TYPED_TEST(FindBackwardGeneric, FindsLastOccurrence) {
+TYPED_TEST(FindBackwardGeneric, FindsLastOccurrence)
+{
     if constexpr (!std::bidirectional_iterator<typename TypeParam::iterator>) {
         GTEST_SKIP() << "requires bidirectional iterator";
     }
@@ -305,7 +333,8 @@ TYPED_TEST(FindBackwardGeneric, FindsLastOccurrence) {
     EXPECT_EQ(std::distance(v.begin(), p), 5);
 }
 
-TYPED_TEST(FindBackwardGeneric, CountedBackwardSearch) {
+TYPED_TEST(FindBackwardGeneric, CountedBackwardSearch)
+{
     if constexpr (!std::bidirectional_iterator<typename TypeParam::iterator>) {
         GTEST_SKIP() << "requires bidirectional iterator";
     }
@@ -322,14 +351,16 @@ class RemoveIfNotGeneric : public ::testing::Test {};
 
 TYPED_TEST_SUITE(RemoveIfNotGeneric, mt::test::EopCoreContainers);
 
-TYPED_TEST(RemoveIfNotGeneric, StableForwardCompaction) {
+TYPED_TEST(RemoveIfNotGeneric, StableForwardCompaction)
+{
     TypeParam v{9, 0, 1, 4, 7};
     constexpr int fill = 5;
     const auto last = mt::test::filled_end(v, fill);
     mt::test::expect_remove_if_not_law(v.begin(), last, [](int x) { return x < 5; });
 }
 
-TYPED_TEST(RemoveIfNotGeneric, BackwardCompaction) {
+TYPED_TEST(RemoveIfNotGeneric, BackwardCompaction)
+{
     if constexpr (!std::bidirectional_iterator<typename TypeParam::iterator>) {
         GTEST_SKIP() << "requires bidirectional iterator";
     }
@@ -339,7 +370,8 @@ TYPED_TEST(RemoveIfNotGeneric, BackwardCompaction) {
     mt::test::expect_remove_if_not_backward_law(v.begin(), last, [](int x) { return x < 5; });
 }
 
-TEST(SpanOpsGeneric, SpanIfBreakIfSplitAtLaws) {
+TEST(SpanOpsGeneric, SpanIfBreakIfSplitAtLaws)
+{
     std::vector<int> v{2, 4, 5, 6};
     mt::test::expect_span_if_law(v.begin(), v.end(), [](int x) { return x % 2 == 0; });
     mt::test::expect_break_if_law(v.begin(), v.end(), [](int x) { return x >= 5; });
@@ -347,7 +379,8 @@ TEST(SpanOpsGeneric, SpanIfBreakIfSplitAtLaws) {
     mt::test::expect_split_at_law(v.begin(), v.end(), 99);
 }
 
-TEST(MapcatGeneric, MatchesManualConcatMap) {
+TEST(MapcatGeneric, MatchesManualConcatMap)
+{
     const std::vector<int> in{1, 2, 3};
     const auto dup = [](int x) { return std::vector{x, x}; };
     mt::test::expect_mapcat_manual(in, dup);
@@ -360,19 +393,21 @@ class ApplyGeneric : public ::testing::Test {};
 
 TYPED_TEST_SUITE(ApplyGeneric, mt::test::EopCoreContainers);
 
-TYPED_TEST(ApplyGeneric, MapsInPlace) {
+TYPED_TEST(ApplyGeneric, MapsInPlace)
+{
     constexpr int fill = 3;
     auto v = mt::test::make_iota_container<TypeParam>(fill, 1);
     const auto last = mt::test::filled_end(v, fill);
     mt::test::expect_apply_maps(v.begin(), last, [](int x) { return x * x; });
 }
 
-TYPED_TEST(ApplyGeneric, ApplyUntilStopsAtPredicate) {
+TYPED_TEST(ApplyGeneric, ApplyUntilStopsAtPredicate)
+{
     constexpr int fill = 4;
     auto v = mt::test::make_iota_container<TypeParam>(fill, 1);
     const auto last = mt::test::filled_end(v, fill);
-    mt::test::expect_apply_until_law(v.begin(), last, [](int x) { return x + 10; },
-                                     [](int x) { return x == 3; });
+    mt::test::expect_apply_until_law(
+        v.begin(), last, [](int x) { return x + 10; }, [](int x) { return x == 3; });
 }
 
 template <typename Container>
@@ -380,7 +415,8 @@ class QuantifiersGeneric : public ::testing::Test {};
 
 TYPED_TEST_SUITE(QuantifiersGeneric, mt::test::EopCoreContainers);
 
-TYPED_TEST(QuantifiersGeneric, MatchStdAlgorithms) {
+TYPED_TEST(QuantifiersGeneric, MatchStdAlgorithms)
+{
     constexpr int fill = 6;
     auto c = mt::test::make_iota_container<TypeParam>(fill);
     const auto slice = mt::test::to_filled_vector(c, fill);
@@ -388,7 +424,8 @@ TYPED_TEST(QuantifiersGeneric, MatchStdAlgorithms) {
     mt::test::expect_quantifiers_match_std(slice, [](int) { return false; });
 }
 
-TYPED_TEST(QuantifiersGeneric, EmptyAllIsTrue) {
+TYPED_TEST(QuantifiersGeneric, EmptyAllIsTrue)
+{
     if constexpr (mt::test::is_std_array_v<TypeParam>) {
         GTEST_SKIP() << "std::array is never empty";
     } else {
@@ -402,7 +439,8 @@ class SliceGeneric : public ::testing::Test {};
 
 TYPED_TEST_SUITE(SliceGeneric, mt::test::EopCoreContainers);
 
-TYPED_TEST(SliceGeneric, ClipsStartAndCount) {
+TYPED_TEST(SliceGeneric, ClipsStartAndCount)
+{
     if constexpr (!std::random_access_iterator<typename TypeParam::iterator>) {
         GTEST_SKIP() << "requires random access";
     } else {
@@ -417,19 +455,22 @@ TYPED_TEST(SliceGeneric, ClipsStartAndCount) {
     }
 }
 
-TEST(PartitionExtrasGeneric, GatherClustersPredicates) {
+TEST(PartitionExtrasGeneric, GatherClustersPredicates)
+{
     std::array<int, 6> a{9, 0, 1, 4, 0, 7};
     const auto pos = a.begin() + 3;
     mt::test::expect_gather_law(a.begin(), a.end(), pos, [](int x) { return x < 2; });
 }
 
-TEST(PartitionExtrasGeneric, SlideWindowBounds) {
+TEST(PartitionExtrasGeneric, SlideWindowBounds)
+{
     std::vector<int> v{0, 1, 2, 3, 4, 5};
     const auto [lo, hi] = mt::slide(v.begin() + 1, v.begin() + 3, v.begin() + 5);
     mt::test::expect_ranges_equal(std::vector<int>(lo, hi), (std::vector<int>{1, 2}));
 }
 
-TEST(RangeOpsGeneric, PairwiseConcatGroupShiftLaws) {
+TEST(RangeOpsGeneric, PairwiseConcatGroupShiftLaws)
+{
     EXPECT_EQ(mt::pairwise(std::vector<int>{1, 2, 3}),
               (std::vector<std::pair<int, int>>{{1, 2}, {2, 3}}));
     EXPECT_EQ(mt::concat(std::vector<int>{1, 2}, std::vector<int>{3}), (std::vector<int>{1, 2, 3}));
@@ -440,7 +481,8 @@ TEST(RangeOpsGeneric, PairwiseConcatGroupShiftLaws) {
     EXPECT_EQ(rot, (std::vector<int>{3, 4, 5, 1, 2}));
 }
 
-TEST(TransposeGeneric, DoubleTransposeIsIdentity) {
+TEST(TransposeGeneric, DoubleTransposeIsIdentity)
+{
     const std::vector<std::vector<int>> m{{1, 2, 3}, {4, 5, 6}};
     mt::test::expect_transpose_roundtrip(m);
     EXPECT_EQ(mt::transpose(m), (std::vector<std::vector<int>>{{1, 4}, {2, 5}, {3, 6}}));
@@ -451,21 +493,24 @@ class IotaGeneric : public ::testing::Test {};
 
 TYPED_TEST_SUITE(IotaGeneric, mt::test::EopCoreContainers);
 
-TYPED_TEST(IotaGeneric, FillsAscendingFromStart) {
+TYPED_TEST(IotaGeneric, FillsAscendingFromStart)
+{
     constexpr int fill = 5;
     TypeParam v{};
     const auto last = mt::test::filled_end(v, fill);
     mt::test::expect_iota_law(v.begin(), last, 10);
 }
 
-TYPED_TEST(IotaGeneric, ReverseIotaCountsDown) {
+TYPED_TEST(IotaGeneric, ReverseIotaCountsDown)
+{
     constexpr int fill = 5;
     TypeParam v{};
     const auto last = mt::test::filled_end(v, fill);
     mt::test::expect_reverse_iota_law(v.begin(), last);
 }
 
-TEST(IotaShapesGeneric, HillAndValleyPatterns) {
+TEST(IotaShapesGeneric, HillAndValleyPatterns)
+{
     std::vector<int> hill(5);
     mt::hill(hill.begin(), hill.end());
     EXPECT_EQ(hill, (std::vector<int>{0, 1, 2, 1, 0}));
@@ -479,7 +524,8 @@ class ZipUnzipGeneric : public ::testing::Test {};
 
 TYPED_TEST_SUITE(ZipUnzipGeneric, mt::test::EopCoreContainers);
 
-TYPED_TEST(ZipUnzipGeneric, UnzipInvertsZip) {
+TYPED_TEST(ZipUnzipGeneric, UnzipInvertsZip)
+{
     constexpr int fill = 4;
     auto a = mt::test::make_iota_container<TypeParam>(fill, 1);
     auto b = mt::test::make_iota_container<TypeParam>(fill, 10);
@@ -488,7 +534,8 @@ TYPED_TEST(ZipUnzipGeneric, UnzipInvertsZip) {
     mt::test::expect_zip_unzip_roundtrip(slice_a, slice_b);
 }
 
-TYPED_TEST(ZipUnzipGeneric, ZipWithAppliesOp) {
+TYPED_TEST(ZipUnzipGeneric, ZipWithAppliesOp)
+{
     constexpr int fill = 3;
     auto a = mt::test::make_iota_container<TypeParam>(fill, 1);
     auto b = mt::test::make_iota_container<TypeParam>(fill, 10);
@@ -507,7 +554,8 @@ class MinMaxGeneric : public ::testing::Test {};
 
 TYPED_TEST_SUITE(MinMaxGeneric, mt::test::EopCoreContainers);
 
-TYPED_TEST(MinMaxGeneric, BoundsAllElements) {
+TYPED_TEST(MinMaxGeneric, BoundsAllElements)
+{
     constexpr int fill = 7;
     auto c = mt::test::make_iota_container<TypeParam>(fill);
     const auto last = mt::test::filled_end(c, fill);
@@ -517,17 +565,19 @@ TYPED_TEST(MinMaxGeneric, BoundsAllElements) {
     EXPECT_EQ(*hi, fill - 1);
 }
 
-TEST(PartitionExtrasGeneric, StablePartitionPositionByIndexMask) {
+TEST(PartitionExtrasGeneric, StablePartitionPositionByIndexMask)
+{
     int a[] = {1, 2, 3, 4, 5, 5, 4, 3, 2, 1};
     const bool mask[] = {0, 1, 0, 1, 0, 0, 1, 0, 1, 0};
-    const auto mid = mt::stable_partition_position(
-        std::begin(a), std::end(a),
-        [&](int* it) { return mask[static_cast<std::size_t>(it - std::begin(a))]; });
+    const auto mid = mt::stable_partition_position(std::begin(a), std::end(a), [&](int* it) {
+        return mask[static_cast<std::size_t>(it - std::begin(a))];
+    });
     EXPECT_EQ(std::vector<int>(std::begin(a), mid), (std::vector<int>{2, 4, 4, 2}));
     EXPECT_EQ(std::vector<int>(mid, std::end(a)), (std::vector<int>{1, 3, 5, 5, 3, 1}));
 }
 
-TEST(RangeOpsGeneric, IntercalateInsertsSeparator) {
+TEST(RangeOpsGeneric, IntercalateInsertsSeparator)
+{
     const std::vector<char> letters{'a', 'b', 'c'};
     EXPECT_EQ(mt::intercalate(',', letters), (std::vector<char>{'a', ',', 'b', ',', 'c'}));
     std::string s;
@@ -535,18 +585,21 @@ TEST(RangeOpsGeneric, IntercalateInsertsSeparator) {
     EXPECT_EQ(s, "a,b,c");
 }
 
-TEST(PrefixSuffixGeneric, StartsAndEndsWithLaws) {
+TEST(PrefixSuffixGeneric, StartsAndEndsWithLaws)
+{
     EXPECT_TRUE(mt::starts_with(std::string{"https://ex.com"}, std::string{"https://"}));
     EXPECT_TRUE(mt::ends_with(std::string{"file.cpp"}, std::string{".cpp"}));
     EXPECT_FALSE(mt::starts_with(std::string{"abc"}, std::string{"abcd"}));
     EXPECT_FALSE(mt::ends_with(std::string{"ab"}, std::string{"cab"}));
 }
 
-TEST(BorderGeneric, OneDimensionalFrameLaw) {
+TEST(BorderGeneric, OneDimensionalFrameLaw)
+{
     mt::test::expect_border_1d(std::vector<int>{1, 2, 3}, 0);
 }
 
-TEST(BorderGeneric, GridFrameDimensions) {
+TEST(BorderGeneric, GridFrameDimensions)
+{
     const std::vector<std::vector<int>> g{{1, 2}, {3, 4}};
     const auto framed = mt::border(g, 0);
     EXPECT_EQ(framed.size(), 4u);
@@ -554,7 +607,8 @@ TEST(BorderGeneric, GridFrameDimensions) {
     EXPECT_EQ(framed[1], (std::vector<int>{0, 1, 2, 0}));
 }
 
-TEST(MergeSetOpsGeneric, SortedMergeAndSetLaws) {
+TEST(MergeSetOpsGeneric, SortedMergeAndSetLaws)
+{
     const std::vector<int> a{1, 3};
     const std::vector<int> b{2, 4};
     mt::test::expect_merge_sorted_union(a, b);
@@ -563,19 +617,22 @@ TEST(MergeSetOpsGeneric, SortedMergeAndSetLaws) {
     mt::test::expect_set_intersection_sorted(std::vector<int>{1, 2, 3}, std::vector<int>{2, 3, 4});
 }
 
-TEST(CombinationGeneric, WalksNCkWithSortedSides) {
+TEST(CombinationGeneric, WalksNCkWithSortedSides)
+{
     std::vector<int> v{1, 2, 3, 4};
     mt::test::expect_combination_walk(v, 2, 6);
 }
 
-TEST(MatchesGeneric, KmpOffsetsAndOverlaps) {
+TEST(MatchesGeneric, KmpOffsetsAndOverlaps)
+{
     mt::test::expect_matches_at_valid_offsets("ababcababa", "aba", {0, 5, 7});
     mt::test::expect_matches_at_valid_offsets("aaaa", "aa", {0, 1, 2});
     EXPECT_TRUE(mt::matches("abc", "").empty());
     EXPECT_TRUE(mt::matches("ab", "abc").empty());
 }
 
-TEST(TextGeneric, LinesWordsRoundTrip) {
+TEST(TextGeneric, LinesWordsRoundTrip)
+{
     EXPECT_EQ(mt::lines("a\nb\n"), (std::vector<std::string>{"a", "b", ""}));
     EXPECT_EQ(mt::unlines(std::vector<std::string>{"a", "b"}), "a\nb");
     EXPECT_EQ(mt::words("  one  two three "), (std::vector<std::string>{"one", "two", "three"}));
@@ -587,7 +644,8 @@ class CopyNWithBufferGeneric : public ::testing::Test {};
 
 TYPED_TEST_SUITE(CopyNWithBufferGeneric, mt::test::EopCoreContainers);
 
-TYPED_TEST(CopyNWithBufferGeneric, PreservesSourceViaBuffer) {
+TYPED_TEST(CopyNWithBufferGeneric, PreservesSourceViaBuffer)
+{
     constexpr int fill = 5;
     auto src = mt::test::make_iota_container<TypeParam>(fill);
     std::vector<int> dst(static_cast<std::size_t>(fill), 100);
@@ -602,7 +660,8 @@ TYPED_TEST(CopyNWithBufferGeneric, PreservesSourceViaBuffer) {
     EXPECT_EQ(dst[3], 100);
 }
 
-TEST(FindAllGeneric, CollectsEveryMatch) {
+TEST(FindAllGeneric, CollectsEveryMatch)
+{
     std::vector<int> v{1, 2, 1, 3, 1};
     const auto hits = mt::find_all(v, 1);
     ASSERT_EQ(hits.size(), 3u);
@@ -611,7 +670,8 @@ TEST(FindAllGeneric, CollectsEveryMatch) {
     }
 }
 
-TEST(ReverseUntilGeneric, SwapsFromOutsideIn) {
+TEST(ReverseUntilGeneric, SwapsFromOutsideIn)
+{
     std::vector<int> v{1, 2, 3, 4, 5};
     const auto [a, b] = mt::reverse_until(v.begin(), v.begin() + 2, v.end());
     EXPECT_EQ(v, (std::vector<int>{5, 4, 3, 2, 1}));
@@ -619,7 +679,8 @@ TEST(ReverseUntilGeneric, SwapsFromOutsideIn) {
     EXPECT_EQ(b, v.begin() + 3);
 }
 
-TEST(SortExtrasGeneric, SortSumsAndMedianSort) {
+TEST(SortExtrasGeneric, SortSumsAndMedianSort)
+{
     const std::vector<int> a{1, 3};
     const std::vector<int> b{0, 10};
     EXPECT_EQ(mt::sort_sums(a, b), (std::vector<int>{1, 3, 11, 13}));

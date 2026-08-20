@@ -19,12 +19,14 @@ std::vector<int> iota_n(int n)
 
 }  // namespace
 
-TEST(Map, Range_Squares) {
+TEST(Map, Range_Squares)
+{
     auto out = mt::map(std::vector{1, 2, 3}, [](int x) { return x * x; });
     EXPECT_EQ(out, (std::vector<int>{1, 4, 9}));
 }
 
-TEST(Map, DestAndForwardIterator) {
+TEST(Map, DestAndForwardIterator)
+{
     std::vector<int> v{1, 2, 3};
     std::vector<int> out(3);
     mt::map(v.begin(), v.end(), out.begin(), [](int x) { return x + 1; });
@@ -36,7 +38,8 @@ TEST(Map, DestAndForwardIterator) {
     EXPECT_EQ(from_list, (std::vector<int>{2, 4, 6}));
 }
 
-TEST(Map, EmptyAndAboveCutoff) {
+TEST(Map, EmptyAndAboveCutoff)
+{
     EXPECT_TRUE(mt::map(std::vector<int>{}, [](int x) { return x; }).empty());
 
     auto v = iota_n(static_cast<int>(mt::par::default_cutoff) + 100);
@@ -46,22 +49,26 @@ TEST(Map, EmptyAndAboveCutoff) {
     EXPECT_EQ(out.back(), v.back() * 2);
 }
 
-TEST(Fold, LeftFoldPlus) {
+TEST(Fold, LeftFoldPlus)
+{
     std::vector<int> v{1, 2, 3, 4};
     EXPECT_EQ(mt::fold(v, 0, std::plus<>{}), 10);
     EXPECT_EQ(mt::fold(std::vector<int>{}, 7, std::plus<>{}), 7);
 }
 
-TEST(Fold, LeftAssociatedMinus) {
+TEST(Fold, LeftAssociatedMinus)
+{
     EXPECT_EQ(mt::fold(std::vector{1, 2, 3}, 0, std::minus<>{}), -6);
 }
 
-TEST(Reduce, SequentialForForwardRange) {
+TEST(Reduce, SequentialForForwardRange)
+{
     std::list<int> lst{1, 2, 3, 4};
     EXPECT_EQ(mt::reduce(lst, 0, std::plus<>{}), 10);
 }
 
-TEST(Reduce, MatchesFoldOnPlus) {
+TEST(Reduce, MatchesFoldOnPlus)
+{
     auto v = iota_n(static_cast<int>(mt::par::default_cutoff) + 50);
     const int sequential = mt::fold(v, 0, std::plus<>{});
     EXPECT_EQ(mt::reduce(v, 0, std::plus<>{}), sequential);
@@ -69,7 +76,8 @@ TEST(Reduce, MatchesFoldOnPlus) {
     EXPECT_EQ(mt::reduce(std::vector<int>{}, 5, std::plus<>{}), 5);
 }
 
-TEST(Pfind, LeftmostMatchOrEnd) {
+TEST(Pfind, LeftmostMatchOrEnd)
+{
     std::vector<int> v{9, 1, 4, 1, 8};
     auto it = mt::pfind(v, 1);
     ASSERT_NE(it, v.end());
@@ -79,7 +87,8 @@ TEST(Pfind, LeftmostMatchOrEnd) {
     EXPECT_EQ(mt::pfind_if(v, [](int x) { return x > 7; }), v.begin());
 }
 
-TEST(Pfind, EmptyAndAboveCutoff) {
+TEST(Pfind, EmptyAndAboveCutoff)
+{
     std::vector<int> empty;
     EXPECT_EQ(mt::pfind(empty, 1), empty.end());
 
@@ -91,7 +100,8 @@ TEST(Pfind, EmptyAndAboveCutoff) {
     EXPECT_EQ(it, v.begin() + 100);
 }
 
-TEST(Psort, SmallAndReversed) {
+TEST(Psort, SmallAndReversed)
+{
     std::vector<int> v{3, 1, 4, 1, 5};
     mt::psort(v);
     EXPECT_EQ(v, (std::vector<int>{1, 1, 3, 4, 5}));
@@ -102,7 +112,8 @@ TEST(Psort, SmallAndReversed) {
     EXPECT_TRUE(std::is_sorted(r.begin(), r.end()));
 }
 
-TEST(Psort, AboveCutoffMatchesStdSort) {
+TEST(Psort, AboveCutoffMatchesStdSort)
+{
     auto v = iota_n(static_cast<int>(mt::par::default_cutoff) + 300);
     std::reverse(v.begin(), v.end());
     auto expected = v;
@@ -111,7 +122,8 @@ TEST(Psort, AboveCutoffMatchesStdSort) {
     EXPECT_EQ(v, expected);
 }
 
-TEST(PartialBucketsort, SortsArithmeticRange) {
+TEST(PartialBucketsort, SortsArithmeticRange)
+{
     std::vector<int> v{9, 1, 8, 2, 7, 3, 0};
     mt::partial_bucketsort(v);
     EXPECT_EQ(v, (std::vector<int>{0, 1, 2, 3, 7, 8, 9}));
@@ -122,7 +134,8 @@ TEST(PartialBucketsort, SortsArithmeticRange) {
     EXPECT_TRUE(std::is_sorted(big.begin(), big.end()));
 }
 
-TEST(PartialBucketsort, EqualElementsAreStableEnoughToStaySorted) {
+TEST(PartialBucketsort, EqualElementsAreStableEnoughToStaySorted)
+{
     std::vector<int> v(64, 7);
     mt::partial_bucketsort(v);
     EXPECT_EQ(v, std::vector<int>(64, 7));

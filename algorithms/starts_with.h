@@ -14,8 +14,8 @@ namespace mt {
 ///
 /// Example:
 ///   mt::starts_with("https://ex.com", "https://");  // true
-template <std::input_iterator I1, std::sentinel_for<I1> S1,
-          std::input_iterator I2, std::sentinel_for<I2> S2>
+template <std::input_iterator I1, std::sentinel_for<I1> S1, std::input_iterator I2,
+          std::sentinel_for<I2> S2>
 [[nodiscard]] constexpr bool starts_with(I1 first1, S1 last1, I2 first2, S2 last2)
 {
     while (first2 != last2) {
@@ -29,12 +29,12 @@ template <std::input_iterator I1, std::sentinel_for<I1> S1,
 }
 
 template <std::ranges::input_range R1, std::ranges::input_range R2>
-    requires (!std::convertible_to<std::remove_cvref_t<R1>, std::string_view> &&
-              !std::convertible_to<std::remove_cvref_t<R1>, std::wstring_view>)
+    requires(!std::convertible_to<std::remove_cvref_t<R1>, std::string_view> &&
+             !std::convertible_to<std::remove_cvref_t<R1>, std::wstring_view>)
 [[nodiscard]] constexpr bool starts_with(R1&& hay, R2&& needle)
 {
-    return starts_with(std::ranges::begin(hay), std::ranges::end(hay),
-                       std::ranges::begin(needle), std::ranges::end(needle));
+    return starts_with(std::ranges::begin(hay), std::ranges::end(hay), std::ranges::begin(needle),
+                       std::ranges::end(needle));
 }
 
 [[nodiscard]] inline bool starts_with(std::string_view hay, std::string_view needle)

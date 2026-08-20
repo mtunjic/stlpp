@@ -50,8 +50,8 @@ template <std::input_iterator I1, std::sentinel_for<I1> S1, std::input_iterator 
 ///
 /// Example:
 ///   auto z = mt::zip(a, b);  // vector of pairs
-template <std::input_iterator I1, std::sentinel_for<I1> S1,
-          std::input_iterator I2, std::sentinel_for<I2> S2, std::weakly_incrementable O>
+template <std::input_iterator I1, std::sentinel_for<I1> S1, std::input_iterator I2,
+          std::sentinel_for<I2> S2, std::weakly_incrementable O>
 O zip(I1 first1, S1 last1, I2 first2, S2 last2, O dest)
 {
     while (first1 != last1 && first2 != last2) {
@@ -69,8 +69,8 @@ template <std::ranges::input_range R1, std::ranges::input_range R2>
     using T1 = std::ranges::range_value_t<R1>;
     using T2 = std::ranges::range_value_t<R2>;
     std::vector<std::pair<T1, T2>> out;
-    zip(std::ranges::begin(a), std::ranges::end(a),
-        std::ranges::begin(b), std::ranges::end(b), std::back_inserter(out));
+    zip(std::ranges::begin(a), std::ranges::end(a), std::ranges::begin(b), std::ranges::end(b),
+        std::back_inserter(out));
     return out;
 }
 
@@ -81,9 +81,8 @@ template <std::ranges::input_range R1, std::ranges::input_range R2>
 ///   mt::zip_with(a.begin(), a.end(), b.begin(), b.end(), std::back_inserter(out),
 ///                std::plus<int>{});
 ///   // out == {11, 22}
-template <std::input_iterator I1, std::sentinel_for<I1> S1,
-          std::input_iterator I2, std::sentinel_for<I2> S2,
-          std::weakly_incrementable O, typename Op>
+template <std::input_iterator I1, std::sentinel_for<I1> S1, std::input_iterator I2,
+          std::sentinel_for<I2> S2, std::weakly_incrementable O, typename Op>
 O zip_with(I1 first1, S1 last1, I2 first2, S2 last2, O dest, Op op)
 {
     while (first1 != last1 && first2 != last2) {
@@ -102,8 +101,8 @@ O zip_with(I1 first1, S1 last1, I2 first2, S2 last2, O dest, Op op)
 ///   std::vector<int> a(2), b(2);
 ///   mt::unzip(z.begin(), z.end(), a.begin(), b.begin());
 ///   // a == {1, 2}, b == {10, 20}
-template <std::input_iterator I, std::sentinel_for<I> S,
-          std::weakly_incrementable O1, std::weakly_incrementable O2>
+template <std::input_iterator I, std::sentinel_for<I> S, std::weakly_incrementable O1,
+          std::weakly_incrementable O2>
 [[nodiscard]] constexpr std::pair<O1, O2> unzip(I first, S last, O1 dest1, O2 dest2)
 {
     for (; first != last; ++first) {

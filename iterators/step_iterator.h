@@ -29,7 +29,10 @@ public:
 
     step_iterator() = default;
     step_iterator(I origin, I limit, difference_type index, difference_type step)
-        : origin_(origin), limit_(limit), index_(index), step_(step)
+        : origin_(origin),
+          limit_(limit),
+          index_(index),
+          step_(step)
     {}
 
     [[nodiscard]] reference operator*() const { return *(origin_ + index_ * step_); }
@@ -123,7 +126,9 @@ class step_range {
 public:
     step_range() = default;
     step_range(I first, I last, std::iter_difference_t<I> step)
-        : first_(first), last_(last), step_(step)
+        : first_(first),
+          last_(last),
+          step_(step)
     {}
 
     [[nodiscard]] step_iterator<I> begin() const { return {first_, last_, 0, step_}; }

@@ -18,8 +18,8 @@ namespace mt {
 ///   std::vector<int> v{1, 2, 3}, out(3);
 ///   mt::map(v.begin(), v.end(), out.begin(), [](int x) { return x * x; });
 ///   // out == {1, 4, 9}
-template <std::random_access_iterator I, std::sentinel_for<I> S,
-          std::random_access_iterator O, typename F>
+template <std::random_access_iterator I, std::sentinel_for<I> S, std::random_access_iterator O,
+          typename F>
 O map(I first, S last, O dest, F f)
 {
     const auto n = last - first;
@@ -37,7 +37,7 @@ O map(I first, S last, O dest, F f)
 }
 
 template <std::input_iterator I, std::sentinel_for<I> S, std::weakly_incrementable O, typename F>
-    requires (!std::random_access_iterator<I> || !std::random_access_iterator<O>)
+    requires(!std::random_access_iterator<I> || !std::random_access_iterator<O>)
 O map(I first, S last, O dest, F f)
 {
     for (; first != last; ++first, ++dest) {
@@ -54,8 +54,7 @@ O map(I first, S last, O dest, F f)
 template <std::ranges::input_range R, typename F>
 [[nodiscard]] auto map(R&& range, F f)
 {
-    using U = std::remove_cvref_t<
-        std::invoke_result_t<F&, std::ranges::range_reference_t<R>>>;
+    using U = std::remove_cvref_t<std::invoke_result_t<F&, std::ranges::range_reference_t<R>>>;
     std::vector<U> out;
     if constexpr (std::ranges::random_access_range<R> && std::ranges::sized_range<R>) {
         out.resize(std::ranges::size(range));

@@ -71,8 +71,7 @@ void expect_htable_roundtrip(mt::htable<K, V>& t, K key, const V& value)
 }
 
 template <typename Compare>
-void expect_pqueue_pop_order(mt::dynamic_pqueue<int, Compare>& q,
-                             const std::vector<int>& expected)
+void expect_pqueue_pop_order(mt::dynamic_pqueue<int, Compare>& q, const std::vector<int>& expected)
 {
     for (int x : expected) {
         ASSERT_FALSE(q.empty());

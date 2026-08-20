@@ -122,10 +122,7 @@ public:
         }
     }
 
-    [[nodiscard]] bool contains(handle h) const
-    {
-        return h < where_.size() && where_[h] != npos;
-    }
+    [[nodiscard]] bool contains(handle h) const { return h < where_.size() && where_[h] != npos; }
 
     void update(handle h, T value)
     {

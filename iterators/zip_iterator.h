@@ -18,7 +18,8 @@ public:
     using iterator_concept = std::input_iterator_tag;
     using iterator_category = std::input_iterator_tag;
     using value_type = std::pair<std::iter_value_t<A>, std::iter_value_t<B>>;
-    using difference_type = std::common_type_t<std::iter_difference_t<A>, std::iter_difference_t<B>>;
+    using difference_type =
+        std::common_type_t<std::iter_difference_t<A>, std::iter_difference_t<B>>;
     using reference = value_type;
     using pointer = void;
 
@@ -86,10 +87,10 @@ class zip_view_range {
 public:
     zip_view_range() = default;
     zip_view_range(A a_first, A a_last, B b_first, B b_last)
-        : a_first_(std::move(a_first))
-        , a_last_(std::move(a_last))
-        , b_first_(std::move(b_first))
-        , b_last_(std::move(b_last))
+        : a_first_(std::move(a_first)),
+          a_last_(std::move(a_last)),
+          b_first_(std::move(b_first)),
+          b_last_(std::move(b_last))
     {}
 
     [[nodiscard]] zip_iterator<A, B> begin() const { return {a_first_, b_first_}; }

@@ -29,8 +29,7 @@ template <std::input_iterator I, std::sentinel_for<I> S, typename T, typename Op
 template <std::ranges::input_range R, typename T, typename Op>
 [[nodiscard]] auto fold(R&& range, T init, Op op)
 {
-    return fold(std::ranges::begin(range), std::ranges::end(range), std::move(init),
-                std::move(op));
+    return fold(std::ranges::begin(range), std::ranges::end(range), std::move(init), std::move(op));
 }
 
 /// Reduce a non-empty range with no identity (EoP `reduce_nonempty`).
@@ -77,8 +76,8 @@ template <std::random_access_iterator I, std::sentinel_for<I> S, typename T, typ
     }
     std::vector<T> parts(chunks);
     par::for_index(chunks, [&](std::size_t c) {
-        auto [b, e] = par::chunk_bounds(first, static_cast<std::size_t>(n),
-                                        static_cast<unsigned>(c), chunks);
+        auto [b, e] =
+            par::chunk_bounds(first, static_cast<std::size_t>(n), static_cast<unsigned>(c), chunks);
         T acc = *b;
         ++b;
         parts[c] = fold(b, e, std::move(acc), op);
@@ -92,7 +91,7 @@ template <std::random_access_iterator I, std::sentinel_for<I> S, typename T, typ
 
 /// Sequential reduce for non-random-access iterators (always a left fold).
 template <std::input_iterator I, std::sentinel_for<I> S, typename T, typename Op>
-    requires (!std::random_access_iterator<I>)
+    requires(!std::random_access_iterator<I>)
 [[nodiscard]] T reduce(I first, S last, T init, Op op)
 {
     return fold(first, last, std::move(init), std::move(op));
@@ -106,11 +105,10 @@ template <std::ranges::random_access_range R, typename T, typename Op>
 }
 
 template <std::ranges::input_range R, typename T, typename Op>
-    requires (!std::ranges::random_access_range<R>)
+    requires(!std::ranges::random_access_range<R>)
 [[nodiscard]] auto reduce(R&& range, T init, Op op)
 {
-    return fold(std::ranges::begin(range), std::ranges::end(range), std::move(init),
-                std::move(op));
+    return fold(std::ranges::begin(range), std::ranges::end(range), std::move(init), std::move(op));
 }
 
 template <std::random_access_iterator I, std::sentinel_for<I> S>

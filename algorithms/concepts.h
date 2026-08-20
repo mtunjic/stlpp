@@ -35,9 +35,8 @@ concept Number = std::is_arithmetic_v<T>;
 
 template <typename T>
 concept Character =
-    std::same_as<T, char> || std::same_as<T, signed char> ||
-    std::same_as<T, unsigned char> || std::same_as<T, wchar_t> ||
-    std::same_as<T, char8_t> || std::same_as<T, char16_t> ||
+    std::same_as<T, char> || std::same_as<T, signed char> || std::same_as<T, unsigned char> ||
+    std::same_as<T, wchar_t> || std::same_as<T, char8_t> || std::same_as<T, char16_t> ||
     std::same_as<T, char32_t>;
 
 template <typename I>
@@ -63,8 +62,7 @@ using Difference_type = std::iter_difference_t<I>;
 
 template <typename Op, typename T>
 concept Binary_operation =
-    std::regular_invocable<Op, T, T> &&
-    std::convertible_to<std::invoke_result_t<Op, T, T>, T>;
+    std::regular_invocable<Op, T, T> && std::convertible_to<std::invoke_result_t<Op, T, T>, T>;
 
 template <typename P, typename T>
 concept Unary_predicate = std::predicate<P, T>;
@@ -84,9 +82,7 @@ concept IteratorBasis = Semiregular<B> && requires(B& b, const B& cb) {
 };
 
 template <typename B>
-concept BidirectionalIteratorBasis = IteratorBasis<B> && requires(B& b) {
-    b.decrement();
-};
+concept BidirectionalIteratorBasis = IteratorBasis<B> && requires(B& b) { b.decrement(); };
 
 template <typename B>
 concept RandomAccessIteratorBasis =

@@ -26,8 +26,9 @@ public:
     using reference = typename B::reference;
     using iterator_category = typename B::iterator_category;
     using iterator_concept = typename B::iterator_category;
-    using pointer = std::conditional_t<std::is_lvalue_reference_v<reference>,
-                                       std::add_pointer_t<std::remove_reference_t<reference>>, void>;
+    using pointer =
+        std::conditional_t<std::is_lvalue_reference_v<reference>,
+                           std::add_pointer_t<std::remove_reference_t<reference>>, void>;
 
     B basis{};
 
@@ -58,10 +59,7 @@ public:
         return tmp;
     }
 
-    friend bool operator==(const iterator& x, const iterator& y)
-    {
-        return x.state() == y.state();
-    }
+    friend bool operator==(const iterator& x, const iterator& y) { return x.state() == y.state(); }
 
     iterator& operator--()
         requires BidirectionalIteratorBasis<B>

@@ -11,7 +11,8 @@
 
 namespace {
 
-TEST(ContainerGeneric, TapeReadWriteInvariants) {
+TEST(ContainerGeneric, TapeReadWriteInvariants)
+{
     mt::tape<int> t{1, 2, 3};
     mt::test::expect_tape_invariants(t);
     EXPECT_EQ(t.read(), 1);
@@ -21,7 +22,8 @@ TEST(ContainerGeneric, TapeReadWriteInvariants) {
     EXPECT_EQ(std::vector<int>(t.begin(), t.end()), (std::vector<int>{1, 9, 3}));
 }
 
-TEST(ContainerGeneric, RopeConcatSizeLaw) {
+TEST(ContainerGeneric, RopeConcatSizeLaw)
+{
     mt::rope a{"ab"};
     mt::rope b{"cd"};
     auto c = mt::concat(a, b);
@@ -29,7 +31,8 @@ TEST(ContainerGeneric, RopeConcatSizeLaw) {
     EXPECT_EQ(c.to_string(), a.to_string() + b.to_string());
 }
 
-TEST(ContainerGeneric, RopeAppendExtends) {
+TEST(ContainerGeneric, RopeAppendExtends)
+{
     mt::rope r{"hi"};
     const std::size_t before = r.size();
     r.append("!");
@@ -37,14 +40,16 @@ TEST(ContainerGeneric, RopeAppendExtends) {
     EXPECT_EQ(r.at(before), '!');
 }
 
-TEST(ContainerGeneric, HtableInsertFindRoundtrip) {
+TEST(ContainerGeneric, HtableInsertFindRoundtrip)
+{
     mt::htable<int, std::string> t;
     mt::test::expect_htable_roundtrip(t, 3, std::string{"three"});
     mt::test::expect_htable_roundtrip(t, 1, std::string{"one"});
     EXPECT_EQ(t.size(), 2u);
 }
 
-TEST(ContainerGeneric, RingBufferFifoWhenCapacityAllows) {
+TEST(ContainerGeneric, RingBufferFifoWhenCapacityAllows)
+{
     mt::ring_buffer<int> r(3);
     EXPECT_TRUE(r.try_push(1));
     EXPECT_TRUE(r.try_push(2));
@@ -54,7 +59,8 @@ TEST(ContainerGeneric, RingBufferFifoWhenCapacityAllows) {
     EXPECT_EQ(r.try_pop(), 3);
 }
 
-TEST(ContainerGeneric, DisjointSetUniteTransitive) {
+TEST(ContainerGeneric, DisjointSetUniteTransitive)
+{
     mt::disjoint_set ds(5);
     ds.unite(0, 1);
     ds.unite(1, 2);
@@ -63,7 +69,8 @@ TEST(ContainerGeneric, DisjointSetUniteTransitive) {
     EXPECT_EQ(ds.component_size(0), 3u);
 }
 
-TEST(ContainerGeneric, GraphNeighborsAfterEdge) {
+TEST(ContainerGeneric, GraphNeighborsAfterEdge)
+{
     mt::graph g(3);
     g.add_edge(0, 1);
     g.add_undirected_edge(1, 2);
@@ -71,7 +78,8 @@ TEST(ContainerGeneric, GraphNeighborsAfterEdge) {
     mt::test::expect_ranges_equal(g.neighbors(2), std::vector<std::size_t>{1});
 }
 
-TEST(ContainerGeneric, ArraySliceSubSizeLaw) {
+TEST(ContainerGeneric, ArraySliceSubSizeLaw)
+{
     std::vector<int> v{0, 1, 2, 3, 4};
     mt::array_slice<int> s{v};
     auto sub = s.sub(1, 99);
@@ -80,7 +88,8 @@ TEST(ContainerGeneric, ArraySliceSubSizeLaw) {
     EXPECT_THROW((void)sub[4], std::out_of_range);
 }
 
-TEST(ContainerGeneric, ZipperToVectorAfterInsert) {
+TEST(ContainerGeneric, ZipperToVectorAfterInsert)
+{
     mt::zipper<int> z{std::vector{1, 2, 3}};
     EXPECT_TRUE(z.move_right());
     z.insert_right(9);
@@ -89,7 +98,8 @@ TEST(ContainerGeneric, ZipperToVectorAfterInsert) {
     EXPECT_EQ(z.focus(), 1);
 }
 
-TEST(ContainerGeneric, DynamicPqueueMaxHeapPopOrder) {
+TEST(ContainerGeneric, DynamicPqueueMaxHeapPopOrder)
+{
     mt::dynamic_pqueue<int> q;
     q.push(2);
     q.push(8);
@@ -97,7 +107,8 @@ TEST(ContainerGeneric, DynamicPqueueMaxHeapPopOrder) {
     mt::test::expect_pqueue_pop_order(q, {8, 5, 2});
 }
 
-TEST(ContainerGeneric, DynamicPqueueMinHeapUpdate) {
+TEST(ContainerGeneric, DynamicPqueueMinHeapUpdate)
+{
     mt::dynamic_pqueue<int, std::greater<int>> q;
     auto h5 = q.push(5);
     q.push(3);
@@ -105,7 +116,8 @@ TEST(ContainerGeneric, DynamicPqueueMinHeapUpdate) {
     EXPECT_EQ(q.top(), 1);
 }
 
-TEST(ContainerGeneric, QuadtreeSplitPreservesAllPoints) {
+TEST(ContainerGeneric, QuadtreeSplitPreservesAllPoints)
+{
     mt::quadtree q({0, 0, 64, 64});
     for (int i = 0; i < 8; ++i) {
         EXPECT_TRUE(q.insert({static_cast<double>(i) + 0.5, 0.5}));
@@ -113,7 +125,8 @@ TEST(ContainerGeneric, QuadtreeSplitPreservesAllPoints) {
     mt::test::expect_quadtree_preserves_inserted(q, {0, 0, 64, 64}, 8);
 }
 
-TEST(ContainerGeneric, Vector2dIndexingLaw) {
+TEST(ContainerGeneric, Vector2dIndexingLaw)
+{
     mt::vector_2d<int> m(2, 3, 0);
     m(1, 2) = 7;
     EXPECT_EQ(m.rows(), 2u);
@@ -122,13 +135,15 @@ TEST(ContainerGeneric, Vector2dIndexingLaw) {
     EXPECT_THROW((void)m(2, 0), std::out_of_range);
 }
 
-TEST(ContainerGeneric, GridNeighbors4CornerCount) {
+TEST(ContainerGeneric, GridNeighbors4CornerCount)
+{
     mt::grid<int> g(3, 3, 0);
     EXPECT_EQ(g.neighbors4(0, 0).size(), 2u);
     EXPECT_EQ(g.neighbors4(1, 1).size(), 4u);
 }
 
-TEST(ContainerGeneric, Vector3dIndexingLaw) {
+TEST(ContainerGeneric, Vector3dIndexingLaw)
+{
     mt::vector_3d<int> v(2, 2, 2, 0);
     v(1, 0, 1) = 4;
     EXPECT_EQ(v.extent(0), 2u);
@@ -137,18 +152,21 @@ TEST(ContainerGeneric, Vector3dIndexingLaw) {
     EXPECT_THROW((void)v(2, 0, 0), std::out_of_range);
 }
 
-TEST(ContainerGeneric, TsStackLifo) {
+TEST(ContainerGeneric, TsStackLifo)
+{
     mt::ts_stack<int> s;
     EXPECT_FALSE(s.try_pop().has_value());
     mt::test::expect_ts_stack_lifo(s, {1, 2, 3});
 }
 
-TEST(ContainerGeneric, TsQueueFifo) {
+TEST(ContainerGeneric, TsQueueFifo)
+{
     mt::ts_queue<int> q;
     mt::test::expect_ts_queue_fifo(q, {1, 2, 3});
 }
 
-TEST(ContainerGeneric, TsPriorityQueuePopOrder) {
+TEST(ContainerGeneric, TsPriorityQueuePopOrder)
+{
     mt::ts_priority_queue<int> pq;
     mt::test::expect_ts_priority_pop_order(pq, {1, 3, 2}, {3, 2, 1});
 }

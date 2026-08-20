@@ -83,7 +83,7 @@ template <typename T, typename R = std::less<>>
 
 template <typename T, typename R>
 [[nodiscard]] constexpr const T& select_1_4_ab_cd(const T& a, const T& b, const T& c, const T& d,
-                                                   R r)
+                                                  R r)
 {
     if (std::invoke(r, c, a)) {
         return select_0_2(a, d, r);
@@ -135,7 +135,7 @@ template <int Ia, int Ib, typename T, typename R>
 
 template <int Ia, int Ib, int Ic, int Id, typename T, typename R>
 [[nodiscard]] constexpr const T& select_1_4_ab_cd_stable(const T& a, const T& b, const T& c,
-                                                          const T& d, R r)
+                                                         const T& d, R r)
 {
     detail::compare_strict_or_reflexive<(Ia < Ic), R> cmp;
     if (cmp(c, a, r)) {
@@ -146,7 +146,7 @@ template <int Ia, int Ib, int Ic, int Id, typename T, typename R>
 
 template <int Ia, int Ib, int Ic, int Id, typename T, typename R>
 [[nodiscard]] constexpr const T& select_1_4_ab_stable(const T& a, const T& b, const T& c,
-                                                       const T& d, R r)
+                                                      const T& d, R r)
 {
     detail::compare_strict_or_reflexive<(Ic < Id), R> cmp;
     if (cmp(d, c, r)) {
@@ -157,7 +157,7 @@ template <int Ia, int Ib, int Ic, int Id, typename T, typename R>
 
 template <int Ia, int Ib, int Ic, int Id, typename T, typename R>
 [[nodiscard]] constexpr const T& select_1_4_stable(const T& a, const T& b, const T& c, const T& d,
-                                                    R r)
+                                                   R r)
 {
     detail::compare_strict_or_reflexive<(Ia < Ib), R> cmp;
     if (cmp(b, a, r)) {
@@ -168,7 +168,7 @@ template <int Ia, int Ib, int Ic, int Id, typename T, typename R>
 
 template <int Ia, int Ib, int Ic, int Id, int Ie, typename T, typename R>
 [[nodiscard]] constexpr const T& select_2_5_ab_cd(const T& a, const T& b, const T& c, const T& d,
-                                                   const T& e, R r)
+                                                  const T& e, R r)
 {
     detail::compare_strict_or_reflexive<(Ia < Ic), R> cmp;
     if (cmp(c, a, r)) {
@@ -179,7 +179,7 @@ template <int Ia, int Ib, int Ic, int Id, int Ie, typename T, typename R>
 
 template <int Ia, int Ib, int Ic, int Id, int Ie, typename T, typename R>
 [[nodiscard]] constexpr const T& select_2_5_ab(const T& a, const T& b, const T& c, const T& d,
-                                                const T& e, R r)
+                                               const T& e, R r)
 {
     detail::compare_strict_or_reflexive<(Ic < Id), R> cmp;
     if (cmp(d, c, r)) {
@@ -190,7 +190,7 @@ template <int Ia, int Ib, int Ic, int Id, int Ie, typename T, typename R>
 
 template <int Ia, int Ib, int Ic, int Id, int Ie, typename T, typename R>
 [[nodiscard]] constexpr const T& select_2_5(const T& a, const T& b, const T& c, const T& d,
-                                             const T& e, R r)
+                                            const T& e, R r)
 {
     detail::compare_strict_or_reflexive<(Ia < Ib), R> cmp;
     if (cmp(b, a, r)) {

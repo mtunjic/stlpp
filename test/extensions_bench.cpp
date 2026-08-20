@@ -5,7 +5,8 @@
 
 #include <benchmark/benchmark.h>
 
-static void BM_KeepIf(benchmark::State& state) {
+static void BM_KeepIf(benchmark::State& state)
+{
     const auto n = static_cast<std::size_t>(state.range(0));
     std::vector<int> proto(n);
     for (std::size_t i = 0; i < n; ++i) {
@@ -20,7 +21,8 @@ static void BM_KeepIf(benchmark::State& state) {
 }
 BENCHMARK(BM_KeepIf)->Arg(1024)->Arg(1 << 16);
 
-static void BM_Sanitize(benchmark::State& state) {
+static void BM_Sanitize(benchmark::State& state)
+{
     const std::string src(static_cast<std::size_t>(state.range(0)), 'A');
     for (auto _ : state) {
         auto s = src;
@@ -31,7 +33,8 @@ static void BM_Sanitize(benchmark::State& state) {
 }
 BENCHMARK(BM_Sanitize)->Arg(1024)->Arg(1 << 16);
 
-static void BM_ToLower(benchmark::State& state) {
+static void BM_ToLower(benchmark::State& state)
+{
     const std::string src(static_cast<std::size_t>(state.range(0)), 'Z');
     for (auto _ : state) {
         auto s = src;
@@ -42,7 +45,8 @@ static void BM_ToLower(benchmark::State& state) {
 }
 BENCHMARK(BM_ToLower)->Arg(1024)->Arg(1 << 16);
 
-static void BM_Distinct(benchmark::State& state) {
+static void BM_Distinct(benchmark::State& state)
+{
     const auto n = static_cast<std::size_t>(state.range(0));
     std::vector<int> proto(n);
     for (std::size_t i = 0; i < n; ++i) {
@@ -57,7 +61,8 @@ static void BM_Distinct(benchmark::State& state) {
 }
 BENCHMARK(BM_Distinct)->Arg(1024)->Arg(1 << 14);
 
-static void BM_Gsub(benchmark::State& state) {
+static void BM_Gsub(benchmark::State& state)
+{
     const std::string src(static_cast<std::size_t>(state.range(0)), 'a');
     for (auto _ : state) {
         auto s = src;
@@ -68,7 +73,8 @@ static void BM_Gsub(benchmark::State& state) {
 }
 BENCHMARK(BM_Gsub)->Arg(1024)->Arg(1 << 16);
 
-static void BM_DigitSum(benchmark::State& state) {
+static void BM_DigitSum(benchmark::State& state)
+{
     const auto n = static_cast<int>(state.range(0));
     for (auto _ : state) {
         int s = mt::digit_sum(n);

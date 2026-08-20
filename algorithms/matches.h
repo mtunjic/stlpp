@@ -16,8 +16,8 @@ namespace mt {
 ///
 /// Example:
 ///   mt::matches("ababcababa", "aba");  // {0, 5, 7}
-[[nodiscard]] inline std::vector<std::size_t>
-matches(std::string_view text, std::string_view pattern)
+[[nodiscard]] inline std::vector<std::size_t> matches(std::string_view text,
+                                                      std::string_view pattern)
 {
     if (pattern.empty() || pattern.size() > text.size()) {
         return {};

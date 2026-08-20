@@ -23,24 +23,29 @@ static_assert(mt::Regular<std::string>);
 static_assert(mt::Binary_operation<std::plus<int>, int>);
 static_assert(mt::Binary_operation<std::multiplies<int>, int>);
 
-TEST(ConceptAxioms, RegularInt) {
+TEST(ConceptAxioms, RegularInt)
+{
     mt::test::check_regular_axioms(42);
 }
 
-TEST(ConceptAxioms, RegularString) {
+TEST(ConceptAxioms, RegularString)
+{
     mt::test::check_regular_axioms(std::string{"hello"});
 }
 
-TEST(ConceptAxioms, AssociativePlusSpotCheck) {
+TEST(ConceptAxioms, AssociativePlusSpotCheck)
+{
     mt::test::check_associative_spot(std::plus<int>{}, 1, 2, 3);
     mt::test::check_associative_spot(std::plus<int>{}, -5, 10, 7);
 }
 
-TEST(ConceptAxioms, AssociativeMultipliesSpotCheck) {
+TEST(ConceptAxioms, AssociativeMultipliesSpotCheck)
+{
     mt::test::check_associative_spot(std::multiplies<int>{}, 2, 3, 5);
 }
 
-TEST(ConceptAxioms, IteratorBasisCountingAdapter) {
+TEST(ConceptAxioms, IteratorBasisCountingAdapter)
+{
     struct counting_basis {
         using state_type = int;
         using value_type = int;

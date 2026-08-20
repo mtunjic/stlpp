@@ -38,9 +38,8 @@ template <std::bidirectional_iterator I, typename P>
     requires std::predicate<P&, std::iter_reference_t<I>>
 [[nodiscard]] std::pair<I, I> gather(I first, I last, I pos, P pred)
 {
-    return {
-        std::stable_partition(first, pos, std::not_fn(pred)),
-        std::stable_partition(pos, last, pred)};
+    return {std::stable_partition(first, pos, std::not_fn(pred)),
+            std::stable_partition(pos, last, pred)};
 }
 
 /// Stable-partition by *position* predicate `p(it)` rather than `p(*it)`
@@ -111,8 +110,8 @@ template <std::bidirectional_iterator I, typename P>
 /// Buffer-assisted stable partition (EoP). `buffer` must hold at least the
 /// number of false elements (or use `partition_stable`).
 template <std::forward_iterator I, std::forward_iterator B, typename P>
-    requires std::predicate<P&, std::iter_reference_t<I>> &&
-             std::indirectly_copyable<I, B> && std::indirectly_copyable<B, I>
+    requires std::predicate<P&, std::iter_reference_t<I>> && std::indirectly_copyable<I, B> &&
+             std::indirectly_copyable<B, I>
 [[nodiscard]] I partition_stable_with_buffer(I first, I last, B buffer, P pred)
 {
     I write = first;

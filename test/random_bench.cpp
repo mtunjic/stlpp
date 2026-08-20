@@ -6,7 +6,8 @@
 
 #include <benchmark/benchmark.h>
 
-static void BM_Random_UniformInt(benchmark::State& state) {
+static void BM_Random_UniformInt(benchmark::State& state)
+{
     std::mt19937_64 rng{1};
     std::vector<int> values(static_cast<std::size_t>(state.range(0)));
     for (auto _ : state) {
@@ -18,7 +19,8 @@ static void BM_Random_UniformInt(benchmark::State& state) {
 }
 BENCHMARK(BM_Random_UniformInt)->Arg(64)->Arg(1024)->Arg(1 << 16);
 
-static void BM_RandomIota_Shuffle(benchmark::State& state) {
+static void BM_RandomIota_Shuffle(benchmark::State& state)
+{
     std::mt19937_64 rng{1};
     std::vector<int> values(static_cast<std::size_t>(state.range(0)));
     for (auto _ : state) {
@@ -30,7 +32,8 @@ static void BM_RandomIota_Shuffle(benchmark::State& state) {
 }
 BENCHMARK(BM_RandomIota_Shuffle)->Arg(64)->Arg(1024)->Arg(1 << 16);
 
-static void BM_StdIota(benchmark::State& state) {
+static void BM_StdIota(benchmark::State& state)
+{
     std::vector<int> values(static_cast<std::size_t>(state.range(0)));
     for (auto _ : state) {
         std::iota(values.begin(), values.end(), 0);

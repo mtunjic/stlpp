@@ -17,8 +17,8 @@ namespace mt {
 ///   auto [a, b] = mt::slice(v.begin(), v.end(), 1, 3);
 ///   // [a, b) == {1, 2, 3}
 template <std::random_access_iterator I>
-[[nodiscard]] constexpr std::pair<I, I>
-slice(I first, I last, Difference_type<I> start, Difference_type<I> count)
+[[nodiscard]] constexpr std::pair<I, I> slice(I first, I last, Difference_type<I> start,
+                                              Difference_type<I> count)
 {
     const Difference_type<I> n = last - first;
     if (start < 0) {

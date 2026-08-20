@@ -7,17 +7,20 @@
 
 #include <gtest/gtest.h>
 
-TEST(NumericIterator, CopiesHalfOpenRange) {
+TEST(NumericIterator, CopiesHalfOpenRange)
+{
     std::vector<int> v;
     std::copy(mt::numeric_iterator<int>{0}, mt::numeric_iterator<int>{4}, std::back_inserter(v));
     EXPECT_EQ(v, (std::vector<int>{0, 1, 2, 3}));
 }
 
-TEST(NumericIterator, IteratorDistance) {
+TEST(NumericIterator, IteratorDistance)
+{
     EXPECT_EQ(mt::numeric_iterator<int>{7} - mt::numeric_iterator<int>{2}, 5);
 }
 
-TEST(StepIterator, StrideThreeOnLongRange) {
+TEST(StepIterator, StrideThreeOnLongRange)
+{
     std::vector<int> v{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     std::vector<int> out;
     auto s = mt::step(v.begin(), v.end(), 3);
@@ -26,7 +29,8 @@ TEST(StepIterator, StrideThreeOnLongRange) {
     EXPECT_EQ(s.end() - s.begin(), 4);
 }
 
-TEST(IteratorAdapter, CountingBasisRandomAccessCopy) {
+TEST(IteratorAdapter, CountingBasisRandomAccessCopy)
+{
     struct counting_basis {
         using state_type = int;
         using value_type = int;

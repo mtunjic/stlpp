@@ -7,7 +7,8 @@
 
 #include <gtest/gtest.h>
 
-TEST(TransformIterator, Squares) {
+TEST(TransformIterator, Squares)
+{
     std::vector<int> v{1, 2, 3};
     std::vector<int> out;
     for (int x : mt::transform(v, [](int n) { return n * n; })) {
@@ -16,7 +17,8 @@ TEST(TransformIterator, Squares) {
     EXPECT_EQ(out, (std::vector<int>{1, 4, 9}));
 }
 
-TEST(FilterIterator, Evens) {
+TEST(FilterIterator, Evens)
+{
     std::vector<int> v{1, 2, 3, 4, 5};
     std::vector<int> out;
     for (int x : mt::filter(v, [](int n) { return n % 2 == 0; })) {
@@ -25,7 +27,8 @@ TEST(FilterIterator, Evens) {
     EXPECT_EQ(out, (std::vector<int>{2, 4}));
 }
 
-TEST(ZipView, StopsAtShorter) {
+TEST(ZipView, StopsAtShorter)
+{
     std::vector<int> a{1, 2};
     std::vector<int> b{10, 20, 30};
     std::vector<std::pair<int, int>> out;
@@ -35,7 +38,8 @@ TEST(ZipView, StopsAtShorter) {
     EXPECT_EQ(out, (std::vector<std::pair<int, int>>{{1, 10}, {2, 20}}));
 }
 
-TEST(WindowChunks, SlidingAndBlocking) {
+TEST(WindowChunks, SlidingAndBlocking)
+{
     std::vector<int> v{1, 2, 3, 4, 5};
     std::vector<std::vector<int>> wins;
     for (auto w : mt::windows(v, 2)) {
@@ -50,7 +54,8 @@ TEST(WindowChunks, SlidingAndBlocking) {
     EXPECT_EQ(ch, (std::vector<std::vector<int>>{{1, 2}, {3, 4}, {5}}));
 }
 
-TEST(CycleIterator, RepeatsFiniteTimes) {
+TEST(CycleIterator, RepeatsFiniteTimes)
+{
     std::vector<int> v{1, 2};
     std::vector<int> out;
     for (int x : mt::cycle(v, 3)) {
@@ -60,7 +65,8 @@ TEST(CycleIterator, RepeatsFiniteTimes) {
     EXPECT_TRUE(mt::cycle(v, 0).begin() == mt::cycle(v, 0).end());
 }
 
-TEST(UnfoldIterator, ManualCountdownLoop) {
+TEST(UnfoldIterator, ManualCountdownLoop)
+{
     auto step = [](int n) -> std::optional<std::pair<int, int>> {
         if (n <= 0) {
             return std::nullopt;

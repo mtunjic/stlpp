@@ -2,9 +2,9 @@
 
 #include "concepts.h"
 
+#include <cctype>
 #include <cmath>
 #include <cstring>
-#include <cctype>
 #include <iostream>
 #include <ostream>
 #include <stdexcept>
@@ -127,10 +127,7 @@ struct multiplies {
 /// Division that returns `x` when `y == 0` (old STL++ convention).
 template <Number N>
 struct divides {
-    constexpr N operator()(const N& x, const N& y) const
-    {
-        return y == N{0} ? x : x / y;
-    }
+    constexpr N operator()(const N& x, const N& y) const { return y == N{0} ? x : x / y; }
 };
 
 template <TotallyOrdered T>
@@ -211,10 +208,7 @@ struct to_upper_char {
 };
 
 struct non_letter {
-    bool operator()(char c) const
-    {
-        return std::isalpha(static_cast<unsigned char>(c)) == 0;
-    }
+    bool operator()(char c) const { return std::isalpha(static_cast<unsigned char>(c)) == 0; }
 };
 
 struct digit {

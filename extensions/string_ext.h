@@ -7,9 +7,9 @@
 #include <algorithm>
 #include <cctype>
 #include <charconv>
+#include <cstddef>
 #include <cstdlib>
 #include <cwctype>
-#include <cstddef>
 #include <functional>
 #include <istream>
 #include <limits>
@@ -158,8 +158,14 @@ inline std::string& to_upper(std::string& s)
     return out;
 }
 
-[[nodiscard]] inline std::string to_lower_copy(std::string_view s) { return to_lower(s); }
-[[nodiscard]] inline std::string to_upper_copy(std::string_view s) { return to_upper(s); }
+[[nodiscard]] inline std::string to_lower_copy(std::string_view s)
+{
+    return to_lower(s);
+}
+[[nodiscard]] inline std::string to_upper_copy(std::string_view s)
+{
+    return to_upper(s);
+}
 
 /// First character of each whitespace-separated word becomes upper-case.
 ///
@@ -266,9 +272,18 @@ template <typename T>
     return out.str();
 }
 
-[[nodiscard]] inline int to_int(std::string_view s) { return from_string<int>(s); }
-[[nodiscard]] inline float to_single(std::string_view s) { return from_string<float>(s); }
-[[nodiscard]] inline double to_double(std::string_view s) { return from_string<double>(s); }
+[[nodiscard]] inline int to_int(std::string_view s)
+{
+    return from_string<int>(s);
+}
+[[nodiscard]] inline float to_single(std::string_view s)
+{
+    return from_string<float>(s);
+}
+[[nodiscard]] inline double to_double(std::string_view s)
+{
+    return from_string<double>(s);
+}
 
 inline std::string& remove_if(std::string& s, auto pred)
 {
@@ -453,7 +468,10 @@ inline void setdelim(std::ios& stream, std::string_view extra)
     return out;
 }
 
-[[nodiscard]] inline std::wstring digits_copy(std::wstring_view s) { return numbers_copy(s); }
+[[nodiscard]] inline std::wstring digits_copy(std::wstring_view s)
+{
+    return numbers_copy(s);
+}
 
 [[nodiscard]] inline std::vector<double> floats_copy(std::string_view s)
 {
@@ -586,7 +604,8 @@ inline std::string& replace(std::string& s, std::string_view from, std::string_v
     return s;
 }
 
-[[nodiscard]] inline std::string replace_copy(std::string s, std::string_view from, std::string_view to)
+[[nodiscard]] inline std::string replace_copy(std::string s, std::string_view from,
+                                              std::string_view to)
 {
     replace(s, from, to);
     return s;
@@ -610,7 +629,8 @@ inline std::string& gsub(std::string& s, std::string_view from, std::string_view
     return s;
 }
 
-[[nodiscard]] inline std::string gsub_copy(std::string s, std::string_view from, std::string_view to)
+[[nodiscard]] inline std::string gsub_copy(std::string s, std::string_view from,
+                                           std::string_view to)
 {
     gsub(s, from, to);
     return s;

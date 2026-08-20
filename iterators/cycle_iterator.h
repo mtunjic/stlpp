@@ -24,7 +24,11 @@ public:
 
     cycle_iterator() = default;
     cycle_iterator(I begin, I end, I current, std::size_t trip, std::size_t times)
-        : begin_(begin), end_(end), current_(current), trip_(trip), times_(times)
+        : begin_(begin),
+          end_(end),
+          current_(current),
+          trip_(trip),
+          times_(times)
     {}
 
     [[nodiscard]] reference operator*() const { return *current_; }
@@ -70,9 +74,7 @@ class cycle_range {
 
 public:
     cycle_range() = default;
-    cycle_range(I first, I last, std::size_t times)
-        : first_(first), last_(last), times_(times)
-    {}
+    cycle_range(I first, I last, std::size_t times) : first_(first), last_(last), times_(times) {}
 
     [[nodiscard]] cycle_iterator<I> begin() const
     {
@@ -82,10 +84,7 @@ public:
         return {first_, last_, first_, 0, times_};
     }
 
-    [[nodiscard]] cycle_iterator<I> end() const
-    {
-        return {first_, last_, first_, times_, times_};
-    }
+    [[nodiscard]] cycle_iterator<I> end() const { return {first_, last_, first_, times_, times_}; }
 };
 
 template <std::forward_iterator I>

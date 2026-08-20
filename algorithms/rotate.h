@@ -1,7 +1,7 @@
 #pragma once
 
-#include "copy.h"
 #include "concepts.h"
+#include "copy.h"
 #include "iterator_ops.h"
 
 #include <algorithm>

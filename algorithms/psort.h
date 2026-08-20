@@ -42,13 +42,11 @@ void psort(I first, I last, Comp comp = {})
     std::vector<I> cuts(chunks + 1);
     cuts[0] = first;
     for (unsigned i = 0; i < chunks; ++i) {
-        cuts[i + 1] = first + static_cast<D>(
-            par::split_at(static_cast<std::size_t>(n), i + 1, chunks));
+        cuts[i + 1] =
+            first + static_cast<D>(par::split_at(static_cast<std::size_t>(n), i + 1, chunks));
     }
 
-    par::for_index(chunks, [&](std::size_t i) {
-        std::sort(cuts[i], cuts[i + 1], comp);
-    });
+    par::for_index(chunks, [&](std::size_t i) { std::sort(cuts[i], cuts[i + 1], comp); });
 
     for (unsigned width = 1; width < chunks; width *= 2) {
         const unsigned stride = width * 2;

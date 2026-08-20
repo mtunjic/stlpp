@@ -172,8 +172,8 @@ void expect_split_at_law(I first, I last, N n)
 template <typename InputRange, typename F>
 void expect_mapcat_manual(const InputRange& input, F f)
 {
-    std::vector<std::ranges::range_value_t<
-        std::invoke_result_t<F, std::ranges::range_value_t<InputRange>>>>
+    std::vector<
+        std::ranges::range_value_t<std::invoke_result_t<F, std::ranges::range_value_t<InputRange>>>>
         manual;
     for (const auto& x : input) {
         const auto sub = std::invoke(f, x);
@@ -229,14 +229,10 @@ void expect_apply_until_law(Range& range, F f, P stop_pred)
 template <typename Range, typename P>
 void expect_quantifiers_match_std(const Range& range, P pred)
 {
-    EXPECT_EQ(mt::all(range, pred),
-              std::all_of(std::begin(range), std::end(range), pred));
-    EXPECT_EQ(mt::any(range, pred),
-              std::any_of(std::begin(range), std::end(range), pred));
-    EXPECT_EQ(mt::none(range, pred),
-              std::none_of(std::begin(range), std::end(range), pred));
-    EXPECT_EQ(mt::count_if(range, pred),
-              std::count_if(std::begin(range), std::end(range), pred));
+    EXPECT_EQ(mt::all(range, pred), std::all_of(std::begin(range), std::end(range), pred));
+    EXPECT_EQ(mt::any(range, pred), std::any_of(std::begin(range), std::end(range), pred));
+    EXPECT_EQ(mt::none(range, pred), std::none_of(std::begin(range), std::end(range), pred));
+    EXPECT_EQ(mt::count_if(range, pred), std::count_if(std::begin(range), std::end(range), pred));
 }
 
 template <std::random_access_iterator I>

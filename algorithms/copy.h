@@ -100,8 +100,8 @@ template <std::forward_iterator I0, std::forward_iterator I1, Integer N>
 
 template <std::forward_iterator I0, std::sentinel_for<I0> S0, std::forward_iterator I1,
           std::sentinel_for<I1> S1, Integer N>
-[[nodiscard]] constexpr std::pair<I0, I1>
-swap_ranges_n(I0 first0, S0 last0, I1 first1, S1 last1, N n)
+[[nodiscard]] constexpr std::pair<I0, I1> swap_ranges_n(I0 first0, S0 last0, I1 first1, S1 last1,
+                                                        N n)
 {
     while (n > N{0} && first0 != last0 && first1 != last1) {
         std::iter_swap(first0, first1);

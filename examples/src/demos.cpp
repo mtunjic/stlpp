@@ -84,8 +84,8 @@ void demo_orbit_rho()
     constexpr int start = 0;
     auto f = [](int x) {
         static constexpr int next[] = {
-            /*0*/ 1, /*1*/ 2, /*2*/ 3, /*3*/ 7, /*4*/ 4, /*5*/ 5, /*6*/ 6,
-            /*7*/ 10, /*8*/ 8, /*9*/ 9, /*10*/ 12, /*11*/ 11, /*12*/ 3,
+            /*0*/ 1,   /*1*/ 2,   /*2*/ 3,   /*3*/ 7,   /*4*/ 4,   /*5*/ 5,  /*6*/ 6,
+            /*7*/ 10,  /*8*/ 8,   /*9*/ 9,   /*10*/ 12, /*11*/ 11, /*12*/ 3,
             /*13*/ 13, /*14*/ 14, /*15*/ 15,
         };
         return next[x];
@@ -187,8 +187,7 @@ void demo_matrix_fibonacci()
         sink = fib_mod(n);
     }
     const auto t1 = std::chrono::steady_clock::now();
-    std::cout << "\n200× F_" << n << " ≡ " << sink << "  (" << elapsed_us(t0, t1)
-              << " µs total)\n";
+    std::cout << "\n200× F_" << n << " ≡ " << sink << "  (" << elapsed_us(t0, t1) << " µs total)\n";
     std::cout << "Naive recurrence would need Θ(n) adds; power needs Θ(log n)\n"
                  "associative multiplies — same abstraction as modular\n"
                  "exponentiation and parallel prefix.\n";
@@ -198,10 +197,9 @@ void demo_pattern_hotspots()
 {
     banner("Pattern hotspots — KMP matches + prefix scan + parallel sort");
 
-    const std::string genome =
-        "ACGTACACACGTACGTACACACGTXXXXACACACGTACGTACAC"
-        "ACGTACACACGTACACACGTACGTACACACGTACGTACACACGT"
-        "NNNNACACACGTACGTACACACGTACACACGTACGTACAC";
+    const std::string genome = "ACGTACACACGTACGTACACACGTXXXXACACACGTACGTACAC"
+                               "ACGTACACACGTACACACGTACGTACACACGTACGTACACACGT"
+                               "NNNNACACACGTACGTACACACGTACACACGTACGTACAC";
     const std::string motif = "ACAC";
 
     const auto hits = mt::matches(genome, motif);
@@ -230,15 +228,15 @@ void demo_pattern_hotspots()
         windows.push_back({i, right - left});
     }
 
-    mt::psort(windows.begin(), windows.end(),
-              [](const WindowScore& a, const WindowScore& b) {
-                  if (a.count != b.count) {
-                      return a.count > b.count;
-                  }
-                  return a.start < b.start;
-              });
+    mt::psort(windows.begin(), windows.end(), [](const WindowScore& a, const WindowScore& b) {
+        if (a.count != b.count) {
+            return a.count > b.count;
+        }
+        return a.start < b.start;
+    });
 
-    std::cout << "\nTop " << window << "-base windows by motif density "
+    std::cout << "\nTop " << window
+              << "-base windows by motif density "
                  "(psort of scan scores):\n";
     for (std::size_t i = 0; i < std::min<std::size_t>(5, windows.size()); ++i) {
         const auto& w = windows[i];
@@ -249,10 +247,8 @@ void demo_pattern_hotspots()
                   << "\"\n";
     }
 
-    const int total_hits =
-        mt::reduce_balanced(density.begin(), density.end(), std::plus<>{}, 0);
-    std::cout << "\nreduce_balanced(density) = " << total_hits
-              << " (matches hits.size())\n";
+    const int total_hits = mt::reduce_balanced(density.begin(), density.end(), std::plus<>{}, 0);
+    std::cout << "\nreduce_balanced(density) = " << total_hits << " (matches hits.size())\n";
     std::cout << "Pipeline: matches → indicator → scan → window scores → psort.\n"
                  "Each step is a reusable generic algorithm, not a one-off loop.\n";
 }
@@ -353,16 +349,15 @@ void demo_expr_btree()
     std::cout << "B: " << infix(b.root()) << "  = " << eval(b.root()) << "\n";
     std::cout << "C: " << infix(c.root()) << "  = " << eval(c.root()) << "\n\n";
 
-    std::cout << "weight(A)=" << mt::weight(a.root())
-              << "  height(A)=" << mt::height(a.root()) << "\n";
+    std::cout << "weight(A)=" << mt::weight(a.root()) << "  height(A)=" << mt::height(a.root())
+              << "\n";
     std::cout << "bifurcate_isomorphic(A,B) = " << std::boolalpha
               << mt::bifurcate_isomorphic(a.root(), b.root()) << "\n";
-    std::cout << "bifurcate_equal(A,B)      = "
-              << mt::bifurcate_equal(a.root(), b.root()) << "\n";
-    std::cout << "bifurcate_isomorphic(A,C) = "
-              << mt::bifurcate_isomorphic(a.root(), c.root()) << "\n";
-    std::cout << "bifurcate_equal(A,C)      = "
-              << mt::bifurcate_equal(a.root(), c.root()) << "\n\n";
+    std::cout << "bifurcate_equal(A,B)      = " << mt::bifurcate_equal(a.root(), b.root()) << "\n";
+    std::cout << "bifurcate_isomorphic(A,C) = " << mt::bifurcate_isomorphic(a.root(), c.root())
+              << "\n";
+    std::cout << "bifurcate_equal(A,C)      = " << mt::bifurcate_equal(a.root(), c.root())
+              << "\n\n";
     std::cout << "Same shape ≠ same value (iso vs equal); post-order traverse\n"
                  "evaluates without allocating an AST visitor class.\n";
 }
@@ -393,11 +388,11 @@ void demo_rope_zipper()
     const auto t4 = std::chrono::steady_clock::now();
 
     std::cout << "Built " << chunks << "×" << chunk_len << "-byte document\n";
-    std::cout << "  rope concat loop:  " << elapsed_us(t0, t1) << " µs  (size="
-              << r.size() << ")\n";
+    std::cout << "  rope concat loop:  " << elapsed_us(t0, t1) << " µs  (size=" << r.size()
+              << ")\n";
     std::cout << "  rope to_string:    " << elapsed_us(t1, t2) << " µs\n";
-    std::cout << "  string += loop:    " << elapsed_us(t3, t4) << " µs  (size="
-              << s.size() << ")\n";
+    std::cout << "  string += loop:    " << elapsed_us(t3, t4) << " µs  (size=" << s.size()
+              << ")\n";
     std::cout << "  strings match?     " << std::boolalpha << (flat == s) << "\n";
     std::cout << "  mid char rope.at:  '" << r.at(r.size() / 2) << "'\n\n";
 
@@ -471,8 +466,8 @@ void demo_parallel_race()
 
     std::cout << "n = " << n << " doubles\n\n";
     std::cout << std::fixed << std::setprecision(6);
-    std::cout << "  fold  (left assoc):  " << std::setw(8) << fold_us
-              << " µs   sum=" << fold_sum << "\n";
+    std::cout << "  fold  (left assoc):  " << std::setw(8) << fold_us << " µs   sum=" << fold_sum
+              << "\n";
     std::cout << "  reduce (parallel):   " << std::setw(8) << reduce_us
               << " µs   sum=" << reduce_sum << "\n";
     std::cout << "  map sequential:      " << std::setw(8) << seq_map_us << " µs\n";
@@ -527,21 +522,20 @@ void demo_cards_gather()
     const auto mid = deck.begin() + static_cast<std::ptrdiff_t>(deck.size() / 2);
     const auto [g0, g1] =
         mt::gather(deck.begin(), deck.end(), mid, [](const Card& c) { return c.suit < 2; });
-    std::cout << "\nafter gather(red → mid): reds occupy ["
-              << (g0 - deck.begin()) << ", " << (g1 - deck.begin()) << ")\n";
+    std::cout << "\nafter gather(red → mid): reds occupy [" << (g0 - deck.begin()) << ", "
+              << (g1 - deck.begin()) << ")\n";
     print_row("gathered: ", deck);
 
     // Slide a 5-card hand from the front to just after the gather window.
     auto hand_lo = deck.begin();
     auto hand_hi = deck.begin() + 5;
     const auto [s0, s1] = mt::slide(hand_lo, hand_hi, g1);
-    std::cout << "\nafter slide(first 5 → after reds): hand now ["
-              << (s0 - deck.begin()) << ", " << (s1 - deck.begin()) << ")\n";
+    std::cout << "\nafter slide(first 5 → after reds): hand now [" << (s0 - deck.begin()) << ", "
+              << (s1 - deck.begin()) << ")\n";
     print_row("slid:     ", deck);
 
     // Stable partition: blacks left, reds right (relative order preserved).
-    (void)mt::partition_stable(deck.begin(), deck.end(),
-                               [](const Card& c) { return c.suit >= 2; });
+    (void)mt::partition_stable(deck.begin(), deck.end(), [](const Card& c) { return c.suit >= 2; });
     std::cout << "\nafter partition_stable(black | red):\n";
     print_row("final:    ", deck);
     std::cout << "\ngather / slide / partition_stable rearrange in-place with\n"
@@ -599,8 +593,8 @@ void demo_components()
     for (std::size_t r : root_of) {
         if (std::find(seen.begin(), seen.end(), r) == seen.end()) {
             seen.push_back(r);
-            std::cout << "  root " << std::setw(2) << r << "  size="
-                      << dsu.component_size(r) << "\n";
+            std::cout << "  root " << std::setw(2) << r << "  size=" << dsu.component_size(r)
+                      << "\n";
         }
     }
 
@@ -609,16 +603,14 @@ void demo_components()
         std::cout << "  ";
         for (int x = 0; x < W; ++x) {
             const auto r = root_of[static_cast<std::size_t>(id(x, y))];
-            const char label =
-                static_cast<char>('A' + static_cast<int>(r % 26));
+            const char label = static_cast<char>('A' + static_cast<int>(r % 26));
             std::cout << label << ' ';
         }
         std::cout << "\n";
     }
 
-    const bool same_corner =
-        dsu.connected(static_cast<std::size_t>(id(0, 0)),
-                      static_cast<std::size_t>(id(W - 1, H - 1)));
+    const bool same_corner = dsu.connected(static_cast<std::size_t>(id(0, 0)),
+                                           static_cast<std::size_t>(id(W - 1, H - 1)));
     std::cout << "\ncorners connected? " << std::boolalpha << same_corner << "\n";
     std::cout << "degree(0) = " << g.neighbors(0).size() << "\n\n";
     std::cout << "Union-find answers connectivity in nearly α(n); the graph\n"
@@ -650,17 +642,16 @@ void demo_lazy_pipeline()
     }
 
     const double mean =
-        window_count == 0 ? 0.0
-                          : static_cast<double>(window_sum_total) / window_count;
+        window_count == 0 ? 0.0 : static_cast<double>(window_sum_total) / window_count;
 
-    std::cout << "Source: numeric_range(0, " << N << ") — no heap vector for the\n"
+    std::cout << "Source: numeric_range(0, " << N
+              << ") — no heap vector for the\n"
                  "full domain; filter yields odds lazily, then we materialize\n"
                  "only the kept stream for random-access windows.\n\n";
     std::cout << "odds kept:           " << odds.size() << "\n";
     std::cout << "windows of " << k << ":       " << window_count << "\n";
     std::cout << "max window sum:      " << max_window << "\n";
-    std::cout << "mean window sum:     " << std::fixed << std::setprecision(2)
-              << mean << "\n";
+    std::cout << "mean window sum:     " << std::fixed << std::setprecision(2) << mean << "\n";
     std::cout << "first window:        ";
     if (!odds.empty()) {
         auto first = *mt::windows(odds, k).begin();
@@ -692,16 +683,16 @@ void demo_adaptive_sort()
         SortProbe::moves = 0;
         SortProbe::comps = 0;
         const auto t0 = std::chrono::steady_clock::now();
-        (void)mt::sort_n_adaptive(
-            data.begin(), n, buffer.begin(), n_buf,
-            [](const SortProbe& a, const SortProbe& b) {
-                ++SortProbe::comps;
+        (void)mt::sort_n_adaptive(data.begin(), n, buffer.begin(), n_buf,
+                                  [](const SortProbe& a, const SortProbe& b) {
+                                      ++SortProbe::comps;
+                                      return a.value < b.value;
+                                  });
+        const auto t1 = std::chrono::steady_clock::now();
+        const bool sorted =
+            std::is_sorted(data.begin(), data.end(), [](const SortProbe& a, const SortProbe& b) {
                 return a.value < b.value;
             });
-        const auto t1 = std::chrono::steady_clock::now();
-        const bool sorted = std::is_sorted(
-            data.begin(), data.end(),
-            [](const SortProbe& a, const SortProbe& b) { return a.value < b.value; });
         return std::tuple{elapsed_us(t0, t1), SortProbe::moves, SortProbe::comps, sorted};
     };
 
@@ -709,11 +700,10 @@ void demo_adaptive_sort()
     const auto [us_big, mv_big, cp_big, ok_big] = run_with_buf(n / 2);
 
     std::cout << "n = " << n << " shuffled ints via sort_n_adaptive\n\n";
-    std::cout << "  n_buf=2 (tiny):   " << std::setw(6) << us_tiny << " µs  moves="
-              << mv_tiny << "  comps=" << cp_tiny << "  ok=" << std::boolalpha
-              << ok_tiny << "\n";
-    std::cout << "  n_buf=n/2 (fat):  " << std::setw(6) << us_big << " µs  moves="
-              << mv_big << "  comps=" << cp_big << "  ok=" << ok_big << "\n\n";
+    std::cout << "  n_buf=2 (tiny):   " << std::setw(6) << us_tiny << " µs  moves=" << mv_tiny
+              << "  comps=" << cp_tiny << "  ok=" << std::boolalpha << ok_tiny << "\n";
+    std::cout << "  n_buf=n/2 (fat):  " << std::setw(6) << us_big << " µs  moves=" << mv_big
+              << "  comps=" << cp_big << "  ok=" << ok_big << "\n\n";
     std::cout << "Same algorithm, different buffer budget: adaptive merge falls\n"
                  "back toward in-place work when scratch is scarce — EoP-style\n"
                  "complexity that tracks real machine resources.\n";
@@ -821,8 +811,7 @@ void demo_quadtree_query()
               << viewport.x1 << "," << viewport.y1 << ")\n";
     std::cout << "  quadtree.query:  " << hits.size() << " hits in " << query_us << " µs\n";
     std::cout << "  brute scan:      " << brute.size() << " hits in " << brute_us << " µs\n";
-    std::cout << "  counts match?    " << std::boolalpha << (hits.size() == brute.size())
-              << "\n\n";
+    std::cout << "  counts match?    " << std::boolalpha << (hits.size() == brute.size()) << "\n\n";
 
     constexpr int gw = 24;
     constexpr int gh = 12;
@@ -850,13 +839,12 @@ void demo_quadtree_query()
     }
 
     std::cout << "\nNearest to probe (" << probe.x << ", " << probe.y << "):\n";
-    std::cout << "  first box (half=" << half << "):  (" << first_guess.x << ", "
-              << first_guess.y << ")  d=" << first_d << "\n";
+    std::cout << "  first box (half=" << half << "):  (" << first_guess.x << ", " << first_guess.y
+              << ")  d=" << first_d << "\n";
     std::cout << "  refined (Chebyshev r=d): (" << refined.x << ", " << refined.y
               << ")  d=" << std::sqrt(dist2(probe, refined)) << "\n";
     std::cout << "  brute Euclidean:         (" << brute_nn.x << ", " << brute_nn.y
-              << ")  d=" << std::sqrt(dist2(probe, brute_nn)) << "  (" << nn_brute_us
-              << " µs)\n";
+              << ")  d=" << std::sqrt(dist2(probe, brute_nn)) << "  (" << nn_brute_us << " µs)\n";
     const bool nn_ok = dist2(refined, brute_nn) < 1e-18;
     std::cout << "  refined == brute?        " << std::boolalpha << nn_ok << "\n\n";
     std::cout << "A square of Chebyshev radius r can hit a far corner before a\n"
@@ -966,16 +954,15 @@ void demo_text_pipeline()
 {
     banner("Text pipeline — lines / starts_with / words / group_by");
 
-    const std::string corpus =
-        "# Notes from EoP\n"
-        "\n"
-        "ERROR: power(a, 0) must not loop\n"
-        "Counted copy_n rejects n <= 0.\n"
-        "# Algebra\n"
-        "fold is always left-associated.\n"
-        "ERROR: parallel reduce needs an associative op\n"
-        "reduce_balanced is the tree-shaped cousin.\n"
-        "fold is the sequential walk.\n";
+    const std::string corpus = "# Notes from EoP\n"
+                               "\n"
+                               "ERROR: power(a, 0) must not loop\n"
+                               "Counted copy_n rejects n <= 0.\n"
+                               "# Algebra\n"
+                               "fold is always left-associated.\n"
+                               "ERROR: parallel reduce needs an associative op\n"
+                               "reduce_balanced is the tree-shaped cousin.\n"
+                               "fold is the sequential walk.\n";
 
     const auto rows = mt::lines(corpus);
     std::vector<std::string> headings;
@@ -995,8 +982,8 @@ void demo_text_pipeline()
     }
 
     std::cout << "Corpus: " << rows.size() << " lines (lines() keeps blanks for round-trip)\n";
-    std::cout << "unlines(lines) == corpus? " << std::boolalpha
-              << (mt::unlines(rows) == corpus) << "\n\n";
+    std::cout << "unlines(lines) == corpus? " << std::boolalpha << (mt::unlines(rows) == corpus)
+              << "\n\n";
 
     std::cout << "Headings (starts_with \"# \"):\n";
     for (const auto& h : headings) {
@@ -1064,8 +1051,7 @@ void demo_combinations()
     do {
         std::cout << "  { ";
         for (int i = 0; i < k; ++i) {
-            std::cout << v[static_cast<std::size_t>(i)]
-                      << (i + 1 < k ? ", " : " ");
+            std::cout << v[static_cast<std::size_t>(i)] << (i + 1 < k ? ", " : " ");
         }
         std::cout << "}    rest:";
         for (std::size_t i = static_cast<std::size_t>(k); i < v.size(); ++i) {
@@ -1076,8 +1062,8 @@ void demo_combinations()
     } while (mt::next_combination(v.begin(), v.begin() + k, v.end()));
 
     std::cout << "\nwalked " << combo_count << " combinations; next_combination returned false\n";
-    std::cout << "range restored to first combo / sorted rest? " << std::boolalpha
-              << (v == people) << "\n\n";
+    std::cout << "range restored to first combo / sorted rest? " << std::boolalpha << (v == people)
+              << "\n\n";
 
     std::vector<std::string> trio{"Ada", "Bjorn", "Cora"};
     std::cout << "Same three people, now next_permutation (order matters, P(3,3)=6):\n";

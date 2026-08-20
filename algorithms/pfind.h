@@ -37,8 +37,8 @@ template <std::random_access_iterator I, std::sentinel_for<I> S, typename P>
     }
     std::vector<I> hits(chunks, last);
     par::for_index(chunks, [&](std::size_t c) {
-        auto [b, e] = par::chunk_bounds(first, static_cast<std::size_t>(n),
-                                        static_cast<unsigned>(c), chunks);
+        auto [b, e] =
+            par::chunk_bounds(first, static_cast<std::size_t>(n), static_cast<unsigned>(c), chunks);
         auto it = std::find_if(b, e, pred);
         if (it != e) {
             hits[c] = it;

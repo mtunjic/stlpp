@@ -8,7 +8,8 @@
 
 namespace {
 
-TEST(ReduceBalancedGeneric, MatchesAssociativeFold) {
+TEST(ReduceBalancedGeneric, MatchesAssociativeFold)
+{
     std::vector<int> v(50);
     std::iota(v.begin(), v.end(), 0);
     const int expected = std::accumulate(v.begin(), v.end(), 0);
@@ -16,7 +17,8 @@ TEST(ReduceBalancedGeneric, MatchesAssociativeFold) {
     EXPECT_EQ(mt::reduce_balanced(v, std::plus<>{}, 0), expected);
 }
 
-TEST(SortNAdaptiveGeneric, MatchesSortNWithSmallAndLargeBuffer) {
+TEST(SortNAdaptiveGeneric, MatchesSortNWithSmallAndLargeBuffer)
+{
     std::vector<int> a{9, 1, 8, 2, 7, 3, 0, 4};
     std::vector<int> b = a;
     std::vector<int> c = a;
@@ -31,7 +33,8 @@ TEST(SortNAdaptiveGeneric, MatchesSortNWithSmallAndLargeBuffer) {
     EXPECT_TRUE(std::is_sorted(a.begin(), a.end()));
 }
 
-TEST(AdvancedSortNGeneric, MatchesSortN) {
+TEST(AdvancedSortNGeneric, MatchesSortN)
+{
     std::vector<int> a{5, 4, 3, 2, 1, 0, 9, 8, 7, 6};
     std::vector<int> b = a;
     (void)mt::advanced_sort_n(a.begin(), static_cast<int>(a.size()));
@@ -39,7 +42,8 @@ TEST(AdvancedSortNGeneric, MatchesSortN) {
     EXPECT_EQ(a, b);
 }
 
-TEST(ReverseNAdaptiveGeneric, MatchesReverseN) {
+TEST(ReverseNAdaptiveGeneric, MatchesReverseN)
+{
     std::vector<int> a{1, 2, 3, 4, 5, 6};
     std::vector<int> b = a;
     std::vector<int> buf(6);
@@ -51,7 +55,8 @@ TEST(ReverseNAdaptiveGeneric, MatchesReverseN) {
     EXPECT_EQ(c, a);
 }
 
-TEST(CycleGeneric, CycleFromRotatesOneOrbit) {
+TEST(CycleGeneric, CycleFromRotatesOneOrbit)
+{
     std::vector<int> v{0, 1, 2, 3};
     // from-permutation for rotate left by 1: i -> i+1, last -> first
     auto from = [&](auto it) {
@@ -64,7 +69,8 @@ TEST(CycleGeneric, CycleFromRotatesOneOrbit) {
     EXPECT_EQ(v, (std::vector<int>{1, 2, 3, 0}));
 }
 
-TEST(MergeCopyBackwardGeneric, MatchesForwardMerge) {
+TEST(MergeCopyBackwardGeneric, MatchesForwardMerge)
+{
     std::vector<int> a{1, 3, 5};
     std::vector<int> b{0, 2, 4};
     std::vector<int> out(6, -1);

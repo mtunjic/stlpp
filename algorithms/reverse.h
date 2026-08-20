@@ -60,7 +60,7 @@ void reverse_n(I first, S last, N n)
 }
 
 template <std::forward_iterator I, std::sentinel_for<I> S, Integer N>
-    requires (!std::bidirectional_iterator<I>)
+    requires(!std::bidirectional_iterator<I>)
 I reverse_n(I first, S last, N n)
 {
     return reverse_n(first, bounded_count(first, last, n));

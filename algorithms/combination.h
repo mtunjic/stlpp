@@ -29,8 +29,7 @@ bool next_combination(I first1, I last1, I first2, I last2)
     I m1 = last1;
     I m2 = last2;
     --m2;
-    while (--m1 != first1 && !(*m1 < *m2)) {
-    }
+    while (--m1 != first1 && !(*m1 < *m2)) {}
     bool result = (m1 == first1) && !(*first1 < *m2);
     if (!result) {
         while (first2 != m2 && !(*m1 < *first2)) {

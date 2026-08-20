@@ -6,7 +6,8 @@
 
 #include <benchmark/benchmark.h>
 
-static void BM_Tape_Walk(benchmark::State& state) {
+static void BM_Tape_Walk(benchmark::State& state)
+{
     const auto n = static_cast<std::size_t>(state.range(0));
     for (auto _ : state) {
         mt::tape<int> t{0};
@@ -22,7 +23,8 @@ static void BM_Tape_Walk(benchmark::State& state) {
 }
 BENCHMARK(BM_Tape_Walk)->Arg(1024)->Arg(1 << 16);
 
-static void BM_Htable_InsertFind(benchmark::State& state) {
+static void BM_Htable_InsertFind(benchmark::State& state)
+{
     const auto n = static_cast<int>(state.range(0));
     for (auto _ : state) {
         mt::htable<int, int> t;
@@ -39,7 +41,8 @@ static void BM_Htable_InsertFind(benchmark::State& state) {
 }
 BENCHMARK(BM_Htable_InsertFind)->Arg(1024)->Arg(1 << 14);
 
-static void BM_Vector2d_Fill(benchmark::State& state) {
+static void BM_Vector2d_Fill(benchmark::State& state)
+{
     const auto n = static_cast<std::size_t>(state.range(0));
     for (auto _ : state) {
         mt::vector_2d<int> m(n, n, 0);
@@ -54,7 +57,8 @@ static void BM_Vector2d_Fill(benchmark::State& state) {
 }
 BENCHMARK(BM_Vector2d_Fill)->Arg(32)->Arg(128);
 
-static void BM_Rope_ConcatFlatten(benchmark::State& state) {
+static void BM_Rope_ConcatFlatten(benchmark::State& state)
+{
     const auto n = static_cast<int>(state.range(0));
     const std::string chunk(16, 'a');
     for (auto _ : state) {
@@ -69,7 +73,8 @@ static void BM_Rope_ConcatFlatten(benchmark::State& state) {
 }
 BENCHMARK(BM_Rope_ConcatFlatten)->Arg(64)->Arg(1024);
 
-static void BM_DynamicPQueue_PushPop(benchmark::State& state) {
+static void BM_DynamicPQueue_PushPop(benchmark::State& state)
+{
     const auto n = static_cast<int>(state.range(0));
     for (auto _ : state) {
         mt::dynamic_pqueue<int, std::greater<int>> q;
@@ -87,7 +92,8 @@ static void BM_DynamicPQueue_PushPop(benchmark::State& state) {
 }
 BENCHMARK(BM_DynamicPQueue_PushPop)->Arg(1024)->Arg(1 << 14);
 
-static void BM_ArraySlice_Sum(benchmark::State& state) {
+static void BM_ArraySlice_Sum(benchmark::State& state)
+{
     const auto n = static_cast<std::size_t>(state.range(0));
     std::vector<int> values(n);
     for (std::size_t i = 0; i < n; ++i) {
@@ -105,7 +111,8 @@ static void BM_ArraySlice_Sum(benchmark::State& state) {
 }
 BENCHMARK(BM_ArraySlice_Sum)->Arg(1024)->Arg(1 << 16);
 
-static void BM_Grid_Neighbors(benchmark::State& state) {
+static void BM_Grid_Neighbors(benchmark::State& state)
+{
     const auto n = static_cast<std::size_t>(state.range(0));
     mt::grid<int> g(n, n, 0);
     for (auto _ : state) {
@@ -121,7 +128,8 @@ static void BM_Grid_Neighbors(benchmark::State& state) {
 }
 BENCHMARK(BM_Grid_Neighbors)->Arg(32)->Arg(64);
 
-static void BM_Graph_Build(benchmark::State& state) {
+static void BM_Graph_Build(benchmark::State& state)
+{
     const auto n = static_cast<std::size_t>(state.range(0));
     for (auto _ : state) {
         mt::graph g(n);
@@ -134,7 +142,8 @@ static void BM_Graph_Build(benchmark::State& state) {
 }
 BENCHMARK(BM_Graph_Build)->Arg(1024)->Arg(1 << 14);
 
-static void BM_TsQueue_PushPop(benchmark::State& state) {
+static void BM_TsQueue_PushPop(benchmark::State& state)
+{
     const auto n = static_cast<int>(state.range(0));
     for (auto _ : state) {
         mt::ts_queue<int> q;
@@ -151,7 +160,8 @@ static void BM_TsQueue_PushPop(benchmark::State& state) {
 }
 BENCHMARK(BM_TsQueue_PushPop)->Arg(1024)->Arg(1 << 14);
 
-static void BM_Quadtree_InsertQuery(benchmark::State& state) {
+static void BM_Quadtree_InsertQuery(benchmark::State& state)
+{
     const auto n = static_cast<int>(state.range(0));
     for (auto _ : state) {
         mt::quadtree q({0, 0, 1024, 1024});

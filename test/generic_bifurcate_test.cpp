@@ -16,7 +16,8 @@ mt::btree<int> make_sample()
     return t;
 }
 
-TEST(BifurcateGeneric, WeightAndHeightMatchRecursiveAndIterative) {
+TEST(BifurcateGeneric, WeightAndHeightMatchRecursiveAndIterative)
+{
     auto t = make_sample();
     const auto c = t.root();
     EXPECT_EQ(mt::weight_recursive(c), 4u);
@@ -25,7 +26,8 @@ TEST(BifurcateGeneric, WeightAndHeightMatchRecursiveAndIterative) {
     EXPECT_EQ(mt::height(c), 3u);
 }
 
-TEST(BifurcateGeneric, IsomorphicVsEquivalent) {
+TEST(BifurcateGeneric, IsomorphicVsEquivalent)
+{
     auto a = make_sample();
     auto b = make_sample();
     EXPECT_TRUE(mt::bifurcate_isomorphic_nonempty(a.root(), b.root()));
@@ -37,7 +39,8 @@ TEST(BifurcateGeneric, IsomorphicVsEquivalent) {
     EXPECT_FALSE(mt::bifurcate_equal_nonempty(a.root(), b.root()));
 }
 
-TEST(BifurcateGeneric, ReachableAndTraverseVisitCount) {
+TEST(BifurcateGeneric, ReachableAndTraverseVisitCount)
+{
     auto t = make_sample();
     const auto root = t.root();
     EXPECT_TRUE(mt::reachable(root, mt::left_successor(mt::left_successor(root))));
@@ -47,7 +50,8 @@ TEST(BifurcateGeneric, ReachableAndTraverseVisitCount) {
     EXPECT_EQ(visits, 12);  // 3 phases × 4 nodes
 }
 
-TEST(BifurcateGeneric, LexicographicalTreeOrder) {
+TEST(BifurcateGeneric, LexicographicalTreeOrder)
+{
     auto a = make_sample();
     auto b = make_sample();
     EXPECT_FALSE(mt::bifurcate_less(a.root(), b.root()));
@@ -56,7 +60,8 @@ TEST(BifurcateGeneric, LexicographicalTreeOrder) {
     EXPECT_TRUE(mt::bifurcate_less(b.root(), a.root()));
 }
 
-TEST(BifurcateGeneric, RotatingWeightAndPhasedTraverse) {
+TEST(BifurcateGeneric, RotatingWeightAndPhasedTraverse)
+{
     auto t = make_sample();
     EXPECT_EQ(mt::weight_rotating(t.root()), 4u);
     std::vector<int> pre;
@@ -64,7 +69,8 @@ TEST(BifurcateGeneric, RotatingWeightAndPhasedTraverse) {
     EXPECT_EQ(pre.size(), 4u);
 }
 
-TEST(BifurcateGeneric, EmptyTrees) {
+TEST(BifurcateGeneric, EmptyTrees)
+{
     mt::btree_coord<int> e{};
     EXPECT_TRUE(mt::empty(e));
     EXPECT_EQ(mt::weight_recursive(e), 0u);

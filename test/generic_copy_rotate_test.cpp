@@ -16,7 +16,8 @@ class CopyBackwardGeneric : public ::testing::Test {};
 
 TYPED_TEST_SUITE(CopyBackwardGeneric, mt::test::EopCoreContainers);
 
-TYPED_TEST(CopyBackwardGeneric, RoundTripViaBufferMatchesSource) {
+TYPED_TEST(CopyBackwardGeneric, RoundTripViaBufferMatchesSource)
+{
     constexpr int n = 6;
     auto src = mt::test::make_iota_container<TypeParam>(n);
     const auto src_last = mt::test::filled_end(src, n);
@@ -26,7 +27,8 @@ TYPED_TEST(CopyBackwardGeneric, RoundTripViaBufferMatchesSource) {
     EXPECT_EQ(dst, mt::test::to_filled_vector(src, n));
 }
 
-TYPED_TEST(CopyBackwardGeneric, CountedCopyBackwardNMatchesBounded) {
+TYPED_TEST(CopyBackwardGeneric, CountedCopyBackwardNMatchesBounded)
+{
     constexpr int n = 5;
     auto src = mt::test::make_iota_container<TypeParam>(n);
     const auto src_last = mt::test::filled_end(src, n);
@@ -39,7 +41,8 @@ TYPED_TEST(CopyBackwardGeneric, CountedCopyBackwardNMatchesBounded) {
     EXPECT_EQ(a, b);
 }
 
-TEST(ReverseCopyBackwardGeneric, WritesReversedIntoTail) {
+TEST(ReverseCopyBackwardGeneric, WritesReversedIntoTail)
+{
     std::vector<int> src{1, 2, 3, 4};
     std::vector<int> dst(4, -1);
     const auto begin = mt::reverse_copy_backward(src.begin(), src.end(), dst.end());
@@ -52,7 +55,8 @@ class RotateGeneric : public ::testing::Test {};
 
 TYPED_TEST_SUITE(RotateGeneric, mt::test::EopCoreContainers);
 
-TYPED_TEST(RotateGeneric, PreservesMultisetAndReturnsOldFirst) {
+TYPED_TEST(RotateGeneric, PreservesMultisetAndReturnsOldFirst)
+{
     constexpr int n = 6;
     auto c = mt::test::make_iota_container<TypeParam>(n);
     const auto last = mt::test::filled_end(c, n);
@@ -67,7 +71,8 @@ TYPED_TEST(RotateGeneric, PreservesMultisetAndReturnsOldFirst) {
     EXPECT_EQ(*p, before.front());
 }
 
-TYPED_TEST(RotateGeneric, DoubleRotateRestoresWhenMiddleIsSymmetric) {
+TYPED_TEST(RotateGeneric, DoubleRotateRestoresWhenMiddleIsSymmetric)
+{
     // For length 6, rotate by 3 twice restores.
     constexpr int n = 6;
     auto c = mt::test::make_iota_container<TypeParam>(n);
@@ -82,7 +87,8 @@ TYPED_TEST(RotateGeneric, DoubleRotateRestoresWhenMiddleIsSymmetric) {
     EXPECT_EQ(mt::test::to_filled_vector(c, n), original);
 }
 
-TEST(RotateGeneric, BufferVariantMatchesRotate) {
+TEST(RotateGeneric, BufferVariantMatchesRotate)
+{
     std::vector<int> a{0, 1, 2, 3, 4, 5};
     std::vector<int> b = a;
     const auto pa = mt::rotate(a.begin(), a.begin() + 2, a.end());
@@ -91,7 +97,8 @@ TEST(RotateGeneric, BufferVariantMatchesRotate) {
     EXPECT_EQ(std::distance(a.begin(), pa), std::distance(b.begin(), pb));
 }
 
-TEST(RotateGeneric, TrivialMiddlesAreIdentity) {
+TEST(RotateGeneric, TrivialMiddlesAreIdentity)
+{
     std::vector<int> v{1, 2, 3};
     EXPECT_EQ(mt::rotate(v.begin(), v.begin(), v.end()), v.end());
     EXPECT_EQ(v, (std::vector<int>{1, 2, 3}));
@@ -99,7 +106,8 @@ TEST(RotateGeneric, TrivialMiddlesAreIdentity) {
     EXPECT_EQ(v, (std::vector<int>{1, 2, 3}));
 }
 
-TEST(CopyBackwardOverlap, RightShiftUsesCopyBackward) {
+TEST(CopyBackwardOverlap, RightShiftUsesCopyBackward)
+{
     std::vector<int> v{1, 2, 3, 4, 0, 0};
     (void)mt::copy_backward(v.begin(), v.begin() + 4, v.end());
     EXPECT_EQ(v, (std::vector<int>{1, 2, 1, 2, 3, 4}));

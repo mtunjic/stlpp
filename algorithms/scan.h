@@ -14,8 +14,7 @@ namespace mt {
 ///   std::vector<int> v{1, 2, 3, 4}, out(4);
 ///   mt::scan(v.begin(), v.end(), out.begin(), std::plus<>{});
 ///   // out == {1, 3, 6, 10}
-template <std::input_iterator I, std::sentinel_for<I> S, std::weakly_incrementable O,
-          typename Op>
+template <std::input_iterator I, std::sentinel_for<I> S, std::weakly_incrementable O, typename Op>
 O scan(I first, S last, O dest, Op op)
 {
     if (first == last) {
@@ -47,8 +46,8 @@ template <std::ranges::input_range R, typename Op>
 ///   std::vector<int> v{1, 2, 3}, out(3);
 ///   mt::exclusive_scan(v.begin(), v.end(), out.begin(), 0, std::plus<>{});
 ///   // out == {0, 1, 3}
-template <std::input_iterator I, std::sentinel_for<I> S, std::weakly_incrementable O,
-          typename T, typename Op>
+template <std::input_iterator I, std::sentinel_for<I> S, std::weakly_incrementable O, typename T,
+          typename Op>
 O exclusive_scan(I first, S last, O dest, T init, Op op)
 {
     for (; first != last; ++first, ++dest) {

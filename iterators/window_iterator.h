@@ -23,9 +23,7 @@ public:
     using pointer = void;
 
     window_iterator() = default;
-    window_iterator(I current, I stop, difference_type k)
-        : current_(current), stop_(stop), k_(k)
-    {}
+    window_iterator(I current, I stop, difference_type k) : current_(current), stop_(stop), k_(k) {}
 
     [[nodiscard]] reference operator*() const { return {current_, current_ + k_}; }
 
@@ -63,8 +61,7 @@ class window_range {
 
 public:
     window_range() = default;
-    window_range(I first, I last, std::iter_difference_t<I> k)
-        : first_(first), last_(last), k_(k)
+    window_range(I first, I last, std::iter_difference_t<I> k) : first_(first), last_(last), k_(k)
     {}
 
     [[nodiscard]] window_iterator<I> begin() const
@@ -159,9 +156,7 @@ class chunk_range {
 
 public:
     chunk_range() = default;
-    chunk_range(I first, I last, std::iter_difference_t<I> k)
-        : first_(first), last_(last), k_(k)
-    {}
+    chunk_range(I first, I last, std::iter_difference_t<I> k) : first_(first), last_(last), k_(k) {}
 
     [[nodiscard]] chunk_iterator<I> begin() const
     {

@@ -32,8 +32,7 @@ template <typename T, typename P>
     requires std::predicate<P&, const T&>
 void keep_if(std::vector<T>& v, P pred)
 {
-    v.erase(std::remove_if(v.begin(), v.end(),
-                           [&](const T& x) { return !std::invoke(pred, x); }),
+    v.erase(std::remove_if(v.begin(), v.end(), [&](const T& x) { return !std::invoke(pred, x); }),
             v.end());
 }
 

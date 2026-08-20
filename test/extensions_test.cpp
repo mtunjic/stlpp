@@ -14,7 +14,8 @@
 
 #include <gtest/gtest.h>
 
-TEST(Functors, VowelDigitLessThan) {
+TEST(Functors, VowelDigitLessThan)
+{
     EXPECT_TRUE(mt::vowel{}('e'));
     EXPECT_FALSE(mt::vowel{}('s'));
     EXPECT_TRUE(mt::digit{}('3'));
@@ -23,7 +24,8 @@ TEST(Functors, VowelDigitLessThan) {
     EXPECT_FALSE(mt::less_than<int>{5}(5));
 }
 
-TEST(Functors, OddEvenHalveModulo) {
+TEST(Functors, OddEvenHalveModulo)
+{
     EXPECT_TRUE(mt::is_odd(3));
     EXPECT_TRUE(mt::is_even(4));
     int n = 10;
@@ -34,7 +36,8 @@ TEST(Functors, OddEvenHalveModulo) {
     EXPECT_EQ(mt::identity_element(op), 1);
 }
 
-TEST(Functors, ArithmeticAndNorm) {
+TEST(Functors, ArithmeticAndNorm)
+{
     EXPECT_EQ(mt::plus<int>{}(2, 3), 5);
     EXPECT_EQ(mt::multiplies<int>{}(2, 3), 6);
     EXPECT_EQ(mt::divides<int>{}(8, 2), 4);
@@ -43,13 +46,15 @@ TEST(Functors, ArithmeticAndNorm) {
     EXPECT_EQ(mt::norm<int>{}(3, 4), 25);
 }
 
-TEST(VectorExt, KeepIfMatchesReadme) {
+TEST(VectorExt, KeepIfMatchesReadme)
+{
     std::vector<int> v{9, 0, 1, 4, 4, 0, 7, 7, 8, 0};
     mt::keep_if(v, mt::less_than<int>{8});
     EXPECT_EQ(v, (std::vector<int>{0, 1, 4, 4, 0, 7, 7, 0}));
 }
 
-TEST(VectorExt, DistinctFastEraseDeleteIf) {
+TEST(VectorExt, DistinctFastEraseDeleteIf)
+{
     std::vector<int> v{3, 1, 3, 2, 1};
     mt::distinct(v);
     EXPECT_EQ(v, (std::vector<int>{1, 2, 3}));
@@ -64,14 +69,16 @@ TEST(VectorExt, DistinctFastEraseDeleteIf) {
     EXPECT_EQ(w, (std::vector<int>{3}));
 }
 
-TEST(VectorExt, ReadNumsFromStream) {
+TEST(VectorExt, ReadNumsFromStream)
+{
     std::istringstream in{"10 20 30"};
     std::vector<int> v;
     mt::read_nums(in, v);
     EXPECT_EQ(v, (std::vector<int>{10, 20, 30}));
 }
 
-TEST(StringExt, TrimRightIfReadme) {
+TEST(StringExt, TrimRightIfReadme)
+{
     std::string s = "woow!!!!";
     mt::trim_right_if(s, '!');
     EXPECT_EQ(s, "woow");
@@ -90,7 +97,8 @@ TEST(StringExt, TrimRightIfReadme) {
     EXPECT_EQ(spaces, "trim me");
 }
 
-TEST(StringExt, CasePrefixSanitize) {
+TEST(StringExt, CasePrefixSanitize)
+{
     EXPECT_EQ(mt::to_lower("MARKO"), "marko");
     EXPECT_EQ(mt::to_upper("cpp"), "CPP");
     EXPECT_EQ(mt::to_title("hello world"), "Hello World");
@@ -107,7 +115,8 @@ TEST(StringExt, CasePrefixSanitize) {
     EXPECT_EQ(mt::floats_copy("1.5x2.25"), (std::vector<double>{1.5, 2.25}));
 }
 
-TEST(StringExt, PalindromeParseRepeat) {
+TEST(StringExt, PalindromeParseRepeat)
+{
     EXPECT_TRUE(mt::is_palindrome("abba"));
     EXPECT_FALSE(mt::is_palindrome("abc"));
     EXPECT_TRUE(mt::is_digit("42"));
@@ -121,7 +130,8 @@ TEST(StringExt, PalindromeParseRepeat) {
     EXPECT_EQ(mt::count("banana", 'a'), 3u);
 }
 
-TEST(StringExt, RemoveAndSanitizeCopy) {
+TEST(StringExt, RemoveAndSanitizeCopy)
+{
     std::string sr{"-1,2,3;name=marko$"};
     mt::remove_if(sr, [](char c) { return std::isdigit(static_cast<unsigned char>(c)) != 0; });
     EXPECT_EQ(sr, "-,,;name=marko$");
@@ -130,7 +140,8 @@ TEST(StringExt, RemoveAndSanitizeCopy) {
     EXPECT_EQ(mt::strip_copy(std::string{"  hi  "}), "hi");
 }
 
-TEST(StringExt, SetdelimAndRandomString) {
+TEST(StringExt, SetdelimAndRandomString)
+{
     std::istringstream in{"1,2,3"};
     mt::setdelim(in, ",");
     int a = 0;
@@ -148,7 +159,8 @@ TEST(StringExt, SetdelimAndRandomString) {
     }));
 }
 
-TEST(StringExt, PadChopReplaceGsub) {
+TEST(StringExt, PadChopReplaceGsub)
+{
     std::string n{"7"};
     mt::left_pad(n, 3, '0');
     EXPECT_EQ(n, "007");
@@ -169,7 +181,8 @@ TEST(StringExt, PadChopReplaceGsub) {
     EXPECT_EQ(mt::gsub_copy("aa ba", "a", "x"), "xx bx");
 }
 
-TEST(StringExt, ContainsPluralizeCrypt) {
+TEST(StringExt, ContainsPluralizeCrypt)
+{
     EXPECT_TRUE(mt::contains("hello", "ell"));
     EXPECT_TRUE(mt::contains("hello", 'h'));
     EXPECT_FALSE(mt::contains_any("hello", "xz"));
@@ -188,7 +201,8 @@ TEST(StringExt, ContainsPluralizeCrypt) {
     EXPECT_EQ(s, "secret");
 }
 
-TEST(Utils, PrintPickRandomizeStopwatch) {
+TEST(Utils, PrintPickRandomizeStopwatch)
+{
     std::ostringstream out;
     mt::print(std::vector<int>{1, 2, 3}, out);
     EXPECT_EQ(out.str(), "[ 1, 2, 3 ]\n");
@@ -206,7 +220,8 @@ TEST(Utils, PrintPickRandomizeStopwatch) {
     EXPECT_GE(t.stop(), 0.0);
 }
 
-TEST(Utils, ToMapListArrayDigitSumBench) {
+TEST(Utils, ToMapListArrayDigitSumBench)
+{
     auto m = mt::to_map(std::vector{std::pair{1, "a"}, std::pair{2, "b"}, std::pair{1, "A"}});
     EXPECT_EQ(m.size(), 2u);
     EXPECT_EQ(m[1], "A");
@@ -225,7 +240,8 @@ TEST(Utils, ToMapListArrayDigitSumBench) {
     EXPECT_GE(mt::bench([] {}), 0.0);
 }
 
-TEST(Utils, ThreadGuardJoins) {
+TEST(Utils, ThreadGuardJoins)
+{
     std::atomic<int> n{0};
     std::thread worker{[&] { n = 1; }};
     {

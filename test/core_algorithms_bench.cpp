@@ -7,7 +7,8 @@
 
 #include <benchmark/benchmark.h>
 
-static void BM_Apply_Square(benchmark::State& state) {
+static void BM_Apply_Square(benchmark::State& state)
+{
     std::vector<int> values(static_cast<std::size_t>(state.range(0)));
     std::iota(values.begin(), values.end(), 0);
     for (auto _ : state) {
@@ -18,7 +19,8 @@ static void BM_Apply_Square(benchmark::State& state) {
 }
 BENCHMARK(BM_Apply_Square)->Arg(1024)->Arg(1 << 16);
 
-static void BM_ReverseN_Vector(benchmark::State& state) {
+static void BM_ReverseN_Vector(benchmark::State& state)
+{
     std::vector<int> values(static_cast<std::size_t>(state.range(0)));
     std::iota(values.begin(), values.end(), 0);
     for (auto _ : state) {
@@ -30,7 +32,8 @@ static void BM_ReverseN_Vector(benchmark::State& state) {
 }
 BENCHMARK(BM_ReverseN_Vector)->Arg(1024)->Arg(1 << 16);
 
-static void BM_SteinGcd(benchmark::State& state) {
+static void BM_SteinGcd(benchmark::State& state)
+{
     const int n = static_cast<int>(state.range(0));
     for (auto _ : state) {
         int g = mt::stein_gcd(n, n / 2 + 1);
@@ -39,7 +42,8 @@ static void BM_SteinGcd(benchmark::State& state) {
 }
 BENCHMARK(BM_SteinGcd)->Arg(1024)->Arg(1 << 20);
 
-static void BM_MinMax(benchmark::State& state) {
+static void BM_MinMax(benchmark::State& state)
+{
     std::vector<int> values(static_cast<std::size_t>(state.range(0)));
     std::iota(values.begin(), values.end(), 0);
     for (auto _ : state) {
@@ -51,7 +55,8 @@ static void BM_MinMax(benchmark::State& state) {
 }
 BENCHMARK(BM_MinMax)->Arg(1024)->Arg(1 << 16);
 
-static void BM_Zip(benchmark::State& state) {
+static void BM_Zip(benchmark::State& state)
+{
     std::vector<int> a(static_cast<std::size_t>(state.range(0)));
     std::vector<int> b(static_cast<std::size_t>(state.range(0)));
     std::iota(a.begin(), a.end(), 0);
@@ -65,7 +70,8 @@ static void BM_Zip(benchmark::State& state) {
 }
 BENCHMARK(BM_Zip)->Arg(1024)->Arg(1 << 14);
 
-static void BM_MedianSort(benchmark::State& state) {
+static void BM_MedianSort(benchmark::State& state)
+{
     const auto n = static_cast<std::size_t>(state.range(0));
     std::vector<int> proto(n);
     std::iota(proto.begin(), proto.end(), 0);
@@ -80,7 +86,8 @@ static void BM_MedianSort(benchmark::State& state) {
 }
 BENCHMARK(BM_MedianSort)->Arg(256)->Arg(4096);
 
-static void BM_Matches_Kmp(benchmark::State& state) {
+static void BM_Matches_Kmp(benchmark::State& state)
+{
     const auto n = static_cast<std::size_t>(state.range(0));
     const std::string text(n, 'a');
     const std::string pat = "aaa";
@@ -92,7 +99,8 @@ static void BM_Matches_Kmp(benchmark::State& state) {
 }
 BENCHMARK(BM_Matches_Kmp)->Arg(1024)->Arg(1 << 16);
 
-static void BM_ShiftBy(benchmark::State& state) {
+static void BM_ShiftBy(benchmark::State& state)
+{
     std::vector<int> values(static_cast<std::size_t>(state.range(0)));
     std::iota(values.begin(), values.end(), 0);
     for (auto _ : state) {

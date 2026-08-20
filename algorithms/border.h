@@ -32,8 +32,8 @@ border(R&& range, const std::ranges::range_value_t<R>& fill)
 ///   auto b = mt::border(g, 0);
 ///   // {{0,0,0,0}, {0,1,2,0}, {0,3,4,0}, {0,0,0,0}}
 template <typename T>
-[[nodiscard]] std::vector<std::vector<T>>
-border(const std::vector<std::vector<T>>& grid, const T& fill)
+[[nodiscard]] std::vector<std::vector<T>> border(const std::vector<std::vector<T>>& grid,
+                                                 const T& fill)
 {
     if (grid.empty()) {
         return {{fill, fill}, {fill, fill}};

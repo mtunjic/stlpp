@@ -24,7 +24,9 @@ public:
 
     filter_iterator() = default;
     filter_iterator(I current, I last, P pred)
-        : current_(std::move(current)), last_(std::move(last)), pred_(std::move(pred))
+        : current_(std::move(current)),
+          last_(std::move(last)),
+          pred_(std::move(pred))
     {
         satisfy();
     }
@@ -74,7 +76,9 @@ class filter_range {
 public:
     filter_range() = default;
     filter_range(I first, I last, P pred)
-        : first_(std::move(first)), last_(std::move(last)), pred_(std::move(pred))
+        : first_(std::move(first)),
+          last_(std::move(last)),
+          pred_(std::move(pred))
     {}
 
     [[nodiscard]] filter_iterator<I, P> begin() const { return {first_, last_, pred_}; }

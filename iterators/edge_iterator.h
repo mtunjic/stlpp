@@ -34,8 +34,8 @@ public:
     {
         I next = current_;
         ++next;
-            return {static_cast<std::iter_value_t<I>>(*current_),
-                    static_cast<std::iter_value_t<I>>(*next)};
+        return {static_cast<std::iter_value_t<I>>(*current_),
+                static_cast<std::iter_value_t<I>>(*next)};
     }
 
     edge_iterator& operator++()
@@ -51,10 +51,7 @@ public:
         return tmp;
     }
 
-    friend bool operator==(edge_iterator a, edge_iterator b)
-    {
-        return a.current_ == b.current_;
-    }
+    friend bool operator==(edge_iterator a, edge_iterator b) { return a.current_ == b.current_; }
 
     [[nodiscard]] I base() const { return current_; }
     [[nodiscard]] I limit() const { return limit_; }

@@ -6,15 +6,15 @@
 #define STLPP_VERSION "0.1.0"
 
 #include "apply.h"
-#include "binary_counter.h"
 #include "bifurcate.h"
+#include "binary_counter.h"
 #include "border.h"
 #include "combination.h"
 #include "compare.h"
 #include "concepts.h"
 #include "copy.h"
-#include "find.h"
 #include "fill.h"
+#include "find.h"
 #include "gcd.h"
 #include "integer.h"
 #include "iota.h"
@@ -52,8 +52,8 @@
 
 #include "functors.h"
 #include "string_ext.h"
-#include "vector_ext.h"
 #include "utils.h"
+#include "vector_ext.h"
 
 #include "counting_output_iterator.h"
 #include "cycle_iterator.h"

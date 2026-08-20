@@ -31,7 +31,8 @@ public:
 
     flatten_iterator() = default;
     flatten_iterator(Outer current, Outer last)
-        : outer_(std::move(current)), outer_last_(std::move(last))
+        : outer_(std::move(current)),
+          outer_last_(std::move(last))
     {
         skip_empty();
     }

@@ -6,9 +6,9 @@
 
 #include <gtest/gtest.h>
 
-TEST(Split, ReadmeSemicolon_KeepsCommaGroups) {
-    const std::string line{
-        "man,meal,moon;fat,food,feel;cat,coat,cook;love,leg,lunch"};
+TEST(Split, ReadmeSemicolon_KeepsCommaGroups)
+{
+    const std::string line{"man,meal,moon;fat,food,feel;cat,coat,cook;love,leg,lunch"};
     std::vector<std::string> words;
     mt::split(line, ";", words);
 
@@ -19,33 +19,35 @@ TEST(Split, ReadmeSemicolon_KeepsCommaGroups) {
     EXPECT_EQ(words[3], "love,leg,lunch");
 }
 
-TEST(Split, ReadmeCharSet_SplitsOnAnyDelimiter) {
-    const std::string line{
-        "man,meal,moon;fat,food,feel;cat,coat,cook;love,leg,lunch"};
+TEST(Split, ReadmeCharSet_SplitsOnAnyDelimiter)
+{
+    const std::string line{"man,meal,moon;fat,food,feel;cat,coat,cook;love,leg,lunch"};
     std::list<std::string> words;
     mt::split(line, ",;.", words);
 
-    const std::vector<std::string> expected{
-        "man", "meal", "moon", "fat", "food", "feel",
-        "cat", "coat", "cook", "love", "leg", "lunch"};
+    const std::vector<std::string> expected{"man", "meal", "moon", "fat",  "food", "feel",
+                                            "cat", "coat", "cook", "love", "leg",  "lunch"};
     EXPECT_EQ(std::vector<std::string>(words.begin(), words.end()), expected);
 }
 
-TEST(Split, EmptyInput_EmitsOneEmptyToken) {
+TEST(Split, EmptyInput_EmitsOneEmptyToken)
+{
     std::vector<std::string> words;
     mt::split("", ";", words);
     ASSERT_EQ(words.size(), 1u);
     EXPECT_TRUE(words.front().empty());
 }
 
-TEST(Split, NoDelimiter_EmitsWholeString) {
+TEST(Split, NoDelimiter_EmitsWholeString)
+{
     std::vector<std::string> words;
     mt::split("alpha", ";", words);
     ASSERT_EQ(words.size(), 1u);
     EXPECT_EQ(words.front(), "alpha");
 }
 
-TEST(Split, ConsecutiveDelimiters_EmitEmptyTokens) {
+TEST(Split, ConsecutiveDelimiters_EmitEmptyTokens)
+{
     std::vector<std::string> words;
     mt::split("a;;b", ";", words);
     ASSERT_EQ(words.size(), 3u);
@@ -54,7 +56,8 @@ TEST(Split, ConsecutiveDelimiters_EmitEmptyTokens) {
     EXPECT_EQ(words[2], "b");
 }
 
-TEST(Split, LeadingAndTrailingDelimiter_EmitsEmptyEdges) {
+TEST(Split, LeadingAndTrailingDelimiter_EmitsEmptyEdges)
+{
     std::vector<std::string> words;
     mt::split(";a;", ";", words);
     ASSERT_EQ(words.size(), 3u);
@@ -63,40 +66,47 @@ TEST(Split, LeadingAndTrailingDelimiter_EmitsEmptyEdges) {
     EXPECT_TRUE(words[2].empty());
 }
 
-TEST(Split, SingleCharDelimiter_MatchesStringViewOverload) {
+TEST(Split, SingleCharDelimiter_MatchesStringViewOverload)
+{
     std::vector<std::string> words;
     mt::split("x-y-z", '-', words);
     const auto copied = mt::split_copy("x-y-z", "-");
     EXPECT_EQ(words, copied);
 }
 
-TEST(Join, EmptyRange_ReturnsEmptyString) {
+TEST(Join, EmptyRange_ReturnsEmptyString)
+{
     const std::vector<std::string> parts;
     EXPECT_TRUE(mt::join(parts, ",").empty());
 }
 
-TEST(Join, SinglePart_OmitsSeparator) {
+TEST(Join, SinglePart_OmitsSeparator)
+{
     const std::vector<std::string> parts{"only"};
     EXPECT_EQ(mt::join(parts, ","), "only");
 }
 
-TEST(Join, ManyParts_InsertsSeparator) {
+TEST(Join, ManyParts_InsertsSeparator)
+{
     const std::vector<std::string> parts{"a", "b", "c"};
     EXPECT_EQ(mt::join(parts, ","), "a,b,c");
 }
 
-TEST(Join, RoundTripWithSingleCharDelimiter) {
+TEST(Join, RoundTripWithSingleCharDelimiter)
+{
     const std::string src{"a;;b;c;"};
     const auto parts = mt::split_copy(src, ";");
     EXPECT_EQ(mt::join(parts, ";"), src);
 }
 
-TEST(JoinCopy, MatchesJoin) {
+TEST(JoinCopy, MatchesJoin)
+{
     const std::vector<std::string> parts{"man", "meal", "moon"};
     EXPECT_EQ(mt::join_copy(parts, ","), mt::join(parts, ","));
 }
 
-TEST(Split, WideString_SplitsOnWideDelimiter) {
+TEST(Split, WideString_SplitsOnWideDelimiter)
+{
     std::vector<std::wstring> words;
     mt::split(std::wstring{L"one|two"}, std::wstring{L"|"}, words);
     ASSERT_EQ(words.size(), 2u);

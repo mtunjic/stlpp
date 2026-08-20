@@ -72,16 +72,16 @@ void split(std::wstring_view input, wchar_t delim, Container& dest)
     split(input, std::wstring_view(&delim, 1), dest);
 }
 
-[[nodiscard]] inline std::vector<std::string>
-split_copy(std::string_view input, std::string_view delims)
+[[nodiscard]] inline std::vector<std::string> split_copy(std::string_view input,
+                                                         std::string_view delims)
 {
     std::vector<std::string> tokens;
     split(input, delims, tokens);
     return tokens;
 }
 
-[[nodiscard]] inline std::vector<std::wstring>
-split_copy(std::wstring_view input, std::wstring_view delims)
+[[nodiscard]] inline std::vector<std::wstring> split_copy(std::wstring_view input,
+                                                          std::wstring_view delims)
 {
     std::vector<std::wstring> tokens;
     split(input, delims, tokens);
@@ -90,8 +90,7 @@ split_copy(std::wstring_view input, std::wstring_view delims)
 
 template <Input_iterator I, Character Char>
     requires std::convertible_to<Value_type<I>, std::basic_string_view<Char>>
-[[nodiscard]] std::basic_string<Char>
-join(I first, I last, std::basic_string_view<Char> sep)
+[[nodiscard]] std::basic_string<Char> join(I first, I last, std::basic_string_view<Char> sep)
 {
     std::basic_string<Char> result;
     if (first == last) {
