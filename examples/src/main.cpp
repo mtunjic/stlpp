@@ -96,6 +96,7 @@ const Demo* find_demo(std::string_view choice)
             return &kDemos[idx - 1];
         }
     }
+
     for (const auto& d : kDemos) {
         if (d.key == choice) {
             return &d;

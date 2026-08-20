@@ -1,4 +1,25 @@
 ---
+# Layout is classic K&R (the example, not “brace at EOL for functions”):
+#   int max(int a, int b)
+#   {
+#       if (a > b) {
+#           return a;
+#       } else {
+#           return b;
+#       }
+#   }
+# Function `{` on the next line; if/for/while `{` at end of the statement;
+# `} else {` and `} while (` attached. 4 spaces. `if (` with a space, `max(`
+# without. Spaces around binary operators.
+#
+# Blank lines are human-owned (clang-format cannot see “new idea”):
+#   - add a blank when an if/for starts a new action
+#   - add a blank after a long block before the next phase
+#   - add a blank between distinct tasks
+#   - keep a definition next to the check/loop that uses it; don’t pad short
+#     functions
+# Formatter only keeps at most one blank (MaxEmptyLinesToKeep) and strips a
+# blank right after `{`. Do not set SeparateDefinitionBlocks: Always.
 Language: Cpp
 BasedOnStyle: LLVM
 Standard: c++20
@@ -25,6 +46,7 @@ BraceWrapping:
   AfterExternBlock: false
   BeforeCatch: false
   BeforeElse: false
+  BeforeWhile: false
   IndentBraces: false
   SplitEmptyFunction: false
   SplitEmptyRecord: false

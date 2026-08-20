@@ -113,6 +113,7 @@ void demo_orbit_rho()
         x = f(x);
     }
     std::cout << "[" << connect << "]";
+
     std::cout << "\nCycle walk (λ steps):\n  ";
     x = connect;
     for (std::size_t i = 0; i < cycle; ++i) {
@@ -123,6 +124,7 @@ void demo_orbit_rho()
         }
     }
     std::cout << " → (" << connect << "…)\n\n";
+
     std::cout << "Why it matters: the same algorithms detect loops in iterator\n"
                  "graphs, hash chains, and state machines — without building the\n"
                  "whole orbit in memory.\n";
@@ -572,6 +574,7 @@ void demo_components()
             }
         }
     }
+
     // A few “bridges” that may merge large regions.
     for (int i = 0; i < 6; ++i) {
         const int a = static_cast<int>(rng() % N);
@@ -679,6 +682,7 @@ void demo_adaptive_sort()
         for (int v : base) {
             data.emplace_back(v);
         }
+
         std::vector<SortProbe> buffer(static_cast<std::size_t>(n_buf));
         SortProbe::moves = 0;
         SortProbe::comps = 0;
@@ -689,6 +693,7 @@ void demo_adaptive_sort()
                                       return a.value < b.value;
                                   });
         const auto t1 = std::chrono::steady_clock::now();
+
         const bool sorted =
             std::is_sorted(data.begin(), data.end(), [](const SortProbe& a, const SortProbe& b) {
                 return a.value < b.value;
@@ -791,6 +796,7 @@ void demo_quadtree_query()
         std::cout << "cloud empty — nothing to query.\n";
         return;
     }
+
     const mt::point_2d first_guess = nearest_of(box_hits);
     const double first_d = std::sqrt(dist2(probe, first_guess));
     const double refine_r = first_d + 1e-9;
@@ -1025,6 +1031,7 @@ void demo_text_pipeline()
     for (std::size_t i = 0; i < std::min<std::size_t>(8, freq.size()); ++i) {
         std::cout << "  " << std::setw(14) << freq[i].word << "  ×" << freq[i].n << "\n";
     }
+
     std::cout << "\nunwords(first 8 body tokens, original order) =\n  ";
     auto original = mt::words(mt::unlines(body));
     if (original.size() > 8) {
