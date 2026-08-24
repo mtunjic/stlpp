@@ -60,6 +60,16 @@ TEST(Random, Double_AllValuesInsideBounds)
         std::all_of(values.begin(), values.end(), [](double x) { return x >= 0.5 && x < 5.0; }));
 }
 
+TEST(Random, IntBoundsCanFillCharRange)
+{
+    std::mt19937_64 rng{8};
+    std::vector<char> values(100);
+    mt::random(values, 0, 61, rng);
+
+    EXPECT_TRUE(std::all_of(values.begin(), values.end(),
+                            [](char x) { return x >= 0 && x <= 61; }));
+}
+
 TEST(RandomIota, ResultIsPermutationOfZeroToNMinusOne)
 {
     std::mt19937_64 rng{123};

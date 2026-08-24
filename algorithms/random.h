@@ -43,10 +43,12 @@ template <std::forward_iterator I, std::sentinel_for<I> S, Uniform_value T, type
              std::indirectly_writable<I, T>
 void random(I first, S last, T lo, T hi, URBG&& rng)
 {
+    using Output = std::iter_value_t<I>;
+
     const auto [a, b] = std::minmax(lo, hi);
     if (a == b) {
         for (; first != last; ++first) {
-            *first = a;
+            *first = static_cast<Output>(a);
         }
         return;
     }
@@ -56,12 +58,12 @@ void random(I first, S last, T lo, T hi, URBG&& rng)
         std::uniform_int_distribution<Dist_int> dist(static_cast<Dist_int>(a),
                                                      static_cast<Dist_int>(b));
         for (; first != last; ++first) {
-            *first = static_cast<T>(dist(rng));
+            *first = static_cast<Output>(dist(rng));
         }
     } else {
         std::uniform_real_distribution<T> dist(a, b);
         for (; first != last; ++first) {
-            *first = dist(rng);
+            *first = static_cast<Output>(dist(rng));
         }
     }
 }
