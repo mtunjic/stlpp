@@ -3,6 +3,7 @@ import os
 from conan import ConanFile
 from conan.tools.build import can_run, check_min_cppstd
 from conan.tools.cmake import CMake, cmake_layout
+from conan.tools.files import load
 
 
 class StlppExamplesConan(ConanFile):
@@ -17,18 +18,21 @@ class StlppExamplesConan(ConanFile):
     """
 
     name = "stlpp_examples"
-    version = "0.1.0"
     package_type = "application"
     settings = "os", "compiler", "build_type", "arch"
     generators = "CMakeDeps", "CMakeToolchain"
     exports_sources = "CMakeLists.txt", "src/*"
+
+    def set_version(self):
+        version_file = os.path.join(self.recipe_folder, "..", "VERSION")
+        self.version = load(self, version_file).strip()
 
     def validate(self):
         check_min_cppstd(self, 20)
 
     def requirements(self):
         # Prefer an editable or just-created local package of the same version.
-        self.requires("stlpp/0.1.0")
+        self.requires(f"stlpp/{self.version}")
 
     def layout(self):
         cmake_layout(self)

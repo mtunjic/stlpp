@@ -24,12 +24,12 @@ cmake --build build
 ./build/stlpp_examples
 ```
 
-If `stlpp/0.1.0` is not in the cache yet:
+If the matching `stlpp/<version>` is not in the cache yet:
 
 ```sh
 # from repo root
 conan create . --build=missing -s compiler.cppstd=20
-# or: conan editable add . stlpp/0.1.0
+# or: conan editable add .
 ```
 
 ## Demos

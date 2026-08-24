@@ -41,6 +41,23 @@ The shortest complete Debug cycle is:
 cmake --workflow --preset debug
 ```
 
+For the same cycle with reusable clean, strict-warning, and parallel-build options:
+
+```powershell
+./scripts/workflow.ps1 -Preset debug
+./scripts/workflow.ps1 -Preset debug -Fresh -CleanFirst -WarningsAsErrors -Jobs 8
+```
+
+From Bash, use the portable Ninja presets:
+
+```sh
+bash scripts/workflow.sh --preset ninja-debug
+bash scripts/workflow.sh --preset ninja-debug --fresh --clean-first --warnings-as-errors --jobs 8
+```
+
+The older `scripts/build.*` and `scripts/build_and_test.*` entry points forward to these
+workflow runners.
+
 For incremental work, run the stages separately:
 
 ```powershell
@@ -48,6 +65,23 @@ cmake --preset debug
 cmake --build --preset debug --target stlpp_tests
 ctest --preset debug
 ```
+
+Clean only the generated Debug artifacts, or clean and rebuild them immediately:
+
+```powershell
+cmake --build --preset debug --target clean
+cmake --build --preset debug --clean-first
+```
+
+`--fresh` removes the CMake cache and configure metadata before configuring again. Combine it
+with the clean target for a complete clean configure, build, and test cycle:
+
+```powershell
+cmake --build --preset debug --target clean
+cmake --workflow --preset debug --fresh
+```
+
+Replace `debug` with `release`, `relwithdebinfo`, or `sanitize` as needed.
 
 Available default Windows configurations:
 
@@ -99,6 +133,11 @@ Visual Studio is multi-config, so the build and test presets select `Debug`, `Re
 GoogleTest and Google Benchmark are fetched only when their corresponding targets are enabled. Their archives are pinned by version and SHA-256. Set `STLPP_WARNINGS_AS_ERRORS=ON` for strict CI builds; it is off by default for compiler portability.
 
 **Generic / concept tests** (EoP-style): `test/concept_axioms_test.cpp`, `test/generic_*_test.cpp`, and helpers in `test/support/`. Behavioral reference: [*Elements of Programming*](https://elementsofprogramming.com/eop.pdf).
+
+### Releases
+
+`VERSION` is the authoritative stable semantic version. Maintainer instructions for validating,
+tagging, packaging, and publishing a release are in [`RELEASE.md`](RELEASE.md).
 
 ### Use in an existing C++ project
 
@@ -152,7 +191,7 @@ cmake -S . -B build -DCMAKE_PREFIX_PATH=/path/to/prefix
 
 #### 3. Conan 2
 
-Once from this repo (puts `stlpp/0.1.0` in the local cache):
+Once from a tagged checkout (the recipe reads `VERSION` and creates `stlpp/<version>`):
 
 ```sh
 conan create . --build=missing -s compiler.cppstd=20
@@ -162,7 +201,7 @@ In your app, `conanfile.txt`:
 
 ```ini
 [requires]
-stlpp/0.1.0
+stlpp/<version>
 
 [generators]
 CMakeDeps

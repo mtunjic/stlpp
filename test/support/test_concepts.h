@@ -70,8 +70,9 @@ int effective_fill(int requested)
 {
     if constexpr (is_std_array_v<Container>) {
         return std::min(requested, static_cast<int>(Container{}.size()));
+    } else {
+        return requested;
     }
-    return requested;
 }
 
 template <typename Container>
@@ -80,8 +81,9 @@ auto filled_end(Container& c, int requested_fill)
     const int n = effective_fill<Container>(requested_fill);
     if constexpr (is_std_array_v<Container>) {
         return c.begin() + n;
+    } else {
+        return c.end();
     }
-    return c.end();
 }
 
 template <typename Container>

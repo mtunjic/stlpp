@@ -1,5 +1,8 @@
 cmake_minimum_required(VERSION 3.25)
-project(stlpp VERSION 0.1.0 LANGUAGES CXX)
+
+include(cmake/StlppVersion.cmake)
+stlpp_read_version(STLPP_VERSION "${CMAKE_CURRENT_SOURCE_DIR}/VERSION")
+project(stlpp VERSION "${STLPP_VERSION}" LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
@@ -15,7 +18,7 @@ include(CTest)
 add_library(stlpp INTERFACE)
 add_library(stlpp::stlpp ALIAS stlpp)
 target_include_directories(stlpp INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/algorithms>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/extensions>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/iterators>
@@ -259,4 +262,4 @@ install(FILES
     "${CMAKE_CURRENT_BINARY_DIR}/stlppConfig.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/stlppConfigVersion.cmake"
     DESTINATION ${CMAKE_INSTALL_DATADIR}/stlpp)
-install(FILES LICENSE DESTINATION ${CMAKE_INSTALL_DATADIR}/stlpp)
+install(FILES LICENSE VERSION DESTINATION ${CMAKE_INSTALL_DATADIR}/stlpp)

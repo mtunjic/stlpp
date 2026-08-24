@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  version:
+    name: Version metadata
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Validate version metadata
+        run: cmake -P cmake/ValidateVersion.cmake
+
+  build:
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: MSVC 2026 Debug
+            os: windows-2025-vs2026
+            preset: debug
+          - name: GCC Debug
+            os: ubuntu-24.04
+            preset: ninja-debug
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Configure
+        run: cmake --preset "${{ matrix.preset }}" -DSTLPP_WARNINGS_AS_ERRORS=ON
+      - name: Build
+        run: cmake --build --preset "${{ matrix.preset }}"
+      - name: Test
+        run: ctest --preset "${{ matrix.preset }}" --output-on-failure
+
+  conan:
+    name: Conan 2 package
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Install Conan
+        run: pipx install "conan==2.31.2"
+      - name: Create profile
+        run: conan profile detect --force
+      - name: Create and test package
+        run: conan create . --build=missing -s compiler.cppstd=20
+
+  vcpkg:
+    name: vcpkg overlay port
+    runs-on: windows-2025-vs2026
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - name: Install overlay port
+        shell: pwsh
+        run: >-
+          & "$env:VCPKG_INSTALLATION_ROOT\vcpkg.exe" install stlpp
+          "--overlay-ports=$env:GITHUB_WORKSPACE\ports" --triplet x64-windows

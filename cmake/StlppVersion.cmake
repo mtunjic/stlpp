@@ -1,0 +1,30 @@
+include_guard(GLOBAL)
+
+function(stlpp_validate_version version context)
+    if(NOT "${version}" MATCHES "^[0-9]+\\.[0-9]+\\.[0-9]+$")
+        message(FATAL_ERROR
+            "${context} must contain a stable semantic version such as 1.2.3; got '${version}'")
+    endif()
+endfunction()
+
+function(stlpp_version_components version major minor patch)
+    stlpp_validate_version("${version}" "version")
+    string(REPLACE "." ";" components "${version}")
+    list(GET components 0 major_value)
+    list(GET components 1 minor_value)
+    list(GET components 2 patch_value)
+    set(${major} "${major_value}" PARENT_SCOPE)
+    set(${minor} "${minor_value}" PARENT_SCOPE)
+    set(${patch} "${patch_value}" PARENT_SCOPE)
+endfunction()
+
+function(stlpp_read_version output version_file)
+    if(NOT EXISTS "${version_file}")
+        message(FATAL_ERROR "Version file not found: ${version_file}")
+    endif()
+
+    file(READ "${version_file}" version)
+    string(STRIP "${version}" version)
+    stlpp_validate_version("${version}" "${version_file}")
+    set(${output} "${version}" PARENT_SCOPE)
+endfunction()

@@ -1,12 +1,11 @@
 from conan import ConanFile
 from conan.tools.build import check_min_cppstd
-from conan.tools.files import copy, save
+from conan.tools.files import copy, load, save
 import os
 
 
 class StlppConan(ConanFile):
     name = "stlpp"
-    version = "0.1.0"
     license = "MIT"
     author = "Marko Tunjić"
     url = "https://github.com/mtunjic/stlpp"
@@ -16,9 +15,12 @@ class StlppConan(ConanFile):
     package_type = "header-library"
     no_copy_source = True
     settings = "os", "compiler", "build_type", "arch"
+    exports = "VERSION"
     exports_sources = (
+        "VERSION",
         "CMakeLists.txt",
         "cmake/*",
+        "include/*.h",
         "algorithms/*.h",
         "containers/*.h",
         "iterators/*.h",
@@ -26,6 +28,9 @@ class StlppConan(ConanFile):
         "utils.h",
         "LICENSE",
     )
+
+    def set_version(self):
+        self.version = load(self, os.path.join(self.recipe_folder, "VERSION")).strip()
 
     def validate(self):
         check_min_cppstd(self, 20)
@@ -35,7 +40,7 @@ class StlppConan(ConanFile):
 
     def layout(self):
         self.cpp.source.includedirs = [
-            ".",
+            "include",
             "algorithms",
             "containers",
             "iterators",

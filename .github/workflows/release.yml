@@ -1,0 +1,66 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Validate tag and create release
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Validate annotated version tag
+        shell: bash
+        run: |
+          if [[ "$(git cat-file -t "$GITHUB_REF_NAME")" != "tag" ]]; then
+            echo "Release tags must be annotated: git tag -a $GITHUB_REF_NAME" >&2
+            exit 1
+          fi
+          cmake "-DSTLPP_GIT_TAG=$GITHUB_REF_NAME" -P cmake/ValidateVersion.cmake
+
+      - name: Configure release
+        run: cmake --preset ninja-release -DSTLPP_WARNINGS_AS_ERRORS=ON
+
+      - name: Compile release
+        run: cmake --build --preset ninja-release
+
+      - name: Test release
+        run: ctest --preset ninja-release --output-on-failure
+
+      - name: Build install-tree archives
+        shell: bash
+        run: |
+          version="$(tr -d '[:space:]' < VERSION)"
+          package="stlpp-$version"
+          cmake --preset ninja-pkg
+          cmake --build --preset ninja-pkg
+          cmake --install out/build/ninja-pkg --prefix "$GITHUB_WORKSPACE/out/package/$package"
+          cd out/package
+          cmake -E tar czf "$package.tar.gz" "$package"
+          cmake -E tar cf "$package.zip" --format=zip "$package"
+
+      - name: Create GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="$(tr -d '[:space:]' < VERSION)"
+          gh release create "$GITHUB_REF_NAME" \
+            "out/package/stlpp-$version.tar.gz" \
+            "out/package/stlpp-$version.zip" \
+            --verify-tag \
+            --generate-notes \
+            --title "stlpp $version"
