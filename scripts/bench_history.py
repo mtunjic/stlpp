@@ -41,6 +41,11 @@ def to_ns(value: float, unit: str) -> float:
 
 def find_binary() -> Path:
     candidates = [
+        ROOT / "out" / "build" / "vs" / "benchmark" / "Release" / "stlpp_bench.exe",
+        ROOT / "out" / "build" / "ninja-benchmark" / "stlpp_bench.exe",
+        ROOT / "out" / "build" / "ninja-benchmark" / "stlpp_bench",
+        ROOT / "out" / "build" / "benchmark" / "stlpp_bench.exe",
+        ROOT / "out" / "build" / "benchmark" / "stlpp_bench",
         ROOT / "build" / "stlpp_bench.exe",
         ROOT / "build" / "stlpp_bench",
         ROOT / "build" / "Release" / "stlpp_bench.exe",
@@ -54,7 +59,8 @@ def find_binary() -> Path:
             return path
     raise FileNotFoundError(
         "stlpp_bench not found. Build it first:\n"
-        "  cmake --build build --target stlpp_bench"
+        "  cmake --preset benchmark\n"
+        "  cmake --build --preset benchmark"
     )
 
 

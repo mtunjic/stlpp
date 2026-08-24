@@ -1,57 +1,420 @@
 {
   "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 25,
+    "patch": 0
+  },
   "configurePresets": [
     {
-      "name": "default",
-      "displayName": "Debug (Ninja)",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build",
+      "name": "common",
+      "hidden": true,
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+        "BUILD_TESTING": "ON",
+        "STLPP_BUILD_BENCHMARKS": "OFF",
+        "STLPP_BUILD_EXAMPLES": "OFF",
+        "STLPP_ENABLE_IPO": "OFF",
+        "STLPP_SANITIZE": "OFF",
+        "STLPP_WARNINGS_AS_ERRORS": "OFF"
       }
+    },
+    {
+      "name": "vs-base",
+      "hidden": true,
+      "inherits": "common",
+      "generator": "Visual Studio 18 2026",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/out/build/vs/${presetName}",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "debug",
+      "displayName": "Debug (Visual Studio)",
+      "description": "Visual Studio Debug build with tests; works from ordinary PowerShell",
+      "inherits": "vs-base"
     },
     {
       "name": "release",
-      "displayName": "Release (Ninja)",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build-release",
-      "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
-      }
+      "displayName": "Release (Visual Studio)",
+      "description": "Visual Studio optimized build with tests",
+      "inherits": "vs-base"
+    },
+    {
+      "name": "relwithdebinfo",
+      "displayName": "RelWithDebInfo (Visual Studio)",
+      "description": "Visual Studio optimized build with debug information and tests",
+      "inherits": "vs-base"
     },
     {
       "name": "sanitize",
-      "displayName": "Debug + ASan/UBSan",
-      "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build-sanitize",
+      "displayName": "Sanitizers (Visual Studio)",
+      "description": "Visual Studio RelWithDebInfo build with AddressSanitizer",
+      "inherits": "vs-base",
       "cacheVariables": {
-        "CMAKE_BUILD_TYPE": "Debug",
-        "STLPP_SANITIZE": "ON",
-        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+        "STLPP_SANITIZE": "ON"
+      }
+    },
+    {
+      "name": "benchmark",
+      "displayName": "Release benchmarks (Visual Studio)",
+      "description": "Visual Studio Release benchmark build with IPO/LTO",
+      "inherits": "vs-base",
+      "cacheVariables": {
+        "BUILD_TESTING": "OFF",
+        "STLPP_BUILD_BENCHMARKS": "ON",
+        "STLPP_ENABLE_IPO": "ON"
       }
     },
     {
       "name": "pkg",
-      "displayName": "Installable package (no tests)",
+      "displayName": "Installable package (Visual Studio)",
+      "description": "Visual Studio Release package build without test dependencies",
+      "inherits": "vs-base",
+      "cacheVariables": {
+        "BUILD_TESTING": "OFF"
+      }
+    },
+    {
+      "name": "ninja-base",
+      "hidden": true,
+      "inherits": "common",
       "generator": "Ninja",
-      "binaryDir": "${sourceDir}/build-pkg",
+      "binaryDir": "${sourceDir}/out/build/${presetName}"
+    },
+    {
+      "name": "ninja-compile-base",
+      "hidden": true,
+      "inherits": "ninja-base",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "ninja-debug",
+      "displayName": "Debug (Ninja)",
+      "description": "Portable single-config Ninja Debug build with tests",
+      "inherits": "ninja-compile-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "ninja-release",
+      "displayName": "Release (Ninja)",
+      "description": "Portable single-config Ninja Release build with tests",
+      "inherits": "ninja-compile-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    },
+    {
+      "name": "ninja-relwithdebinfo",
+      "displayName": "RelWithDebInfo (Ninja)",
+      "description": "Portable optimized Ninja build with debug information and tests",
+      "inherits": "ninja-compile-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+      }
+    },
+    {
+      "name": "ninja-sanitize",
+      "displayName": "Sanitizers (Ninja)",
+      "description": "Portable RelWithDebInfo Ninja build with supported sanitizers",
+      "inherits": "ninja-compile-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "STLPP_SANITIZE": "ON"
+      }
+    },
+    {
+      "name": "ninja-benchmark",
+      "displayName": "Release benchmarks (Ninja)",
+      "description": "Portable Ninja Release benchmark build with IPO/LTO",
+      "inherits": "ninja-compile-base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
-        "STLPP_BUILD_TESTING": "OFF",
-        "STLPP_BUILD_BENCHMARKS": "OFF"
+        "BUILD_TESTING": "OFF",
+        "STLPP_BUILD_BENCHMARKS": "ON",
+        "STLPP_ENABLE_IPO": "ON"
+      }
+    },
+    {
+      "name": "ninja-pkg",
+      "displayName": "Installable package (Ninja)",
+      "description": "Portable Ninja Release package build without test dependencies",
+      "inherits": "ninja-base",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "BUILD_TESTING": "OFF"
       }
     }
   ],
   "buildPresets": [
-    { "name": "default", "configurePreset": "default" },
-    { "name": "release", "configurePreset": "release" },
-    { "name": "sanitize", "configurePreset": "sanitize" },
-    { "name": "pkg", "configurePreset": "pkg" }
+    {
+      "name": "debug",
+      "configurePreset": "debug",
+      "configuration": "Debug"
+    },
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "configuration": "Release"
+    },
+    {
+      "name": "relwithdebinfo",
+      "configurePreset": "relwithdebinfo",
+      "configuration": "RelWithDebInfo"
+    },
+    {
+      "name": "sanitize",
+      "configurePreset": "sanitize",
+      "configuration": "RelWithDebInfo"
+    },
+    {
+      "name": "benchmark",
+      "configurePreset": "benchmark",
+      "configuration": "Release",
+      "targets": [
+        "stlpp_bench"
+      ]
+    },
+    {
+      "name": "pkg",
+      "configurePreset": "pkg",
+      "configuration": "Release"
+    },
+    {
+      "name": "ninja-debug",
+      "configurePreset": "ninja-debug"
+    },
+    {
+      "name": "ninja-release",
+      "configurePreset": "ninja-release"
+    },
+    {
+      "name": "ninja-relwithdebinfo",
+      "configurePreset": "ninja-relwithdebinfo"
+    },
+    {
+      "name": "ninja-sanitize",
+      "configurePreset": "ninja-sanitize"
+    },
+    {
+      "name": "ninja-benchmark",
+      "configurePreset": "ninja-benchmark",
+      "targets": [
+        "stlpp_bench"
+      ]
+    },
+    {
+      "name": "ninja-pkg",
+      "configurePreset": "ninja-pkg"
+    }
   ],
   "testPresets": [
-    { "name": "default", "configurePreset": "default", "output": { "outputOnFailure": true } },
-    { "name": "sanitize", "configurePreset": "sanitize", "output": { "outputOnFailure": true } }
+    {
+      "name": "test-base",
+      "hidden": true,
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "noTestsAction": "error"
+      }
+    },
+    {
+      "name": "debug",
+      "configurePreset": "debug",
+      "inherits": "test-base",
+      "configuration": "Debug"
+    },
+    {
+      "name": "release",
+      "configurePreset": "release",
+      "inherits": "test-base",
+      "configuration": "Release"
+    },
+    {
+      "name": "relwithdebinfo",
+      "configurePreset": "relwithdebinfo",
+      "inherits": "test-base",
+      "configuration": "RelWithDebInfo"
+    },
+    {
+      "name": "sanitize",
+      "configurePreset": "sanitize",
+      "inherits": "test-base",
+      "configuration": "RelWithDebInfo"
+    },
+    {
+      "name": "ninja-debug",
+      "configurePreset": "ninja-debug",
+      "inherits": "test-base"
+    },
+    {
+      "name": "ninja-release",
+      "configurePreset": "ninja-release",
+      "inherits": "test-base"
+    },
+    {
+      "name": "ninja-relwithdebinfo",
+      "configurePreset": "ninja-relwithdebinfo",
+      "inherits": "test-base"
+    },
+    {
+      "name": "ninja-sanitize",
+      "configurePreset": "ninja-sanitize",
+      "inherits": "test-base"
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "debug",
+      "displayName": "Configure, build, and test Debug with Visual Studio",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "debug"
+        },
+        {
+          "type": "build",
+          "name": "debug"
+        },
+        {
+          "type": "test",
+          "name": "debug"
+        }
+      ]
+    },
+    {
+      "name": "release",
+      "displayName": "Configure, build, and test Release with Visual Studio",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "release"
+        },
+        {
+          "type": "build",
+          "name": "release"
+        },
+        {
+          "type": "test",
+          "name": "release"
+        }
+      ]
+    },
+    {
+      "name": "relwithdebinfo",
+      "displayName": "Configure, build, and test RelWithDebInfo with Visual Studio",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "relwithdebinfo"
+        },
+        {
+          "type": "build",
+          "name": "relwithdebinfo"
+        },
+        {
+          "type": "test",
+          "name": "relwithdebinfo"
+        }
+      ]
+    },
+    {
+      "name": "sanitize",
+      "displayName": "Configure, build, and test with Visual Studio AddressSanitizer",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "sanitize"
+        },
+        {
+          "type": "build",
+          "name": "sanitize"
+        },
+        {
+          "type": "test",
+          "name": "sanitize"
+        }
+      ]
+    },
+    {
+      "name": "ninja-debug",
+      "displayName": "Configure, build, and test Debug with Ninja",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ninja-debug"
+        },
+        {
+          "type": "build",
+          "name": "ninja-debug"
+        },
+        {
+          "type": "test",
+          "name": "ninja-debug"
+        }
+      ]
+    },
+    {
+      "name": "ninja-release",
+      "displayName": "Configure, build, and test Release with Ninja",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ninja-release"
+        },
+        {
+          "type": "build",
+          "name": "ninja-release"
+        },
+        {
+          "type": "test",
+          "name": "ninja-release"
+        }
+      ]
+    },
+    {
+      "name": "ninja-relwithdebinfo",
+      "displayName": "Configure, build, and test RelWithDebInfo with Ninja",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ninja-relwithdebinfo"
+        },
+        {
+          "type": "build",
+          "name": "ninja-relwithdebinfo"
+        },
+        {
+          "type": "test",
+          "name": "ninja-relwithdebinfo"
+        }
+      ]
+    },
+    {
+      "name": "ninja-sanitize",
+      "displayName": "Configure, build, and test with Ninja sanitizers",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "ninja-sanitize"
+        },
+        {
+          "type": "build",
+          "name": "ninja-sanitize"
+        },
+        {
+          "type": "test",
+          "name": "ninja-sanitize"
+        }
+      ]
+    }
   ]
 }

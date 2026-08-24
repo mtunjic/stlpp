@@ -27,33 +27,78 @@ Include `"stlpp.h"` (or `"algorithms.h"`). CMake target `stlpp::stlpp`. Conan an
 **Iterators** — `numeric_iterator`, `filter`, `windows`  
 **String** — `trim`, `sanitize`
 
-The rest: [plan / progress](doc/progress.md).
-
 **v0.1.0** freezes this surface: `namespace mt`, include `"stlpp.h"`. Checked names keep their signatures. CUDA `scan` / `power` / `map` / `reduce` and dual-GPU `partial_bucketsort` are not in this freeze.
 
 Recommended reading: Alexander Stepanov and Paul McJones, [*Elements of Programming*](https://elementsofprogramming.com/eop.pdf) (free PDF).
 
 ### Build
 
-CMake 3.20+, C++20 compiler. GoogleTest and Google Benchmark are fetched automatically.
+Requires CMake 3.25+ and a C++20 compiler. On Windows, the default presets use Visual Studio 18 2026 and work from ordinary PowerShell; CMake selects the compiler, linker, and Windows SDK environment.
+
+The shortest complete Debug cycle is:
+
+```powershell
+cmake --workflow --preset debug
+```
+
+For incremental work, run the stages separately:
+
+```powershell
+cmake --preset debug
+cmake --build --preset debug --target stlpp_tests
+ctest --preset debug
+```
+
+Available default Windows configurations:
+
+| Preset | Purpose |
+| --- | --- |
+| `debug` | Debug build and tests |
+| `release` | Optimized build and tests |
+| `relwithdebinfo` | Optimized build with debug information and tests |
+| `sanitize` | RelWithDebInfo plus MSVC AddressSanitizer |
+| `benchmark` | Release benchmarks with IPO/LTO and no test dependency |
+| `pkg` | Release package without test or benchmark dependencies |
+
+The first four also support `cmake --workflow --preset <name>`.
+
+Portable single-config Ninja alternatives use the `ninja-` prefix, for example:
 
 ```sh
-cmake -S . -B build
-cmake --build build --target stlpp_tests stlpp_bench
-ctest --test-dir build --output-on-failure
-./build/stlpp_bench --benchmark_min_time=0.1s
+cmake --workflow --preset ninja-debug
+cmake --workflow --preset ninja-release
+```
+
+On Linux or macOS, those presets use the compiler available in the shell. With MSVC on Windows, run Ninja presets from a Developer PowerShell so `INCLUDE`, `LIB`, and the Windows SDK are initialized. The Visual Studio presets do not require that step.
+
+Build and run benchmarks on Windows:
+
+```powershell
+cmake --preset benchmark
+cmake --build --preset benchmark
+.\out\build\vs\benchmark\Release\stlpp_bench.exe --benchmark_min_time=0.1s
 python scripts/bench_history.py --min-time 0.1s
 ```
 
-Or with presets: `cmake --preset sanitize && cmake --build --preset sanitize && ctest --preset sanitize`.
+For Ninja, use `ninja-benchmark`; its executable is under `out/build/ninja-benchmark/`.
 
-**Examples** (interactive demos): `-DSTLPP_BUILD_EXAMPLES=ON`, then `./build/examples/stlpp_examples`. See [`examples/README.md`](examples/README.md) for the Conan consumer skeleton.
+Dated JSON and SVG results land in `bench/` (`stlpp-bench-YYYY-MM-DD`); `bench/stlpp-bench-history.svg` overlays every run. See `bench.md`.
 
-Dated JSON + SVG land in `bench/` (`stlpp-bench-YYYY-MM-DD`); `bench/stlpp-bench-history.svg` overlays every run. See `bench.md`.
+Enable the example runner in a Windows Debug preset build:
 
-Optional: `-DSTLPP_SANITIZE=ON` for ASan/UBSan (needs `libasan`/`libubsan`; off by default on this MinGW). Packaging (`cmake --install`, Conan, vcpkg) uses `-DSTLPP_BUILD_TESTING=OFF -DSTLPP_BUILD_BENCHMARKS=OFF` so GoogleTest/Benchmark are not fetched.
+```powershell
+cmake --preset debug -DSTLPP_BUILD_EXAMPLES=ON
+cmake --build --preset debug --target stlpp_examples
+.\out\build\vs\debug\examples\Debug\stlpp_examples.exe
+```
 
-**Generic / concept tests** (EoP-style): `test/concept_axioms_test.cpp`, `test/generic_*_test.cpp`, and helpers in `test/support/`. See [`doc/progress.md`](doc/progress.md#generic-law-tests-eop-style). Behavioral reference: [Elements of Programming](https://elementsofprogramming.com/eop.pdf) and [`doc/eop-code/tests.h`](doc/eop-code/tests.h).
+See [`examples/README.md`](examples/README.md) for the Conan consumer skeleton.
+
+Visual Studio is multi-config, so the build and test presets select `Debug`, `Release`, or `RelWithDebInfo` using their `configuration` fields. Ninja is single-config, so its presets set `CMAKE_BUILD_TYPE` at configure time.
+
+GoogleTest and Google Benchmark are fetched only when their corresponding targets are enabled. Their archives are pinned by version and SHA-256. Set `STLPP_WARNINGS_AS_ERRORS=ON` for strict CI builds; it is off by default for compiler portability.
+
+**Generic / concept tests** (EoP-style): `test/concept_axioms_test.cpp`, `test/generic_*_test.cpp`, and helpers in `test/support/`. Behavioral reference: [*Elements of Programming*](https://elementsofprogramming.com/eop.pdf).
 
 ### Use in an existing C++ project
 
@@ -85,15 +130,16 @@ add_subdirectory(third_party/stlpp)
 target_link_libraries(your_app PRIVATE stlpp::stlpp)
 ```
 
-Tests/benches stay off when stlpp is not the top-level project. No `find_package`.
+Benchmarks stay off when stlpp is not the top-level project. Tests follow the parent project's standard `BUILD_TESTING` option; set it to `OFF` if the parent does not want any tests. No `find_package`.
 
 #### 2. CMake install
 
 From this repo:
 
 ```sh
-cmake -S . -B build-pkg -DSTLPP_BUILD_TESTING=OFF -DSTLPP_BUILD_BENCHMARKS=OFF
-cmake --install build-pkg --prefix /path/to/prefix
+cmake --preset pkg
+cmake --build --preset pkg
+cmake --install out/build/vs/pkg --config Release --prefix /path/to/prefix
 ```
 
 Headers land in `<prefix>/include/stlpp/` (so they do not collide with other `find.h` files). `stlpp::stlpp` adds that path; `#include "stlpp.h"` still works. There is also `<prefix>/include/stlpp.h` that forwards to the umbrella.

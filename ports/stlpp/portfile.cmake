@@ -5,7 +5,7 @@ get_filename_component(SOURCE_PATH "${CURRENT_PORT_DIR}/../.." ABSOLUTE)
 vcpkg_cmake_configure(
     SOURCE_PATH "${SOURCE_PATH}"
     OPTIONS
-        -DSTLPP_BUILD_TESTING=OFF
+        -DBUILD_TESTING=OFF
         -DSTLPP_BUILD_BENCHMARKS=OFF
 )
 

@@ -4,13 +4,13 @@ Interactive runner that lists demos; you pick one by number or key.
 
 ## Build inside the monorepo
 
-```sh
-cmake -S . -B build -DSTLPP_BUILD_EXAMPLES=ON -DSTLPP_BUILD_TESTING=OFF -DSTLPP_BUILD_BENCHMARKS=OFF
-cmake --build build --target stlpp_examples
-./build/examples/stlpp_examples
+```powershell
+cmake --preset debug -DSTLPP_BUILD_EXAMPLES=ON -DBUILD_TESTING=OFF
+cmake --build --preset debug --target stlpp_examples
+.\out\build\vs\debug\examples\Debug\stlpp_examples.exe
 ```
 
-Non-interactive: `./build/examples/stlpp_examples orbit`
+Non-interactive: `.\out\build\vs\debug\examples\Debug\stlpp_examples.exe orbit`
 
 ## Build as a Conan consumer (skeleton)
 

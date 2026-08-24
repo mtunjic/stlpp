@@ -35,3 +35,7 @@ CMakeUserPresets.json
 test_package/build/
 /build-pkg/
 /dist-stlpp/
+*main*
+build/
+/out/
+tmp/

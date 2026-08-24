@@ -1,23 +1,16 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.25)
 project(stlpp VERSION 0.1.0 LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-    set(STLPP_IS_TOPLEVEL ON)
-    set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-else()
-    set(STLPP_IS_TOPLEVEL OFF)
-endif()
-
-option(STLPP_BUILD_TESTING "Build GoogleTest suite" ${STLPP_IS_TOPLEVEL})
-option(STLPP_BUILD_BENCHMARKS "Build Google Benchmark suite" ${STLPP_IS_TOPLEVEL})
-option(STLPP_BUILD_EXAMPLES "Build interactive example runner" OFF)
-option(STLPP_SANITIZE "Build tests with ASan and UBSan (requires libasan/libubsan)" OFF)
-
 include(GNUInstallDirs)
+
+option(BUILD_TESTING "Build the GoogleTest suite" ${PROJECT_IS_TOP_LEVEL})
+option(STLPP_BUILD_BENCHMARKS "Build the Google Benchmark suite" OFF)
+option(STLPP_BUILD_EXAMPLES "Build the interactive example runner" OFF)
+option(STLPP_SANITIZE "Enable AddressSanitizer and, where available, UndefinedBehaviorSanitizer" OFF)
+option(STLPP_ENABLE_IPO "Enable interprocedural optimization for compiled targets" OFF)
+option(STLPP_WARNINGS_AS_ERRORS "Treat stlpp test, benchmark, and example warnings as errors" OFF)
+
+include(CTest)
 
 add_library(stlpp INTERFACE)
 add_library(stlpp::stlpp ALIAS stlpp)
@@ -35,43 +28,119 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 target_link_libraries(stlpp INTERFACE Threads::Threads)
 
-function(stlpp_warnings target)
+function(stlpp_enable_warnings target)
     if(MSVC)
         target_compile_options(${target} PRIVATE /W4 /permissive-)
     else()
-        target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic -Werror)
+        target_compile_options(${target} PRIVATE -Wall -Wextra -Wpedantic)
+    endif()
+
+    if(STLPP_WARNINGS_AS_ERRORS)
+        set_property(TARGET ${target} PROPERTY COMPILE_WARNING_AS_ERROR ON)
     endif()
 endfunction()
 
-function(stlpp_sanitize target)
-    if(STLPP_SANITIZE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
-        target_compile_options(${target} PRIVATE -fsanitize=address,undefined -fno-omit-frame-pointer)
+function(stlpp_enable_sanitizer_instrumentation target)
+    if(NOT STLPP_SANITIZE)
+        return()
+    endif()
+
+    if(MSVC)
+        target_compile_options(${target} PRIVATE /fsanitize=address)
+    elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
+        target_compile_options(${target} PRIVATE
+            -fsanitize=address,undefined
+            -fno-omit-frame-pointer)
+    else()
+        message(FATAL_ERROR
+            "STLPP_SANITIZE is not supported by ${CMAKE_CXX_COMPILER_ID}")
+    endif()
+endfunction()
+
+function(stlpp_enable_sanitizers target)
+    stlpp_enable_sanitizer_instrumentation(${target})
+
+    if(NOT STLPP_SANITIZE)
+        return()
+    endif()
+
+    if(MSVC)
+        # Instrumented objects select the ASan runtime automatically. link.exe
+        # does not accept the compiler's /fsanitize option.
+        target_link_options(${target} PRIVATE /INCREMENTAL:NO)
+    else()
         target_link_options(${target} PRIVATE -fsanitize=address,undefined)
     endif()
 endfunction()
 
-if(STLPP_BUILD_TESTING OR STLPP_BUILD_BENCHMARKS)
-    include(FetchContent)
-    set(_gtest_zip "${CMAKE_CURRENT_SOURCE_DIR}/build/_deps_src/gtest.zip")
-    set(_gbench_zip "${CMAKE_CURRENT_SOURCE_DIR}/build/_deps_src/benchmark.zip")
-    if(NOT EXISTS "${_gtest_zip}")
-        set(_gtest_zip "https://github.com/google/googletest/archive/refs/tags/v1.15.2.zip")
+function(stlpp_deploy_msvc_asan_runtime target)
+    if(NOT (STLPP_SANITIZE AND MSVC))
+        return()
     endif()
-    if(NOT EXISTS "${_gbench_zip}")
-        set(_gbench_zip "https://github.com/google/benchmark/archive/refs/tags/v1.9.1.zip")
+
+    get_filename_component(_stlpp_msvc_bin_dir "${CMAKE_CXX_COMPILER}" DIRECTORY)
+    if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+        set(_stlpp_asan_arch x86_64)
+    else()
+        set(_stlpp_asan_arch i386)
+    endif()
+    set(_stlpp_asan_runtime
+        "${_stlpp_msvc_bin_dir}/clang_rt.asan_dynamic-${_stlpp_asan_arch}.dll")
+
+    if(NOT EXISTS "${_stlpp_asan_runtime}")
+        message(FATAL_ERROR
+            "MSVC AddressSanitizer runtime not found: ${_stlpp_asan_runtime}")
+    endif()
+
+    add_custom_command(TARGET ${target} POST_BUILD
+        COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+            "${_stlpp_asan_runtime}"
+            "$<TARGET_FILE_DIR:${target}>"
+        COMMENT "Deploying the MSVC AddressSanitizer runtime for ${target}"
+        VERBATIM)
+endfunction()
+
+if(STLPP_ENABLE_IPO)
+    include(CheckIPOSupported)
+    check_ipo_supported(
+        RESULT STLPP_IPO_SUPPORTED
+        OUTPUT STLPP_IPO_ERROR
+        LANGUAGES CXX)
+    if(NOT STLPP_IPO_SUPPORTED)
+        message(FATAL_ERROR
+            "STLPP_ENABLE_IPO was requested, but IPO is unavailable: ${STLPP_IPO_ERROR}")
     endif()
 endif()
 
-if(STLPP_BUILD_TESTING)
+function(stlpp_enable_ipo target)
+    if(STLPP_ENABLE_IPO)
+        set_property(TARGET ${target} PROPERTY INTERPROCEDURAL_OPTIMIZATION ON)
+    endif()
+endfunction()
+
+if(BUILD_TESTING OR STLPP_BUILD_BENCHMARKS)
+    include(FetchContent)
+endif()
+
+if(BUILD_TESTING)
     FetchContent_Declare(
         googletest
-        URL "${_gtest_zip}"
+        URL https://github.com/google/googletest/archive/refs/tags/v1.15.2.zip
+        URL_HASH SHA256=f179ec217f9b3b3f3c6e8b02d3e7eda997b49e4ce26d6b235c9053bec9c0bf9f
         DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
     set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
     set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
     FetchContent_MakeAvailable(googletest)
 
-    enable_testing()
+    # MSVC's annotated STL requires every linked static library to use the
+    # same ASan instrumentation setting. Instrumenting dependencies also gives
+    # GCC and Clang complete sanitizer coverage.
+    foreach(_target gtest gtest_main gmock gmock_main)
+        if(TARGET ${_target})
+            stlpp_enable_sanitizer_instrumentation(${_target})
+        endif()
+    endforeach()
+
     include(GoogleTest)
 
     add_executable(stlpp_tests
@@ -100,21 +169,42 @@ if(STLPP_BUILD_TESTING)
         test/generic_random_test.cpp
         test/generic_fp_test.cpp)
     target_link_libraries(stlpp_tests PRIVATE stlpp GTest::gtest_main)
-    stlpp_warnings(stlpp_tests)
-    stlpp_sanitize(stlpp_tests)
+    stlpp_enable_warnings(stlpp_tests)
+    stlpp_enable_sanitizers(stlpp_tests)
+    stlpp_deploy_msvc_asan_runtime(stlpp_tests)
+    stlpp_enable_ipo(stlpp_tests)
     gtest_discover_tests(stlpp_tests)
 endif()
 
 if(STLPP_BUILD_BENCHMARKS)
     FetchContent_Declare(
         benchmark
-        URL "${_gbench_zip}"
+        URL https://github.com/google/benchmark/archive/refs/tags/v1.9.1.zip
+        URL_HASH SHA256=8a63c9c6adf9e7ce8d0d81f251c47de83efb5e077e147d109fa2045daac8368b
         DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
     set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
     set(BENCHMARK_ENABLE_GTEST_TESTS OFF CACHE BOOL "" FORCE)
     set(BENCHMARK_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
     set(BENCHMARK_ENABLE_WERROR OFF CACHE BOOL "" FORCE)
+    set(BENCHMARK_ENABLE_LTO ${STLPP_ENABLE_IPO} CACHE BOOL "" FORCE)
+
+    # An extracted release archive has no .git directory. Prevent benchmark's
+    # version probe from walking up into stlpp's repository and using its tag.
+    set(_stlpp_saved_disable_find_git "${CMAKE_DISABLE_FIND_PACKAGE_Git}")
+    set(_stlpp_saved_git_executable "${GIT_EXECUTABLE}")
+    set(CMAKE_DISABLE_FIND_PACKAGE_Git ON)
+    set(GIT_EXECUTABLE "")
     FetchContent_MakeAvailable(benchmark)
+    set(CMAKE_DISABLE_FIND_PACKAGE_Git "${_stlpp_saved_disable_find_git}")
+    set(GIT_EXECUTABLE "${_stlpp_saved_git_executable}")
+    unset(_stlpp_saved_disable_find_git)
+    unset(_stlpp_saved_git_executable)
+
+    foreach(_target benchmark benchmark_main)
+        if(TARGET ${_target})
+            stlpp_enable_sanitizer_instrumentation(${_target})
+        endif()
+    endforeach()
 
     add_executable(stlpp_bench
         test/bench_main.cpp
@@ -128,10 +218,13 @@ if(STLPP_BUILD_BENCHMARKS)
         test/hybrid_bench.cpp
         test/fp_bench.cpp)
     target_link_libraries(stlpp_bench PRIVATE stlpp benchmark::benchmark)
-    stlpp_warnings(stlpp_bench)
+    stlpp_enable_warnings(stlpp_bench)
+    stlpp_enable_sanitizers(stlpp_bench)
+    stlpp_deploy_msvc_asan_runtime(stlpp_bench)
+    stlpp_enable_ipo(stlpp_bench)
 endif()
 
-if(STLPP_BUILD_EXAMPLES AND STLPP_IS_TOPLEVEL)
+if(STLPP_BUILD_EXAMPLES AND PROJECT_IS_TOP_LEVEL)
     add_subdirectory(examples)
 endif()
 
