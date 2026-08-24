@@ -1,6 +1,6 @@
 {
   "name": "stlpp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Header-only Stepanov-style algorithms, iterators, and containers (STL++)",
   "homepage": "https://github.com/mtunjic/stlpp",
   "license": "MIT",
