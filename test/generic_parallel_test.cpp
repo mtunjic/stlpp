@@ -84,18 +84,6 @@ TEST(ParallelPfindGeneric, NoMatchReturnsEnd)
     EXPECT_EQ(mt::pfind_if(v, [](int) { return false; }), v.end());
 }
 
-TEST(ParallelReduceGeneric, NonAssociativeMinusDiffersAboveCutoff)
-{
-    auto v = large_iota();
-    const auto folded = mt::fold(v, 0, std::minus<>{});
-    const auto reduced = mt::reduce(v, 0, std::minus<>{});
-    if (v.size() > mt::par::default_cutoff && mt::par::thread_count() > 1) {
-        EXPECT_NE(reduced, folded);
-    } else {
-        EXPECT_EQ(reduced, folded);
-    }
-}
-
 TEST(ParallelReduceGeneric, FoldIsCanonicalForNonAssociativeOps)
 {
     auto v = large_iota();

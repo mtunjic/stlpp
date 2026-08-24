@@ -222,7 +222,9 @@ TEST(Utils, PrintPickRandomizeStopwatch)
 
 TEST(Utils, ToMapListArrayDigitSumBench)
 {
-    auto m = mt::to_map(std::vector{std::pair{1, "a"}, std::pair{2, "b"}, std::pair{1, "A"}});
+    auto m = mt::to_map(
+        std::vector{std::pair{1, std::string{"a"}}, std::pair{2, std::string{"b"}},
+                    std::pair{1, std::string{"A"}}});
     EXPECT_EQ(m.size(), 2u);
     EXPECT_EQ(m[1], "A");
     EXPECT_EQ(m[2], "b");
