@@ -153,7 +153,7 @@ template <std::forward_iterator I, typename F>
     requires std::invocable<F&, I> && std::same_as<std::invoke_result_t<F&, I>, I>
 void cycle_from(I i, F f)
 {
-    auto tmp = std::move(*i);
+    std::iter_value_t<I> tmp = std::move(*i);
     I j = i;
     I k = std::invoke(f, i);
     while (k != i) {

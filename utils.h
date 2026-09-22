@@ -71,11 +71,12 @@ void print(std::priority_queue<T, Container, Comp> pq, std::ostream& out = std::
     while (!pq.empty()) {
         out << pq.top() << ' ';
         pq.pop();
-        if (++n % per_line == 0) {
+        ++n;
+        if (per_line != 0 && n % per_line == 0) {
             out << '\n';
         }
     }
-    if (n % per_line != 0) {
+    if (n != 0 && (per_line == 0 || n % per_line != 0)) {
         out << '\n';
     }
 }

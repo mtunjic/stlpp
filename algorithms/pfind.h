@@ -22,20 +22,21 @@ template <std::random_access_iterator I, std::sentinel_for<I> S, typename P>
 [[nodiscard]] I pfind_if(I first, S last, P pred)
 {
     using D = std::iter_difference_t<I>;
-    const D n = last - first;
+    const I end = std::ranges::next(first, last);
+    const D n = end - first;
     if (n <= 0) {
-        return last;
+        return end;
     }
     const unsigned t = par::thread_count();
     if (static_cast<std::size_t>(n) <= par::default_cutoff || t <= 1) {
-        return std::find_if(first, last, std::move(pred));
+        return std::find_if(first, end, std::move(pred));
     }
 
     const unsigned chunks = par::worker_chunks(static_cast<std::size_t>(n));
     if (chunks == 0) {
-        return last;
+        return end;
     }
-    std::vector<I> hits(chunks, last);
+    std::vector<I> hits(chunks, end);
     par::for_index(chunks, [&](std::size_t c) {
         auto [b, e] =
             par::chunk_bounds(first, static_cast<std::size_t>(n), static_cast<unsigned>(c), chunks);
@@ -44,9 +45,9 @@ template <std::random_access_iterator I, std::sentinel_for<I> S, typename P>
             hits[c] = it;
         }
     });
-    I best = last;
+    I best = end;
     for (I h : hits) {
-        if (h != last && (best == last || h < best)) {
+        if (h != end && (best == end || h < best)) {
             best = h;
         }
     }

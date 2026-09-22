@@ -20,7 +20,7 @@ O scan(I first, S last, O dest, Op op)
     if (first == last) {
         return dest;
     }
-    auto acc = *first;
+    std::iter_value_t<I> acc = *first;
     *dest = acc;
     ++dest;
     ++first;
@@ -51,8 +51,9 @@ template <std::input_iterator I, std::sentinel_for<I> S, std::weakly_incrementab
 O exclusive_scan(I first, S last, O dest, T init, Op op)
 {
     for (; first != last; ++first, ++dest) {
-        *dest = init;
+        T previous = init;
         init = std::invoke(op, std::move(init), *first);
+        *dest = std::move(previous);
     }
     return dest;
 }

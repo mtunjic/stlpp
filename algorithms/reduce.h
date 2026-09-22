@@ -5,6 +5,7 @@
 
 #include <functional>
 #include <iterator>
+#include <optional>
 #include <ranges>
 #include <utility>
 #include <vector>
@@ -37,7 +38,7 @@ template <std::ranges::input_range R, typename T, typename Op>
 template <std::input_iterator I, std::sentinel_for<I> S, typename Op>
 [[nodiscard]] auto reduce_nonempty(I first, S last, Op op)
 {
-    auto acc = *first;
+    std::iter_value_t<I> acc = *first;
     ++first;
     return fold(first, last, std::move(acc), std::move(op));
 }
@@ -61,7 +62,8 @@ template <std::random_access_iterator I, std::sentinel_for<I> S, typename T, typ
 [[nodiscard]] T reduce(I first, S last, T init, Op op)
 {
     using D = std::iter_difference_t<I>;
-    const D n = last - first;
+    const I end = std::ranges::next(first, last);
+    const D n = end - first;
     if (n <= 0) {
         return init;
     }
@@ -74,17 +76,17 @@ template <std::random_access_iterator I, std::sentinel_for<I> S, typename T, typ
     if (chunks == 0) {
         return init;
     }
-    std::vector<T> parts(chunks);
+    std::vector<std::optional<T>> parts(chunks);
     par::for_index(chunks, [&](std::size_t c) {
         auto [b, e] =
             par::chunk_bounds(first, static_cast<std::size_t>(n), static_cast<unsigned>(c), chunks);
         T acc = *b;
         ++b;
-        parts[c] = fold(b, e, std::move(acc), op);
+        parts[c].emplace(fold(b, e, std::move(acc), op));
     });
     T acc = std::move(init);
-    for (T& p : parts) {
-        acc = std::invoke(op, std::move(acc), std::move(p));
+    for (auto& p : parts) {
+        acc = std::invoke(op, std::move(acc), std::move(*p));
     }
     return acc;
 }

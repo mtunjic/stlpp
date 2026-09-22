@@ -21,7 +21,7 @@ template <std::input_iterator I, std::sentinel_for<I> S, typename P>
     requires std::predicate<P&, std::iter_reference_t<I>>
 [[nodiscard]] I span_if(I first, S last, P pred)
 {
-    return std::find_if_not(first, last, std::move(pred));
+    return std::ranges::find_if_not(first, last, std::move(pred));
 }
 
 template <std::ranges::input_range R, typename P>
@@ -35,7 +35,7 @@ template <std::input_iterator I, std::sentinel_for<I> S, typename P>
     requires std::predicate<P&, std::iter_reference_t<I>>
 [[nodiscard]] I break_if(I first, S last, P pred)
 {
-    return std::find_if(first, last, std::move(pred));
+    return std::ranges::find_if(first, last, std::move(pred));
 }
 
 template <std::ranges::input_range R, typename P>

@@ -62,7 +62,11 @@ public:
         return *this;
     }
 
-    numeric_iterator& operator-=(difference_type n) { return *this += -n; }
+    numeric_iterator& operator-=(difference_type n)
+    {
+        value_ -= static_cast<T>(n);
+        return *this;
+    }
 
     [[nodiscard]] T operator[](difference_type n) const { return *(*this + n); }
 
@@ -70,11 +74,17 @@ public:
 
     friend numeric_iterator operator+(difference_type n, numeric_iterator i) { return i += n; }
 
-    friend numeric_iterator operator-(numeric_iterator i, difference_type n) { return i += -n; }
+    friend numeric_iterator operator-(numeric_iterator i, difference_type n) { return i -= n; }
 
     friend difference_type operator-(numeric_iterator a, numeric_iterator b)
     {
-        return static_cast<difference_type>(a.value_) - static_cast<difference_type>(b.value_);
+        using U = std::make_unsigned_t<T>;
+        if (a.value_ >= b.value_) {
+            return static_cast<difference_type>(
+                static_cast<U>(static_cast<U>(a.value_) - static_cast<U>(b.value_)));
+        }
+        const U magnitude = static_cast<U>(b.value_) - static_cast<U>(a.value_);
+        return -static_cast<difference_type>(magnitude - 1) - 1;
     }
 
     friend bool operator==(numeric_iterator, numeric_iterator) = default;
@@ -101,10 +111,7 @@ public:
 
     [[nodiscard]] numeric_iterator<T> begin() const { return numeric_iterator<T>{first_}; }
     [[nodiscard]] numeric_iterator<T> end() const { return numeric_iterator<T>{last_}; }
-    [[nodiscard]] difference_type size() const
-    {
-        return static_cast<difference_type>(last_) - static_cast<difference_type>(first_);
-    }
+    [[nodiscard]] difference_type size() const { return end() - begin(); }
 };
 
 }  // namespace mt

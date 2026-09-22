@@ -15,7 +15,7 @@ template <std::input_iterator I, std::sentinel_for<I> S, typename P>
     requires std::predicate<P&, std::iter_reference_t<I>>
 [[nodiscard]] bool all(I first, S last, P pred)
 {
-    return std::all_of(first, last, std::move(pred));
+    return std::ranges::all_of(first, last, std::move(pred));
 }
 
 template <std::ranges::input_range R, typename P>
@@ -29,7 +29,7 @@ template <std::input_iterator I, std::sentinel_for<I> S, typename P>
     requires std::predicate<P&, std::iter_reference_t<I>>
 [[nodiscard]] bool any(I first, S last, P pred)
 {
-    return std::any_of(first, last, std::move(pred));
+    return std::ranges::any_of(first, last, std::move(pred));
 }
 
 template <std::ranges::input_range R, typename P>
@@ -43,7 +43,7 @@ template <std::input_iterator I, std::sentinel_for<I> S, typename P>
     requires std::predicate<P&, std::iter_reference_t<I>>
 [[nodiscard]] bool none(I first, S last, P pred)
 {
-    return std::none_of(first, last, std::move(pred));
+    return std::ranges::none_of(first, last, std::move(pred));
 }
 
 template <std::ranges::input_range R, typename P>
@@ -56,7 +56,7 @@ template <std::input_iterator I, std::sentinel_for<I> S, typename P>
     requires std::predicate<P&, std::iter_reference_t<I>>
 [[nodiscard]] std::iter_difference_t<I> count_if(I first, S last, P pred)
 {
-    return std::count_if(first, last, std::move(pred));
+    return std::ranges::count_if(first, last, std::move(pred));
 }
 
 template <std::ranges::input_range R, typename P>
@@ -69,7 +69,7 @@ template <std::input_iterator I, std::sentinel_for<I> S, typename P>
     requires std::predicate<P&, std::iter_reference_t<I>>
 [[nodiscard]] std::iter_difference_t<I> count_if_not(I first, S last, P pred)
 {
-    return std::count_if(first, last, std::not_fn(std::move(pred)));
+    return std::ranges::count_if(first, last, std::not_fn(std::move(pred)));
 }
 
 template <std::ranges::input_range R, typename P>
@@ -81,7 +81,7 @@ template <std::ranges::input_range R, typename P>
 template <std::input_iterator I, std::sentinel_for<I> S, typename T>
 [[nodiscard]] std::iter_difference_t<I> count_not(I first, S last, const T& value)
 {
-    return std::count_if(first, last, [&](const auto& x) { return !(x == value); });
+    return std::ranges::count_if(first, last, [&](const auto& x) { return !(x == value); });
 }
 
 template <std::ranges::input_range R, typename T>

@@ -40,11 +40,9 @@ struct modulo_multiply {
             if constexpr (std::unsigned_integral<I>) {
                 return static_cast<U>(x % static_cast<I>(mod));
             } else {
-                I r = static_cast<I>(x % static_cast<I>(mod));
-                if (r < I{0}) {
-                    r += static_cast<I>(mod);
-                }
-                return static_cast<U>(r);
+                const U magnitude = x < I{0} ? U{0} - static_cast<U>(x) : static_cast<U>(x);
+                const U remainder = magnitude % mod;
+                return x < I{0} && remainder != U{0} ? mod - remainder : remainder;
             }
         };
         auto addmod = [mod](U x, U y) -> U {
@@ -221,7 +219,7 @@ struct digit {
 ///   mt::vowel{}('e');  // true
 ///   mt::vowel{}('s');  // false
 struct vowel {
-    bool operator()(char c) const { return std::strchr("aeiouAEIOU", c) != nullptr; }
+    bool operator()(char c) const { return c != '\0' && std::strchr("aeiouAEIOU", c) != nullptr; }
 };
 
 template <typename T>

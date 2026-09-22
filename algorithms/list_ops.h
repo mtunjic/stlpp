@@ -104,7 +104,19 @@ template <std::input_iterator I, std::sentinel_for<I> S, std::weakly_incrementab
           typename Op = std::minus<>>
 O adjacent_difference(I first, S last, O dest, Op op = {})
 {
-    return std::adjacent_difference(first, last, dest, std::move(op));
+    if (first == last) {
+        return dest;
+    }
+    std::iter_value_t<I> previous = *first;
+    *dest = previous;
+    ++dest;
+    while (++first != last) {
+        std::iter_value_t<I> current = *first;
+        *dest = std::invoke(op, current, std::move(previous));
+        previous = std::move(current);
+        ++dest;
+    }
+    return dest;
 }
 
 template <std::ranges::input_range R, typename Op = std::minus<>>
@@ -126,8 +138,8 @@ template <std::input_iterator I, std::sentinel_for<I> S, std::weakly_incrementab
           std::weakly_incrementable O2, typename P>
 std::pair<O1, O2> partition_copy(I first, S last, O1 yes, O2 no, P pred)
 {
-    auto [y, n] = std::partition_copy(first, last, yes, no, std::move(pred));
-    return {y, n};
+    auto result = std::ranges::partition_copy(first, last, yes, no, std::move(pred));
+    return {result.out1, result.out2};
 }
 
 template <std::ranges::input_range R, typename P>
@@ -150,7 +162,8 @@ template <std::input_iterator I1, std::sentinel_for<I1> S1, std::forward_iterato
           std::sentinel_for<I2> S2, std::weakly_incrementable O>
 O cartesian_product(I1 a, S1 a_last, I2 b, S2 b_last, O dest)
 {
-    std::vector<std::iter_value_t<I2>> b_copy(b, b_last);
+    std::vector<std::iter_value_t<I2>> b_copy;
+    std::ranges::copy(b, b_last, std::back_inserter(b_copy));
     for (; a != a_last; ++a) {
         for (const auto& y : b_copy) {
             *dest = std::pair<std::iter_value_t<I1>, std::iter_value_t<I2>>{*a, y};

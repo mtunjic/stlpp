@@ -112,6 +112,10 @@ void partial_bucketsort(I first, I last)
         std::min(n, std::max<std::size_t>(static_cast<std::size_t>(par::thread_count()) * 8, 16));
     const double dlo = static_cast<double>(lo);
     const double span = static_cast<double>(hi) - dlo;
+    if (!std::isfinite(dlo) || !std::isfinite(span) || span <= 0) {
+        std::sort(first, last);
+        return;
+    }
     auto bucket_of = [dlo, span, B](T v) -> std::size_t {
         const double t = (static_cast<double>(v) - dlo) / span;
         auto i = static_cast<std::size_t>(t * static_cast<double>(B - 1));

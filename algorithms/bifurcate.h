@@ -349,6 +349,20 @@ Proc traverse_rotating(C c, Proc proc)
     return proc;
 }
 
+// Rotations update child parent links, including temporary links to the root.
+// Restore the original external parent after the child links are restored.
+template <typename T, typename Proc>
+Proc traverse_rotating(btree_coord<T> c, Proc proc)
+{
+    if (empty(c)) {
+        return proc;
+    }
+    auto* parent = c.ptr()->parent;
+    auto result = traverse_rotating<btree_coord<T>, Proc>(c, std::move(proc));
+    c.ptr()->parent = parent;
+    return result;
+}
+
 template <typename C>
 [[nodiscard]] std::size_t weight_rotating(C c)
 {

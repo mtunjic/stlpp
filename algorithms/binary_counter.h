@@ -61,7 +61,8 @@ template <Input_iterator I, Binary_operation<Value_type<I>> Op>
     ++first;
     while (first != last) {
         if (*first != zero) {
-            result = op(std::move(result), *first);
+            // Higher slots contain older elements; preserve insertion order.
+            result = op(*first, std::move(result));
         }
         ++first;
     }

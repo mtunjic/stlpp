@@ -3,6 +3,7 @@
 #include "concepts.h"
 
 #include <iterator>
+#include <utility>
 
 namespace mt {
 
@@ -69,8 +70,7 @@ template <std::forward_iterator I, std::sentinel_for<I> S, Integer N>
         if (d <= 0) {
             return N{0};
         }
-        const auto dn = static_cast<N>(d);
-        return n < dn ? n : dn;
+        return std::cmp_less(+n, d) ? n : static_cast<N>(d);
     } else {
         N k = 0;
         while (k < n && first != last) {

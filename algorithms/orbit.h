@@ -11,7 +11,7 @@ namespace mt {
 template <typename T, Integer N, typename F>
 [[nodiscard]] T power_unary(T x, N n, F f)
 {
-    while (n != N{0}) {
+    while (n > N{0}) {
         --n;
         x = std::invoke(f, std::move(x));
     }

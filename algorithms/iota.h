@@ -17,9 +17,11 @@ template <std::forward_iterator I, std::sentinel_for<I> S>
     requires std::incrementable<Value_type<I>>
 constexpr void iota(I first, S last, Value_type<I> value = {})
 {
-    for (; first != last; ++first) {
+    while (first != last) {
         *first = value;
-        ++value;
+        if (++first != last) {
+            ++value;
+        }
     }
 }
 

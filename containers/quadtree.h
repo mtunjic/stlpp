@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <memory>
+#include <numeric>
 #include <utility>
 #include <vector>
 
@@ -50,14 +51,23 @@ class quadtree {
 
         [[nodiscard]] bool divided() const { return static_cast<bool>(nw); }
 
-        void divide()
+        bool divide()
         {
-            const double mx = (box.x0 + box.x1) / 2;
-            const double my = (box.y0 + box.y1) / 2;
-            nw = std::make_unique<node>(rect_2d{box.x0, my, mx, box.y1});
-            ne = std::make_unique<node>(rect_2d{mx, my, box.x1, box.y1});
-            sw = std::make_unique<node>(rect_2d{box.x0, box.y0, mx, my});
-            se = std::make_unique<node>(rect_2d{mx, box.y0, box.x1, my});
+            const double mx = std::midpoint(box.x0, box.x1);
+            const double my = std::midpoint(box.y0, box.y1);
+            if (!(box.x0 < mx && mx < box.x1 && box.y0 < my && my < box.y1)) {
+                return false;
+            }
+            // Publish all four children together, including on allocation failure.
+            auto new_nw = std::make_unique<node>(rect_2d{box.x0, my, mx, box.y1});
+            auto new_ne = std::make_unique<node>(rect_2d{mx, my, box.x1, box.y1});
+            auto new_sw = std::make_unique<node>(rect_2d{box.x0, box.y0, mx, my});
+            auto new_se = std::make_unique<node>(rect_2d{mx, box.y0, box.x1, my});
+            nw = std::move(new_nw);
+            ne = std::move(new_ne);
+            sw = std::move(new_sw);
+            se = std::move(new_se);
+            return true;
         }
     };
 
@@ -78,15 +88,12 @@ class quadtree {
                 n.points.push_back(p);
                 return true;
             }
-            n.divide();
-            std::vector<point_2d> keep;
-            keep.reserve(n.points.size());
-            for (point_2d q : n.points) {
-                if (!into_child(q)) {
-                    keep.push_back(q);
-                }
+            if (!n.divide()) {
+                n.points.push_back(p);
+                return true;
             }
-            n.points = std::move(keep);
+            // Keep existing points here. Queries visit both this node and its
+            // children, and failed child insertion cannot duplicate old points.
         }
         if (into_child(p)) {
             return true;

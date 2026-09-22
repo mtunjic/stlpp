@@ -114,11 +114,11 @@ template <std::forward_iterator I0, std::sentinel_for<I0> S0, std::forward_itera
 
 /// Copy `[first, last)` backward into the range ending at `result` (EoP ch. 9).
 /// Returns the new begin of the written range. Safe for overlapping ranges
-/// when `result` is in `(first, last]`.
+/// when the destination starts to the right of `first` (or equals the source).
 ///
 /// Example:
 ///   std::vector<int> v{1, 2, 3, 0, 0};
-///   mt::copy_backward(v.begin(), v.begin() + 3, v.end());  // {?, 1, 2, 3} pattern
+///   mt::copy_backward(v.begin(), v.begin() + 3, v.end());  // {1, 2, 1, 2, 3}
 template <std::bidirectional_iterator I, std::bidirectional_iterator O>
     requires std::indirectly_copyable<I, O>
 [[nodiscard]] constexpr O copy_backward(I first, I last, O result)
@@ -186,7 +186,7 @@ template <std::bidirectional_iterator I0, std::bidirectional_iterator I1,
 [[nodiscard]] O merge_copy_backward(I0 f0, I0 l0, I1 f1, I1 l1, O result, Comp comp = {})
 {
     return combine_copy_backward(f0, l0, f1, l1, result,
-                                 [&](const auto& a, const auto& b) { return !comp(a, b); });
+                                 [&](const auto& a, const auto& b) { return comp(b, a); });
 }
 
 }  // namespace mt

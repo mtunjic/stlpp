@@ -1,7 +1,9 @@
 #pragma once
 
+#include <concepts>
 #include <cstddef>
 #include <deque>
+#include <unordered_map>
 #include <utility>
 
 namespace mt {
@@ -123,6 +125,39 @@ class btree {
 
 public:
     using coord = btree_coord<T>;
+
+    btree() = default;
+
+    btree(const btree& other)
+        requires std::copy_constructible<T>
+        : nodes_(other.nodes_)
+    {
+        std::unordered_map<const btree_node<T>*, btree_node<T>*> copies;
+        for (std::size_t i = 0; i < nodes_.size(); ++i) {
+            copies.emplace(&other.nodes_[i], &nodes_[i]);
+        }
+        auto rebind = [&](btree_node<T>* p) { return p ? copies.at(p) : nullptr; };
+        for (auto& n : nodes_) {
+            n.left = rebind(n.left);
+            n.right = rebind(n.right);
+            n.parent = rebind(n.parent);
+        }
+        root_ = rebind(other.root_);
+    }
+
+    btree(btree&& other) : btree() { swap(other); }
+
+    btree& operator=(btree other)
+    {
+        swap(other);
+        return *this;
+    }
+
+    void swap(btree& other) noexcept
+    {
+        nodes_.swap(other.nodes_);
+        std::swap(root_, other.root_);
+    }
 
     [[nodiscard]] coord root() const { return coord{root_}; }
 

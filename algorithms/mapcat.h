@@ -19,7 +19,7 @@ O mapcat(I first, S last, F f, O dest)
 {
     for (; first != last; ++first) {
         auto sub = std::invoke(f, *first);
-        dest = std::copy(std::ranges::begin(sub), std::ranges::end(sub), dest);
+        dest = std::ranges::copy(sub, dest).out;
     }
     return dest;
 }
@@ -44,7 +44,7 @@ O flatten(I first, S last, O dest)
 {
     for (; first != last; ++first) {
         auto&& inner = *first;
-        dest = std::copy(std::ranges::begin(inner), std::ranges::end(inner), dest);
+        dest = std::ranges::copy(inner, dest).out;
     }
     return dest;
 }

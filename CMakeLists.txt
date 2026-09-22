@@ -147,6 +147,7 @@ if(BUILD_TESTING)
     include(GoogleTest)
 
     add_executable(stlpp_tests
+        test/audit_regressions_test.cpp
         test/binary_counter_test.cpp
         test/split_join_test.cpp
         test/random_test.cpp

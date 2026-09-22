@@ -127,7 +127,8 @@ template <std::forward_iterator I, std::forward_iterator B, typename P>
             ++buf;
         }
     }
-    return std::move(buffer, buf, write);
+    std::move(buffer, buf, write);
+    return write;
 }
 
 /// Semistable partition (EoP): elements **not** satisfying `pred` precede

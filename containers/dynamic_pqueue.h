@@ -81,13 +81,19 @@ public:
         handle h;
         if (!free_.empty()) {
             h = free_.back();
+            heap_.push_back(node{std::move(value), h});
             free_.pop_back();
-            where_[h] = heap_.size();
+            where_[h] = heap_.size() - 1;
         } else {
             h = where_.size();
             where_.push_back(heap_.size());
+            try {
+                heap_.push_back(node{std::move(value), h});
+            } catch (...) {
+                where_.pop_back();
+                throw;
+            }
         }
-        heap_.push_back(node{std::move(value), h});
         sift_up(heap_.size() - 1);
         return h;
     }
@@ -113,6 +119,9 @@ public:
             return;
         }
         const handle h = heap_.front().handle;
+        if (free_.size() == free_.capacity()) {
+            free_.reserve(free_.empty() ? 1 : free_.size() * 2);
+        }
         swap_nodes(0, heap_.size() - 1);
         heap_.pop_back();
         where_[h] = npos;

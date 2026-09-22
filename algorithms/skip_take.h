@@ -55,7 +55,7 @@ template <std::ranges::input_range R, typename P>
 ///
 /// Example:
 ///   auto [a, b] = mt::take(v.begin(), v.end(), 3);
-template <std::input_iterator I, std::sentinel_for<I> S>
+template <std::forward_iterator I, std::sentinel_for<I> S>
 [[nodiscard]] constexpr std::pair<I, I> take(I first, S last, Difference_type<I> n)
 {
     I taken = first;
@@ -79,7 +79,7 @@ template <std::ranges::forward_range R>
 ///   std::vector<int> v{-1, -2, 3, 4};
 ///   auto [a, b] = mt::take_while(v.begin(), v.end(), [](int x) { return x < 0; });
 ///   // [a, b) == {-1, -2}
-template <std::input_iterator I, std::sentinel_for<I> S, typename P>
+template <std::forward_iterator I, std::sentinel_for<I> S, typename P>
     requires std::predicate<P&, std::iter_reference_t<I>>
 [[nodiscard]] constexpr std::pair<I, I> take_while(I first, S last, P pred)
 {

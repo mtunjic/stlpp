@@ -82,8 +82,8 @@ I lower_bound_n(I first, S last, N n, const T& value, Comp comp = {})
 template <std::forward_iterator I, std::sentinel_for<I> S, typename T, typename Comp = std::less<>>
 [[nodiscard]] std::pair<I, I> equal_range(I first, S last, const T& value, Comp comp = {})
 {
-    first = std::lower_bound(first, last, value, comp);
-    return {first, std::upper_bound(first, last, value, comp)};
+    first = std::ranges::lower_bound(first, last, value, comp);
+    return {first, std::ranges::upper_bound(first, last, value, comp)};
 }
 
 template <std::forward_iterator I, Integer N, typename T, typename Comp = std::less<>>
@@ -117,7 +117,7 @@ void binary_insertion_sort_n(I first, N n, Comp comp = {})
         return;
     }
     for (N i = 1; i < n; ++i) {
-        auto value = std::move(first[static_cast<Difference_type<I>>(i)]);
+        std::iter_value_t<I> value = std::move(first[static_cast<Difference_type<I>>(i)]);
         I insertion = upper_bound_n(first, i, value, comp);
         std::move_backward(insertion, first + i, first + i + 1);
         *insertion = std::move(value);
@@ -163,7 +163,8 @@ template <std::input_iterator I1, std::sentinel_for<I1> S1, std::input_iterator 
 O sort_sums(I1 a, S1 a_last, I2 b, S2 b_last, O dest)
 {
     using Sum = decltype(*a + *b);
-    std::vector<Value_type<I2>> b_copy(b, b_last);
+    std::vector<Value_type<I2>> b_copy;
+    std::ranges::copy(b, b_last, std::back_inserter(b_copy));
     std::vector<Sum> sums;
     for (; a != a_last; ++a) {
         for (const auto& y : b_copy) {

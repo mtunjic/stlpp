@@ -91,7 +91,7 @@ void for_index(std::size_t n, F f)
     const unsigned chunks = worker_chunks(n);
     std::mutex mu;
     std::exception_ptr eptr;
-    launch_chunks(chunks, [n, chunks, f, &mu, &eptr](unsigned c) {
+    launch_chunks(chunks, [n, chunks, f, &mu, &eptr](unsigned c) mutable {
         try {
             const std::size_t b = split_at(n, c, chunks);
             const std::size_t e = split_at(n, c + 1, chunks);
@@ -131,7 +131,7 @@ void for_chunks(I first, I last, F f, std::size_t cutoff = default_cutoff)
     }
     std::mutex mu;
     std::exception_ptr eptr;
-    launch_chunks(chunks, [first, n, chunks, f, &mu, &eptr](unsigned c) {
+    launch_chunks(chunks, [first, n, chunks, f, &mu, &eptr](unsigned c) mutable {
         try {
             auto [b, e] = chunk_bounds(first, static_cast<std::size_t>(n), c, chunks);
             f(b, e);

@@ -16,7 +16,7 @@ template <std::input_iterator I1, std::sentinel_for<I1> S1, std::input_iterator 
           std::sentinel_for<I2> S2, std::weakly_incrementable O, typename Comp = std::less<>>
 O merge(I1 a, S1 a_last, I2 b, S2 b_last, O dest, Comp comp = {})
 {
-    return std::merge(a, a_last, b, b_last, dest, std::move(comp));
+    return std::ranges::merge(a, a_last, b, b_last, dest, std::move(comp)).out;
 }
 
 template <std::ranges::input_range R1, std::ranges::input_range R2, typename Comp = std::less<>>
@@ -32,7 +32,7 @@ template <std::input_iterator I1, std::sentinel_for<I1> S1, std::input_iterator 
           std::sentinel_for<I2> S2, std::weakly_incrementable O, typename Comp = std::less<>>
 O set_union(I1 a, S1 a_last, I2 b, S2 b_last, O dest, Comp comp = {})
 {
-    return std::set_union(a, a_last, b, b_last, dest, std::move(comp));
+    return std::ranges::set_union(a, a_last, b, b_last, dest, std::move(comp)).out;
 }
 
 template <std::ranges::input_range R1, std::ranges::input_range R2, typename Comp = std::less<>>
@@ -48,7 +48,7 @@ template <std::input_iterator I1, std::sentinel_for<I1> S1, std::input_iterator 
           std::sentinel_for<I2> S2, std::weakly_incrementable O, typename Comp = std::less<>>
 O set_intersection(I1 a, S1 a_last, I2 b, S2 b_last, O dest, Comp comp = {})
 {
-    return std::set_intersection(a, a_last, b, b_last, dest, std::move(comp));
+    return std::ranges::set_intersection(a, a_last, b, b_last, dest, std::move(comp)).out;
 }
 
 template <std::ranges::input_range R1, std::ranges::input_range R2, typename Comp = std::less<>>
@@ -88,6 +88,9 @@ template <std::forward_iterator I, std::forward_iterator B, typename N, typename
     requires std::indirectly_copyable<I, B> && std::indirectly_copyable<B, I>
 [[nodiscard]] I sort_n_with_buffer(I first, N n, B buffer, Comp comp = {})
 {
+    if (n <= N{0}) {
+        return first;
+    }
     const N h = n / N{2};
     if (h == N{0}) {
         I end = first;
@@ -109,7 +112,7 @@ template <std::forward_iterator I, typename N, typename Comp = std::less<>>
         return end;
     }
     using T = std::iter_value_t<I>;
-    std::vector<T> buf(static_cast<std::size_t>((n + N{1}) / N{2}));
+    std::vector<T> buf(static_cast<std::size_t>(n / N{2} + n % N{2}));
     return sort_n_with_buffer(first, n, buf.begin(), std::move(comp));
 }
 
@@ -146,6 +149,9 @@ template <std::forward_iterator I, std::forward_iterator B, typename N, typename
     requires std::indirectly_copyable<I, B> && std::indirectly_copyable<B, I>
 [[nodiscard]] I sort_n_adaptive(I first, N n, B buffer, N n_buf, Comp comp = {})
 {
+    if (n <= N{0}) {
+        return first;
+    }
     const N h = n / N{2};
     if (h == N{0}) {
         I end = first;
@@ -169,7 +175,7 @@ template <std::forward_iterator I, typename N, typename Comp = std::less<>>
         return end;
     }
     if (n <= k_stack * N{2}) {
-        std::vector<T> buf(static_cast<std::size_t>((n + N{1}) / N{2}));
+        std::vector<T> buf(static_cast<std::size_t>(n / N{2} + n % N{2}));
         return sort_n_with_buffer(first, n, buf.begin(), std::move(comp));
     }
     std::vector<T> buf(static_cast<std::size_t>(k_stack));

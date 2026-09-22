@@ -99,14 +99,17 @@ public:
     [[nodiscard]] I base() const
     {
         const difference_type span = limit_ - origin_;
-        const difference_type offset = index_ * step_;
-        if (offset >= span) {
-            return limit_;
-        }
-        if (offset <= 0) {
+        if (span <= 0 || step_ <= 0) {
             return origin_;
         }
-        return origin_ + offset;
+        const difference_type count = span / step_ + (span % step_ != 0);
+        if (index_ >= count) {
+            return limit_;
+        }
+        if (index_ <= 0) {
+            return origin_;
+        }
+        return origin_ + index_ * step_;
     }
     [[nodiscard]] difference_type step() const { return step_; }
 
@@ -140,7 +143,7 @@ public:
         if (n <= 0 || step_ <= 0) {
             return {first_, last_, 0, step_};
         }
-        const D count = (n + step_ - 1) / step_;
+        const D count = n / step_ + (n % step_ != 0);
         return {first_, last_, count, step_};
     }
 };

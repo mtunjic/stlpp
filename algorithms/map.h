@@ -22,12 +22,19 @@ template <std::random_access_iterator I, std::sentinel_for<I> S, std::random_acc
           typename F>
 O map(I first, S last, O dest, F f)
 {
-    const auto n = last - first;
+    const I end = std::ranges::next(first, last);
+    const auto n = end - first;
     if (n <= 0) {
         return dest;
     }
+    if constexpr (!std::is_lvalue_reference_v<std::iter_reference_t<O>>) {
+        for (; first != end; ++first, ++dest) {
+            *dest = std::invoke(f, *first);
+        }
+        return dest;
+    }
     const I origin = first;
-    par::for_chunks(first, last, [f, dest, origin](I b, I e) {
+    par::for_chunks(first, end, [f, dest, origin](I b, I e) mutable {
         O o = dest + (b - origin);
         for (; b != e; ++b, ++o) {
             *o = std::invoke(f, *b);
@@ -56,7 +63,8 @@ template <std::ranges::input_range R, typename F>
 {
     using U = std::remove_cvref_t<std::invoke_result_t<F&, std::ranges::range_reference_t<R>>>;
     std::vector<U> out;
-    if constexpr (std::ranges::random_access_range<R> && std::ranges::sized_range<R>) {
+    if constexpr (std::ranges::random_access_range<R> && std::ranges::sized_range<R> &&
+                  std::default_initializable<U> && !std::same_as<U, bool>) {
         out.resize(std::ranges::size(range));
         map(std::ranges::begin(range), std::ranges::end(range), out.begin(), std::move(f));
     } else {

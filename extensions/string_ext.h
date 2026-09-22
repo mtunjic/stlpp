@@ -621,10 +621,13 @@ inline std::string& gsub(std::string& s, std::string_view from, std::string_view
     if (from.empty()) {
         return s;
     }
+    // Views may refer into s and be invalidated by the first replacement.
+    const std::string needle(from);
+    const std::string replacement(to);
     std::size_t p = 0;
-    while ((p = s.find(from, p)) != std::string::npos) {
-        s.replace(p, from.size(), to);
-        p += to.size();
+    while ((p = s.find(needle, p)) != std::string::npos) {
+        s.replace(p, needle.size(), replacement);
+        p += replacement.size();
     }
     return s;
 }

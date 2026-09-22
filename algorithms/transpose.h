@@ -7,7 +7,7 @@
 namespace mt {
 
 /// Transpose a rectangular matrix stored as `rows` vectors of equal length.
-/// Jagged extra cells are ignored; missing cells in short rows are value-init.
+/// The longest row sets the output width; missing cells are value-initialized.
 ///
 /// Example:
 ///   std::vector<std::vector<int>> m{{1, 2, 3}, {4, 5, 6}};

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <iterator>
-#include <optional>
+#include <memory>
 #include <ranges>
 #include <type_traits>
 #include <utility>
@@ -20,10 +20,12 @@ namespace mt {
 template <std::forward_iterator Outer>
 class flatten_iterator {
 public:
-    using InnerRange = std::remove_cvref_t<std::iter_reference_t<Outer>>;
+    using InnerRange = std::remove_reference_t<std::iter_reference_t<Outer>>;
     using Inner = std::ranges::iterator_t<InnerRange>;
-    using iterator_concept = std::forward_iterator_tag;
-    using iterator_category = std::forward_iterator_tag;
+    using iterator_concept =
+        std::conditional_t<std::is_lvalue_reference_v<std::iter_reference_t<Outer>>,
+                           std::forward_iterator_tag, std::input_iterator_tag>;
+    using iterator_category = iterator_concept;
     using value_type = std::iter_value_t<Inner>;
     using difference_type = std::iter_difference_t<Inner>;
     using reference = std::iter_reference_t<Inner>;
@@ -72,7 +74,7 @@ private:
             inner_ = std::ranges::begin(*outer_);
             inner_last_ = std::ranges::end(*outer_);
         } else {
-            owned_.emplace(*outer_);
+            owned_ = std::make_shared<InnerRange>(*outer_);
             inner_ = std::ranges::begin(*owned_);
             inner_last_ = std::ranges::end(*owned_);
         }
@@ -89,14 +91,14 @@ private:
         }
         owned_.reset();
         inner_ = Inner{};
-        inner_last_ = Inner{};
+        inner_last_ = {};
     }
 
     Outer outer_{};
     Outer outer_last_{};
     Inner inner_{};
-    Inner inner_last_{};
-    std::optional<InnerRange> owned_{};
+    std::ranges::sentinel_t<InnerRange> inner_last_{};
+    std::shared_ptr<InnerRange> owned_{};
 };
 
 template <std::forward_iterator Outer>

@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <functional>
 #include <optional>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -12,7 +13,8 @@ namespace mt {
 /// equality-comparable. Empty and tombstone slots do not construct `K` or `V`.
 ///
 /// `insert` fails if the key is already present. Use `insert_or_assign` to
-/// overwrite.
+/// overwrite. Rehash preserves contents on failure for copyable keys/values.
+/// For noncopyable types with throwing moves, failed rehash leaves an empty table.
 ///
 /// Example:
 ///   mt::htable<int, std::string> t;
@@ -30,7 +32,12 @@ class htable {
         void emplace(K&& k, V&& v)
         {
             key.emplace(std::move(k));
-            value.emplace(std::move(v));
+            try {
+                value.emplace(std::move(v));
+            } catch (...) {
+                key.reset();
+                throw;
+            }
             st = kind::filled;
         }
 
@@ -42,9 +49,9 @@ class htable {
         }
     };
 
+    Hash hash_{};
     std::vector<slot> buckets_{8};
     std::size_t size_ = 0;
-    Hash hash_{};
 
     [[nodiscard]] std::size_t probe_start(const K& key) const
     {
@@ -53,14 +60,42 @@ class htable {
 
     void rehash(std::size_t n)
     {
-        std::vector<slot> old = std::move(buckets_);
-        buckets_.assign(n == 0 ? 8 : n, slot{});
-        size_ = 0;
-        for (auto& s : old) {
-            if (s.st == kind::filled) {
-                insert_or_assign(std::move(*s.key), std::move(*s.value));
+        std::vector<slot> replacement(n == 0 ? 8 : n);
+        std::vector<std::pair<std::size_t, std::size_t>> destinations;
+        destinations.reserve(size_);
+        for (std::size_t from = 0; from < buckets_.size(); ++from) {
+            if (buckets_[from].st != kind::filled) {
+                continue;
             }
+            std::size_t to = hash_(*buckets_[from].key) % replacement.size();
+            while (replacement[to].st == kind::filled) {
+                to = (to + 1) % replacement.size();
+            }
+            replacement[to].st = kind::filled;
+            destinations.emplace_back(from, to);
         }
+        try {
+            for (auto [from, to] : destinations) {
+                auto& src = buckets_[from];
+                auto& dst = replacement[to];
+                if constexpr (std::is_copy_constructible_v<K> && std::is_copy_constructible_v<V>) {
+                    dst.key.emplace(*src.key);
+                    dst.value.emplace(*src.value);
+                } else {
+                    dst.key.emplace(std::move(*src.key));
+                    dst.value.emplace(std::move(*src.value));
+                }
+            }
+        } catch (...) {
+            if constexpr (!(std::is_copy_constructible_v<K> && std::is_copy_constructible_v<V>)) {
+                // A throwing move may change a key's hash. Leave a valid empty
+                // table rather than retaining keys in incorrect probe chains.
+                buckets_.clear();
+                size_ = 0;
+            }
+            throw;
+        }
+        buckets_.swap(replacement);
     }
 
     slot* locate(const K& key)
@@ -87,7 +122,10 @@ class htable {
     template <typename Put>
     bool place(K key, V value, Put put)
     {
-        if (buckets_.empty() || size_ * 4 >= buckets_.size() * 3) {
+        if (auto* existing = locate(key)) {
+            return put(*existing, std::move(key), std::move(value));
+        }
+        if (buckets_.empty() || size_ >= buckets_.size() - buckets_.size() / 4) {
             rehash(buckets_.empty() ? 8 : buckets_.size() * 2);
         }
         for (;;) {
@@ -120,6 +158,29 @@ class htable {
     }
 
 public:
+    htable() = default;
+    htable(const htable&) = default;
+    htable& operator=(const htable&) = default;
+
+    htable(htable&& other) noexcept(std::is_nothrow_move_constructible_v<Hash>)
+        : hash_(std::move(other.hash_)),
+          buckets_(std::move(other.buckets_)),
+          size_(std::exchange(other.size_, 0))
+    {
+        other.buckets_.clear();
+    }
+
+    htable& operator=(htable&& other) noexcept(std::is_nothrow_move_assignable_v<Hash>)
+    {
+        if (this != &other) {
+            hash_ = std::move(other.hash_);
+            buckets_ = std::move(other.buckets_);
+            size_ = std::exchange(other.size_, 0);
+            other.buckets_.clear();
+        }
+        return *this;
+    }
+
     [[nodiscard]] std::size_t size() const { return size_; }
     [[nodiscard]] bool empty() const { return size_ == 0; }
 

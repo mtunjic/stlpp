@@ -32,6 +32,24 @@ class ring_buffer {
 
 public:
     explicit ring_buffer(std::size_t capacity) : buf_(capacity) {}
+    ring_buffer(const ring_buffer&) = default;
+    ring_buffer& operator=(const ring_buffer&) = default;
+
+    ring_buffer(ring_buffer&& other) noexcept
+        : buf_(std::move(other.buf_)),
+          head_(std::exchange(other.head_, 0)),
+          size_(std::exchange(other.size_, 0))
+    {}
+
+    ring_buffer& operator=(ring_buffer&& other) noexcept
+    {
+        if (this != &other) {
+            buf_ = std::move(other.buf_);
+            head_ = std::exchange(other.head_, 0);
+            size_ = std::exchange(other.size_, 0);
+        }
+        return *this;
+    }
 
     [[nodiscard]] std::size_t capacity() const { return buf_.size(); }
     [[nodiscard]] std::size_t size() const { return size_; }
