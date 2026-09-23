@@ -32,15 +32,16 @@ O map(I first, S last, O dest, F f)
             *dest = std::invoke(f, *first);
         }
         return dest;
+    } else {
+        const I origin = first;
+        par::for_chunks(first, end, [f, dest, origin](I b, I e) mutable {
+            O o = dest + (b - origin);
+            for (; b != e; ++b, ++o) {
+                *o = std::invoke(f, *b);
+            }
+        });
+        return dest + n;
     }
-    const I origin = first;
-    par::for_chunks(first, end, [f, dest, origin](I b, I e) mutable {
-        O o = dest + (b - origin);
-        for (; b != e; ++b, ++o) {
-            *o = std::invoke(f, *b);
-        }
-    });
-    return dest + n;
 }
 
 template <std::input_iterator I, std::sentinel_for<I> S, std::weakly_incrementable O, typename F>
